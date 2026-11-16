@@ -46,6 +46,12 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   - Imagen: bloom, viñeta, aberración cromática, hit-stop, temblor de pantalla configurable, animación procedural, parallax de 4 capas y soporte HiDPI.
   - Calidad gráfica alta, media o baja.
   - Música y efectos sintetizados con Web Audio. La música cambia al cargar el teletransportador y al pelear contra el jefe.
+- **Cuentas y clasificación.**
+  - Cuentas locales con contraseña (se guarda con sal y SHA-256, nunca en claro).
+  - Clasificación con una pestaña por dificultad: posición, usuario, personaje, nivel, loop, tiempo y puntuación.
+  - Viene precargada con 12 partidas ficticias por dificultad. La puntuación premia el progreso y se multiplica según la dificultad.
+  - Las cuentas y la clasificación se guardan solo en este dispositivo; quien juega como invitado no entra en el ranking.
+- **Personajes articulados.** Cada héroe tiene esqueleto (cabeza, torso, piernas y brazos animados), una capa con física y un arma que apunta al cursor. Además lleva equipo propio: los aros del Cronista, los planos holográficos de la Mecánica, la cola de la Quimera, etc.
 - **Guardado.** Logros, desbloqueos, récords por dificultad, ajustes y la partida en curso, que se puede continuar desde el inicio de la etapa.
 
 ![Selección de personaje](docs/capturas/seleccion.png)
@@ -80,11 +86,12 @@ Todas las teclas se pueden reasignar en **🎮 Controles**, desde el menú o des
 
 ## Jugar
 
-**En el navegador:** abre `index.html`. No necesita servidor ni instalación.
+**En el navegador:** abre `html/index.html`. No necesita servidor ni instalación.
 
 Hay dos parámetros de URL para pruebas:
-- `index.html?unlockall`: desbloquea todos los personajes.
-- `index.html?debug`: la tecla B activa el teletransportador.
+- `html/index.html?unlockall`: desbloquea todos los personajes y salta la pantalla de cuenta.
+- `html/index.html?guest`: entra directamente como invitado.
+- `html/index.html?debug`: la tecla B activa el teletransportador.
 
 ## Desarrollo
 
@@ -141,12 +148,16 @@ El icono del `.exe` (`build/icon.png`), los iconos de Android y su pantalla de c
 
 | Archivo | Contenido |
 |---|---|
-| `engine.js` | Estado, física, combate, bucle principal |
-| `fx.js`, `art.js` | Pools de partículas y proyectiles, post-procesado, dibujo procedural |
-| `data_characters.js`, `data_items.js`, `data_enemies.js`, `data_stages.js` | Contenido declarativo |
-| `abilities.js`, `loot.js`, `enemies.js`, `bosses.js`, `stages.js` | Lógica de habilidades, objetos, enemigos, jefes y escenarios |
-| `audio.js`, `save.js`, `input.js`, `touch.js`, `ui.js` | Sonido, guardado, controles, táctil, interfaz |
-| `main.js` | Ventana de escritorio (Electron) |
+| `html/index.html` | Página del juego (carga `../css` y `../js`) |
+| `css/style.css` | Estilos de menús y pantallas |
+| `js/engine.js` | Estado, física, combate, bucle principal |
+| `js/renderer.js` | Dibujo procedural: héroes articulados, enemigos, luz aditiva, sacudida direccional |
+| `js/fx.js` | Pools de partículas y proyectiles, post-procesado, números de daño |
+| `js/data_characters.js`, `js/data_items.js`, `js/data_enemies.js`, `js/data_stages.js` | Contenido declarativo |
+| `js/abilities.js`, `js/loot.js`, `js/enemies.js`, `js/bosses.js`, `js/stages.js` | Lógica de habilidades, objetos, enemigos, jefes y escenarios |
+| `js/audio.js`, `js/save.js`, `js/input.js`, `js/touch.js`, `js/ui.js` | Sonido, guardado, controles, táctil, interfaz |
+| `js/auth.js` | Cuentas, puntuación y clasificación |
+| `js/main.js` | Ventana de escritorio (Electron) |
 | `tools/` | Pruebas (`smoke.js`, `browser.js`) y scripts de empaquetado |
 
 Las sinergias entre objetos van por un bus de eventos: `onHit`, `onKill`, `onJump`, `onTakeDamage`, `onLevelUp`, `onCast`, `onDash`, `onHeal`, `onChestOpen` y `onBossPhase`.

@@ -3,14 +3,14 @@
 // y juega cada personaje × dificultad buscando excepciones. No valida lo visual.
 const fs=require('fs'),path=require('path'),assert=require('assert');
 const root=path.join(__dirname,'..');
-const files=[...fs.readFileSync(path.join(root,'index.html'),'utf8').matchAll(/<script src="([^"]+)"/g)].map(m=>m[1]);
+const files=[...fs.readFileSync(path.join(root,'html','index.html'),'utf8').matchAll(/<script src="([^"]+)"/g)].map(m=>m[1]);
 
 global.Path2D=function(){};const ctx=new Proxy({},{get:(t,k)=>k in t?t[k]:(k==='createLinearGradient'||k==='createRadialGradient'?()=>({addColorStop(){}}):k==='measureText'?s=>({width:String(s).length*7}):()=>{}),set:(t,k,v)=>(t[k]=v,true)});
 const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
-eval(files.map(f=>fs.readFileSync(path.join(root,f),'utf8')).join('\n;\n')+
- '\n;global.T={start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
+ '\n;global.T={Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);T.update(1/60);T.draw()}};
@@ -225,4 +225,22 @@ console.log('DPS (1 objetivo · grupo de 5):\n'+dr.map(([n,a,b])=>`  ${n.padEnd(
 const surv=T.DIFFS.map((df,d)=>{let tot=0,it=0;for(const ch of Object.keys(T.CHARS)){const r=bot(ch,d,120);tot+=r.t;it+=r.items}const N=Object.keys(T.CHARS).length;return `${df.name}: ${(tot/N).toFixed(0)}s (${(it/N).toFixed(1)} obj.)`});
 console.log('Supervivencia media del bot (máx 120s):',surv.join(' · '));
 console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificultades: 0 excepciones');
-process.exit(fails?1:0);
+// 27. Cuentas y clasificación (asíncrono: SHA-256 con crypto.subtle)
+async function authTests(){const A=T.Auth;
+ assert(await A.register('ab','1234'),'aceptó un nombre de 2 letras');assert(await A.register('Piloto','12'),'aceptó una contraseña de 2');
+ assert.strictEqual(await A.register('Piloto','clave1'),'');assert.strictEqual(A.user,'Piloto');
+ assert(await A.register('piloto','otra'),'permitió un nombre repetido cambiando mayúsculas');
+ A.setUser(null);assert(await A.login('Piloto','mala'),'entró con contraseña incorrecta');assert.strictEqual(A.user,null);
+ assert.strictEqual(await A.login('PILOTO','clave1'),'');assert.strictEqual(A.user,'Piloto');
+ assert(!/clave1/.test(JSON.stringify(A.users())),'la contraseña se guardó en claro');
+ // la puntuación sube con el progreso y con la dificultad
+ const r={kills:100,lvl:10,stages:3,loop:1,win:false,time:600,diff:1};
+ assert(T.scoreRun({...r,stages:4})>T.scoreRun(r)&&T.scoreRun({...r,loop:2})>T.scoreRun(r)&&T.scoreRun({...r,diff:3})>T.scoreRun(r));
+ // datos precargados: 12 por dificultad, deterministas y coherentes con la fórmula
+ for(let d=0;d<5;d++){const b=T.seedBoard(d);assert.strictEqual(b.length,12);for(const e of b)assert(e.score===T.scoreRun(e)&&e.loop>=1&&e.user&&e.ch)}
+ // una partida real entra en su dificultad, ordenada, y el invitado no entra
+ T.start('vanguard',2);T.S.kills=5000;T.S.stage=4;const res=A.submit(true);assert(res.rank===1,'la partida récord no quedó primera');
+ const b=A.board(2);assert(b[0].user==='Piloto'&&b.every((e,i)=>!i||b[i-1].score>=e.score),'clasificación mal ordenada');
+ A.setUser(null);const n=A.board(2).length;assert(!A.submit(false).rank&&A.board(2).length===n,'el invitado entró en la clasificación');
+ console.log('Cuentas, contraseñas con sal, puntuación y clasificación: OK')}
+authTests().then(()=>process.exit(fails?1:0),e=>{console.error(e);process.exit(1)});

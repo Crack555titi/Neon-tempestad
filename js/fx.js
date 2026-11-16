@@ -29,7 +29,7 @@ function setQuality(k){QL=QUALITY[k]||QUALITY.alta;PT.max=QL.pmax;if(PT.n>PT.max
 let hitstop=0,chroma=0,hsCd=0;
 const hitStop=ms=>{hitstop=Math.max(hitstop,ms/1000)};
 const chromaHit=v=>{chroma=Math.max(chroma,v)};  // aberración cromática breve en golpes fuertes
-function fxReset(){PT.clear();PR.clear();TX.clear();BL.clear();hitstop=0;chroma=0}
+function fxReset(){PT.clear();PR.clear();TX.clear();BL.clear();hitstop=0;chroma=0;KICK.x=KICK.y=KICK.vx=KICK.vy=0}
 // jag>0: rayo quebrado (se redibuja aleatorio cada frame); jag=0: haz recto
 function bolt(x1,y1,x2,y2,col,w,jag,l){const b=BL.get();if(!b)return;b.x1=x1;b.y1=y1;b.x2=x2;b.y2=y2;b.c=col;b.w=w||2;b.jag=jag===undefined?10:jag;b.l=b.ml=l||.14}
 
@@ -42,7 +42,8 @@ function disintegrate(x,y,w,h,col){const cols=clamp(w/8|0,2,7),rows=clamp(h/8|0,
  for(let i=0;i<cols;i++)for(let j=0;j<rows;j++){if(QL.amb<1&&(i+j)%2)continue;const px=x-w/2+(i+.5)*w/cols,py=y-h+(j+.5)*h/rows,a=Math.atan2(py-(y-h/2),px-x),v=R(40,170);
   spark(px,py,Math.cos(a)*v,Math.sin(a)*v-R(30,110),R(.45,1.1),j%3?col:'#fff',s)}}
 /* números flotantes: size = tamaño (crítico grande, DoT pequeño); aparecen con un pequeño "pop" */
-function txt(x,y,s,col,size){const t=TX.get();if(!t)return;t.x=x;t.y=y;t.s=s;t.c=col||'#fff';t.l=t.ml=size>16?1.1:.8;t.size=size||13}
+function txt(x,y,s,col,size){const t=TX.get();if(!t)return;t.x=x;t.y=y;t.s=s;t.c=col||'#fff';t.l=t.ml=size>16?1.1:.8;t.size=size||13;
+ const num=/^[-+\d]/.test(s);t.vx=num?R(-70,70):0;t.vy=num?-R(170,240)*(size>16?1.2:1):-40;t.g=num?640:0}
 function fxProj(o){const q=PR.get();if(!q)return null;q.hit.clear();Object.assign(q,PR_DEF,o);return q}
 
 /* Canvas HiDPI: el búfer sigue el tamaño real en pantalla × devicePixelRatio;

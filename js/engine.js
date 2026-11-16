@@ -116,7 +116,7 @@ function hurtE(e,d,o){
  if(d<=0)return;
  if(e.boss&&e.ph<3)d=Math.min(d,e.hp-e.maxHp*(e.ph===1?.655:.325));  // un golpe no puede saltarse una fase: se queda en el umbral
  e.hp-=d;e.flash=.1;e.lastCrit=crit;txt(e.x+R(-10,10),e.y-e.h-6,Math.round(d)+(crit?'!':''),crit?'#ffd23c':o.dot?'#d9a0ff':o.proc?'#9ae6ff':'#fff',crit?20:o.dot?11:o.proc?12:14);
- if(crit&&(e.elite||e.boss)&&!o.proc&&hsCd<=0){hitStop(30);hsCd=.25}
+ if(crit&&!o.proc&&!o.dot&&hsCd<=0){hitStop(30);hsCd=e.elite||e.boss?.25:.5;kick(p.aim,2.5)}
  // Guillotina: ejecuta a los no-jefes por debajo del umbral
  if(p.m.exec&&!e.boss&&e.hp>0&&e.hp<e.maxHp*Math.min(.4,.06+p.m.exec)){e.hp=0;txt(e.x,e.y-e.h-20,'EJECUTADO','#ff2a6a')}
  Ev.emit('onHit',e,d,o,crit);
@@ -145,7 +145,7 @@ function hurtP(d,src){
  for(const id in p.buf){const b=p.buf[id];if(b.onHurt&&b.onHurt(b,d))return}
  if(p.m.dodge&&chance(Math.min(.5,p.m.dodge))){p.inv=.25;txt(p.x,p.y-56,'ESQUIVA','#9ae6ff');return}
  // invulnerable ANTES de reflejar: si no, Fortaleza ↔ élite Reflectante se devuelven el daño sin fin
- p.inv=.45;S.shake=Math.max(S.shake,9);
+ p.inv=.45;S.shake=Math.max(S.shake,9);if(src&&src.x!==undefined)kick(Math.atan2(p.y-(src.y||p.y),p.x-src.x),Math.min(12,4+d/p.maxHp*40));
  d*=(1-Math.min(.6,p.m.arm))*bm('taken');
  p.shT=4;if(p.sh>0){const a=Math.min(p.sh,d);p.sh-=a;d-=a}
  const rf=bsum('reflect');if(rf)aoe(p.x,p.y-20,220,d*rf,RAW);
@@ -292,9 +292,9 @@ function update(dt){
  s.zn=s.zn.filter(z=>z.life>0);
  for(const q of s.sch)if(!(q.en&&fz))q.t-=dt;for(const q of s.sch.filter(q=>q.t<=0))q.f();s.sch=s.sch.filter(q=>q.t>0);
  for(let i=0;i<PT.n;i++){const q=PT.a[i];q.l-=dt;if(q.ring){q.r+=(q.mr-q.r)*Math.min(1,dt*9)}else{q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.93;q.vy*=.93}}
- PT.sweep(deadL);for(let i=0;i<TX.n;i++){const t=TX.a[i];t.l-=dt;t.y-=40*dt}TX.sweep(deadL);
+ PT.sweep(deadL);for(let i=0;i<TX.n;i++){const t=TX.a[i];t.l-=dt;t.vy+=t.g*dt;t.x+=t.vx*dt;t.y+=t.vy*dt}TX.sweep(deadL);
  for(let i=0;i<BL.n;i++)BL.a[i].l-=dt;BL.sweep(deadL);
- s.shake*=.88;s.msgT-=dt;hsCd-=dt;s.fade=Math.max(0,s.fade-dt*1.8);if(s.lvlFx&&(s.lvlFx.t-=dt)<=0)s.lvlFx=null;
+ s.shake*=.88;updKick(dt);s.msgT-=dt;hsCd-=dt;s.fade=Math.max(0,s.fade-dt*1.8);if(s.lvlFx&&(s.lvlFx.t-=dt)<=0)s.lvlFx=null;
 }
 
 /* ===================== RENDER ===================== */
@@ -310,7 +310,7 @@ function drawZone(z){
  c.globalAlpha=1}
 function draw(){
  const s=S;screen();drawBg(s.cam,s.boss?s.boss.ph:0,s.t);
- const sh=s.shake*SHAKE,sx=R(-1,1)*sh,sy=R(-1,1)*sh;c.translate(-s.cam+sx,sy);
+ const sh=s.shake*SHAKE,sx=R(-1,1)*sh+KICK.x*SHAKE,sy=R(-1,1)*sh+KICK.y*SHAKE;c.translate(-s.cam+sx,sy);
  drawPlats();
  for(const z of s.zn)drawZone(z);
  // portales
@@ -343,12 +343,13 @@ function draw(){
  if(s.fade>0){screen();c.fillStyle=`rgba(5,3,13,${s.fade})`;c.fillRect(0,0,W,H)}
 }
 function drawPlayer(p){
- const s=S,col=p.form==='b'?'#2a8a1a':s.ch.color,cy=p.y-p.h/2,acc=FAM_ACC[s.ch.fam],moving=Math.abs(p.vx)>30,lean=clamp(p.vx/s.ch.spd,-1,1)*.12;
+ const s=S,col=p.form==='b'?'#2a8a1a':s.ch.color,cy=p.y-p.h/2,cid=s.cid,moving=Math.abs(p.vx)>30,lean=clamp(p.vx/s.ch.spd,-1,1)*.12;
  // estela del dash / intangibilidad
- for(const gh of p.ghosts){c.globalAlpha=gh.l*1.6;drawHero(c,gh.x,gh.y,{col,face:gh.face,aim:gh.aim,run:gh.run,moving:1,acc,t:s.t})}
+ for(const gh of p.ghosts){c.globalAlpha=gh.l*1.6;drawHero(c,gh.x,gh.y,{cid,col,face:gh.face,aim:gh.aim,run:gh.run,moving:1,t:s.t,ghost:1})}
  c.globalAlpha=bany('intang')?.35:p.inv>0&&Math.floor(s.t*20)%2?.45:1;
  if(p.buf.void){glow('#9b30ff',30);c.fillStyle='#9b30ff44';c.beginPath();c.arc(p.x,cy,34+Math.sin(s.t*9)*4,0,6.283);c.fill();c.shadowBlur=0}
- drawHero(c,p.x,p.y,{col,face:p.face,aim:p.aim,sx:p.sx,sy:p.sy,lean,run:p.run,moving,atk:p.atk,acc,t:s.t,air:!p.ground});
+ light(c,p.x,cy,90,col,.22);  // el héroe ilumina lo que le rodea
+ drawHero(c,p.x,p.y,{cid,col,face:p.face,aim:p.aim,sx:p.sx,sy:p.sy,lean,run:p.run,moving,atk:p.atk,t:s.t,air:!p.ground,vy:p.vy,form:p.form,cape:p.cape||(p.cape={})});
  c.globalAlpha=1;
  if(p.buf.frost){c.strokeStyle='#bff4ff';c.lineWidth=2;c.strokeRect(p.x-p.w/2-3,p.y-p.h-3,p.w+6,p.h+6)}
  if(p.sh>0){c.strokeStyle='#5ab4ff';c.lineWidth=2;c.globalAlpha=.6;c.beginPath();c.arc(p.x,cy,30,0,6.283);c.stroke();c.globalAlpha=1}

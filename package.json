@@ -3,7 +3,7 @@
   "productName": "Neón Tempestad",
   "version": "1.0.0",
   "description": "Roguelike de acción 2D en HTML5 Canvas y JavaScript puro",
-  "main": "main.js",
+  "main": "js/main.js",
   "author": "thaigo naboni",
   "license": "UNLICENSED",
   "private": true,
@@ -31,15 +31,9 @@
       "output": "dist"
     },
     "files": [
-      "main.js",
-      "index.html",
-      "style.css",
-      "*.js",
-      "!tools/**",
-      "!www/**",
-      "!android/**",
-      "!docs/**",
-      "!capacitor.config.json"
+      "html/**",
+      "css/**",
+      "js/**"
     ],
     "win": {
       "target": "portable"

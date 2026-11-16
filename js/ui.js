@@ -117,7 +117,8 @@ function openMastery(){
 }
 
 function endGame(win){
- S.st='over';recordRunEnd(win);
+ S.st='over';recordRunEnd(win);const sc=Auth.submit(win);
+ $('endScore').textContent=sc?`Puntuación ${sc.score.toLocaleString('es')}${sc.rank?` · puesto #${sc.rank} en ${S.df.name}`:Auth.user?'':' · entra con una cuenta para aparecer en la clasificación'}`:'';
  // muerte permanente estricta: se borra la partida guardada y no hay reintento
  if(win||S.df.perma)clearRun();
  $('endT').textContent=win?'¡HAS SUPERADO LA TEMPESTAD!':(S.df.perma?'MUERTE PERMANENTE · PARTIDA BORRADA':'HAS CAÍDO');
@@ -168,12 +169,12 @@ $('retry').onclick=()=>{const r=loadRun();if(r){$('end').style.display='none';st
 $('again').onclick=()=>{$('end').style.display='none';$('menu').style.display='flex';S=null;buildMenu()};
 
 /* vista previa animada del personaje: corre, se detiene, apunta y ataca en bucle */
-let previewC='vanguard';
+let previewC='vanguard';const prevCape={};
 function drawPreview(t){const k=$('prev');if(!k||!k.getContext)return;const g=k.getContext('2d');if(!g)return;
  const v=CHARS[previewC],lk=!isUnlocked(previewC),ph=t%4,at=(t*1.4)%1;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,k.width,k.height);
  const gr=g.createRadialGradient(k.width/2,k.height-18,4,k.width/2,k.height-18,90);gr.addColorStop(0,(lk?'#555':v.color)+'55');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,k.width,k.height);
  g.save();g.translate(k.width/2,k.height-18);g.scale(2.1,2.1);
- drawHero(g,0,0,{col:lk?'#2a2440':v.color,face:1,aim:Math.sin(t*1.3)*.5-.15,run:t*9,moving:ph<2,atk:at<.15?1-at/.15:0,acc:FAM_ACC[v.fam],t});g.restore()}
+ drawHero(g,0,0,{col:lk?'#2a2440':v.color,face:1,aim:Math.sin(t*1.3)*.5-.15,run:t*9,moving:ph<2,atk:at<.15?1-at/.15:0,t,cid:previewC,cape:prevCape[previewC]||(prevCape[previewC]={})});g.restore()}
 
 /* ===================== PAUSA, OPCIONES Y CONTROLES ===================== */
 const show=id=>{$(id).style.display='flex'},hide=id=>{$(id).style.display='none'};

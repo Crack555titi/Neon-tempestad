@@ -26,9 +26,17 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  const js=async e=>{const r=await cmd('Runtime.evaluate',{expression:e,awaitPromise:true,returnByValue:true});if(r.result.exceptionDetails)errors.push('[evaluate] '+e.slice(0,60)+' → '+(r.result.exceptionDetails.exception?.description||JSON.stringify(r.result.exceptionDetails).slice(0,300)));return r.result.result?.value};
  const shot=async name=>{const r=await cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(out,name+'.png'),Buffer.from(r.result.data,'base64'));console.log('captura',name)};
  await cmd('Runtime.enable');await cmd('Page.enable');
- await cmd('Page.navigate',{url:'file:///'+path.join(root,'index.html').replace(/\\/g,'/')+'?unlockall&debug'});await sleep(2500);
+ await cmd('Page.navigate',{url:'file:///'+path.join(root,'html','index.html').replace(/\\/g,'/')+'?unlockall&debug'});await sleep(2500);
  await shot('01-menu');
  await js("document.querySelector('[data-k=\"chimera\"]').click()");await sleep(600);await shot('02-seleccion');
+ await js("showLogin()");await sleep(400);await shot('02b-cuenta');await js("enterMenu();openRank(3)");await sleep(400);await shot('02c-ranking');await js("$('rBack').click()");
+ // galería: los 20 héroes en plena carrera, apuntando y con la capa en movimiento
+ await js(`(()=>{const k=document.createElement('canvas');k.id='gal';k.width=1500;k.height=640;k.style.cssText='position:fixed;inset:0;z-index:99;background:#0a0618;width:1000px;height:427px';
+  document.body.appendChild(k);const g=k.getContext('2d'),ids=Object.keys(CHARS),cp={};let t=0;
+  window.__gal=setInterval(()=>{t+=1/30;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,1500,640);ids.forEach((id,i)=>{const x=75+(i%10)*150,y=250+(i/10|0)*300;
+   g.save();g.translate(x,y);g.scale(2.6,2.6);drawHero(g,0,0,{cid:id,col:CHARS[id].color,face:1,aim:Math.sin(t*1.3+i)*.6-.3,run:t*10,moving:1,t,cape:cp[id]||(cp[id]={})});g.restore();
+   g.fillStyle='#cfc9f5';g.font='15px monospace';g.textAlign='center';g.fillText(CHARS[id].name,x,y+30)})},33)})()`);
+ await sleep(1500);await shot('02d-galeria');await js("clearInterval(window.__gal);document.getElementById('gal').remove()");
  // partida: el bot dispara al enemigo más cercano y abre cofres
  await js(`start('vanguard',1);window.__bot=setInterval(()=>{if(!S||S.st!=='play')return;const e=S.en.find(e=>!e.boss)||S.en[0];
   mouse.l=1;mouse.r=Math.random()<.3;keys.ShiftLeft=Math.random()<.05;keys.KeyQ=1;if(e){mouse.x=e.x-S.cam;mouse.y=e.y-e.h/2}

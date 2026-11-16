@@ -10,7 +10,7 @@ function createWindow(){
   if(i.key==='F12'){win.webContents.toggleDevTools();e.preventDefault()}});
  // los enlaces externos (si alguno) se abren fuera, nunca dentro del juego
  win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
- win.loadFile(path.join(__dirname,'index.html'));
+ win.loadFile(path.join(__dirname,'..','html','index.html'));
 }
 app.whenReady().then(createWindow);
 app.on('window-all-closed',()=>app.quit());

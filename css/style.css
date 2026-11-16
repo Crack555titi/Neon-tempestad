@@ -108,3 +108,29 @@ button.sec{border-color:#3cf0ff;box-shadow:0 0 12px #3cf0ff;background:#0a1e30;f
 #touch .tb.on{background:rgba(255,60,242,.45);transform:scale(.92)}
 #rotate{display:none;position:fixed;inset:0;background:#05030d;color:#3cf0ff;font-size:22px;align-items:center;justify-content:center;text-align:center;z-index:9;padding:20px}
 @media (orientation:portrait){body.touchmode #rotate{display:flex}}
+
+/* ===== Cuentas y clasificación ===== */
+#login{background:radial-gradient(ellipse at center,rgba(42,15,85,.55),rgba(5,3,13,.96))}
+.lbox{display:flex;flex-direction:column;gap:10px;align-items:stretch;width:min(360px,100%);padding:20px 22px;border:2px solid #3cf0ff88;border-radius:12px;
+ background:rgba(10,6,28,.85);box-shadow:0 0 24px #3cf0ff33,inset 0 0 30px #ff3cf211}
+.lbox h2{margin:0 0 4px;font-size:18px;letter-spacing:4px;color:#3cf0ff;text-shadow:0 0 10px #3cf0ff}
+.lbox input{padding:10px 12px;font-size:15px;color:#e8e6ff;background:#120a26;border:1px solid #5a4a8a;border-radius:6px;outline:none}
+.lbox input:focus{border-color:#ff3cf2;box-shadow:0 0 10px #ff3cf266}
+.lbox .row button{flex:1;padding:10px 12px}
+#lErr{min-height:16px;font-size:13px;color:#ff5a7a}
+#lGuest{font-size:13px;color:#9aa0ff}
+#who{position:absolute;top:10px;right:14px;font-size:13px;color:#cfc9f5;z-index:1}
+#who a,#lGuest{color:#3cf0ff}
+#rTabs .tab{font-size:12px;padding:6px 12px}
+#rTabs .tab.on{background:#3cf0ff;color:#05030d;box-shadow:0 0 18px #3cf0ff}
+#rTable{border-collapse:collapse;width:min(760px,100%);font-size:13px;font-variant-numeric:tabular-nums}
+#rTable th{color:#ffd23c;font-weight:700;letter-spacing:1px;padding:6px 8px;border-bottom:2px solid #ffd23c66;text-align:left}
+#rTable td{padding:5px 8px;border-bottom:1px solid #2a2050;text-align:left}
+#rTable td:first-child,#rTable th:first-child{text-align:center;width:32px}
+#rTable td:last-child,#rTable th:last-child{text-align:right;color:#fff;font-weight:700}
+#rTable tbody tr:nth-child(1) td:first-child{color:#ffd23c;text-shadow:0 0 8px #ffd23c}
+#rTable tbody tr:nth-child(2) td:first-child{color:#d8e0ff}
+#rTable tbody tr:nth-child(3) td:first-child{color:#ffb070}
+#rTable tr.me td{background:#ff3cf222;color:#fff}
+#endScore{font-size:18px;font-weight:700;color:#ffd23c;text-shadow:0 0 10px #ffd23c88;min-height:1em}
+@media (max-width:640px){#rTable th:nth-child(3),#rTable td:nth-child(3){display:none}#rTable{font-size:12px}}
