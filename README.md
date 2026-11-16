@@ -129,25 +129,40 @@ El `.exe` portable no necesita instalación y guarda las partidas en el perfil d
 
 ### Android (APK con Capacitor)
 
-**Requisitos:** [Android Studio](https://developer.android.com/studio), que incluye el SDK de Android y el JDK.
-
 ```bash
-npm run www               # copia el juego a www/
-npx cap add android       # solo la primera vez: crea el proyecto android/
-npm run android           # actualiza www/, sincroniza y bloquea la orientación horizontal
-npm run android:open      # abre el proyecto en Android Studio
+npm run apk    # genera dist/NeonTempestad-<versión>.apk firmado, listo para instalar
 ```
 
-**Generar el APK en Android Studio:**
-- Para probar: *Build › Build Bundle(s) / APK(s) › Build APK(s)*. El APK de depuración queda en `android/app/build/outputs/apk/debug/`.
-- Para publicar: *Build › Generate Signed Bundle / APK*.
+**Requisitos:** JDK 21 y SDK de Android. Hay dos formas de tenerlos:
+- Instalar [Android Studio](https://developer.android.com/studio) y definir `JAVA_HOME` y `ANDROID_HOME`.
+- Usar las versiones portátiles de `%LOCALAPPDATA%
+eon-android`, que es lo que hace el script si no encuentra esas variables.
 
-También se puede generar desde la terminal con `cd android && gradlew assembleDebug`.
+**Firma:** la primera vez se crea una clave en `~/.neon-tempestad/` (`release.jks` y `keystore.json`).
+> ⚠️ **Haz una copia de seguridad de esa carpeta y no la subas al repositorio.** Android solo instala una actualización encima de la anterior si está firmada con la misma clave. Si la pierdes, cada jugador tendrá que desinstalar el juego (y perder su progreso) para instalar la siguiente versión.
+
+Para abrir el proyecto en Android Studio: `npm run android && npm run android:open`.
 
 **Notas:**
 - `tools/android-setup.js` bloquea la orientación horizontal en `AndroidManifest.xml` con `sensorLandscape`, y copia el icono y la pantalla de carga.
 - Además, el juego pide pantalla completa en horizontal al tocar la pantalla.
 - Cada vez que cambies el código del juego, vuelve a ejecutar `npm run android`.
+
+### Publicar una actualización (obligatoria)
+
+**Cómo funciona:**
+- Al abrirse, y cada 30 minutos, el juego lee [`version.json`](version.json) de la rama `main` de GitHub.
+- Si la versión instalada es menor que `min`, aparece una pantalla de **actualización obligatoria**. No se puede cerrar y lleva a la página de descarga.
+- Si llega en mitad de una partida, espera a que termine.
+- Sin conexión se puede seguir jugando.
+
+**Pasos para sacar una versión nueva:**
+1. `npm run bump -- 1.2.0 "Qué trae esta versión"`. Sube la versión en `package.json`, `js/update.js` y `version.json`.
+2. `npm run dist` y `npm run apk` generan `NeonTempestad-1.2.0-portable.exe` y `NeonTempestad-1.2.0.apk` en `dist/`.
+3. En GitHub › *Releases* › *Draft a new release*, crea la etiqueta `v1.2.0` y adjunta los dos archivos.
+4. Publica la release y después sube `version.json` a `main` con un merge y un push. **Desde ese momento**, todas las copias anteriores quedan bloqueadas hasta actualizar.
+
+Haz el paso 4 al final: si `version.json` llega a `main` antes que la release, los jugadores quedan bloqueados sin nada que descargar.
 
 ### Icono y pantalla de carga
 
@@ -166,6 +181,7 @@ El icono del `.exe` (`build/icon.png`), los iconos de Android y su pantalla de c
 | `js/abilities.js`, `js/loot.js`, `js/enemies.js`, `js/bosses.js`, `js/stages.js` | Lógica de habilidades, objetos, enemigos, jefes y escenarios |
 | `js/audio.js`, `js/save.js`, `js/input.js`, `js/touch.js`, `js/ui.js` | Sonido, guardado, controles, táctil, interfaz |
 | `js/auth.js` | Cuentas, puntuación y clasificación |
+| `js/update.js`, `version.json` | Comprobación de versión y actualización obligatoria |
 | `js/main.js` | Ventana de escritorio (Electron) |
 | `tools/` | Pruebas (`smoke.js`, `browser.js`) y scripts de empaquetado |
 
