@@ -25,7 +25,7 @@ function nextStage(){
  hitStop(60);loadStage(S.stage+1);saveRun();
 }
 function useTP(){const T=S.tp;
- if(T.state==='idle'){T.state='charging';spawnBoss();say(`¡Teletransportador activado! Quédate cerca para cargarlo`)}
+ if(T.state==='idle'){T.state='charging';Snd.play('tp');spawnBoss();say(`¡Teletransportador activado! Quédate cerca para cargarlo`)}
  else if(T.state==='ready')nextStage();
  else say(S.boss?'Derrota al jefe y termina la carga':'El teletransportador aún se está cargando')}
 
@@ -38,7 +38,7 @@ function fallPit(){const p=S.p;
 function updStage(dt){
  const s=S,p=s.p,T=s.tp;
  if(T.state==='charging'){const inR=hyp(p.x-T.x,p.y-T.y)<TP_R;if(inR)T.charge=Math.min(1,T.charge+dt/TP_CHARGE);T.out=!inR;
-  if(T.charge>=1&&s.bossDone){T.state='ready';say('¡Teletransportador listo! Pulsa E sobre él para continuar')}}
+  if(T.charge>=1&&s.bossDone){T.state='ready';Snd.play('tp');say(`¡Teletransportador listo! Pulsa ${keyName(BIND.interact[0])} sobre él para continuar`)}}
  // lava (Hidra): el suelo sólido quema
  if(s.lava&&p.ground&&p.plat&&p.plat.solid){s.lavaT=(s.lavaT||0)-dt;if(s.lavaT<=0){s.lavaT=.5;hurtP(p.maxHp*.06)}}
  // paredes que se cierran (Arconte, fase 3)

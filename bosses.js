@@ -131,7 +131,7 @@ function spawnBoss(id){
  const def=BOSSES[id||STAGE.boss],hp=def.hp*hpScale();
  const b={type:'boss',boss:1,def,d:def,x:S.tp?S.tp.x:WORLD/2,y:def.y,w:def.w,h:def.h,vx:0,vy:0,hp,maxHp:hp,stag:0,stagMax:def.stagMax,stun:0,t:2,ph:1,flash:0,slowT:0,markT:0,aff:[],ang:0,dmg:def.dmg};
  if(def.init)def.init(b);
- S.boss=b;S.en.push(b);say(`¡${def.name.toUpperCase()} HA DESPERTADO!`);S.shake=22;
+ S.boss=b;S.en.push(b);say(`¡${def.name.toUpperCase()} HA DESPERTADO!`);S.shake=22;Snd.play('boss');
 }
 // núcleo común: ruptura de guardia → aturdido; si no, se mueve y elige un ataque del repertorio de su fase
 function bossAI(b,dt){

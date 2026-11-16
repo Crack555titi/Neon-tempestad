@@ -143,7 +143,9 @@ function buildMenu(){
   ${v.passive?`<p class="passive">◆ ${esc(v.passive.desc)}</p>`:''}
   <ul>${abHtml('LMB',v.primary)}${abHtml('RMB',v.secondary)}${abHtml('SHIFT',v.move)}${abHtml('Q',v.ult)}</ul>`;
  $('diffs').innerHTML=DIFFS.map((d,i)=>`<div class="diff ${i===selD?'sel':''}" data-i="${i}">${i+1}. ${d.name}</div>`).join('');
- $('dd').textContent=DIFFS[selD].desc;
+ const rec=Save.d.records[selD],fmt=t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`;
+ $('dd').textContent=DIFFS[selD].desc+(rec?` · Récord: etapa ${rec.stage}/${STAGES.length} (${rec.ch})${rec.wins?` · ${rec.wins} victoria${rec.wins>1?'s':''}, mejor ${fmt(rec.best)}`:''}`:'');
+ $('help').textContent=helpText();
  const n=Object.keys(CHARS).filter(isUnlocked).length;$('unl').textContent=`${n}/${Object.keys(CHARS).length} desbloqueados`;
  const run=loadRun();$('cont').style.display=run?'inline-block':'none';
  if(run)$('cont').textContent=`▶ CONTINUAR · ${CHARS[run.cid].name} · Etapa ${run.stage+1} · ${DIFFS[run.did].name}`;
@@ -172,10 +174,30 @@ function drawPreview(t){const k=$('prev');if(!k||!k.getContext)return;const g=k.
  g.save();g.translate(k.width/2,k.height-18);g.scale(2.1,2.1);
  drawHero(g,0,0,{col:lk?'#2a2440':v.color,face:1,aim:Math.sin(t*1.3)*.5-.15,run:t*9,moving:ph<2,atk:at<.15?1-at/.15:0,acc:FAM_ACC[v.fam],t});g.restore()}
 
-/* ===================== OPCIONES (calidad y temblor) ===================== */
-function applySettings(){const st=Save.d.settings;setQuality(st.quality);SHAKE=st.shake;$('qual').value=st.quality;$('shk').value=Math.round(st.shake*100)}
-$('qual').onchange=e=>{Save.d.settings.quality=e.target.value;Save.write();applySettings()};
-$('shk').oninput=e=>{Save.d.settings.shake=+e.target.value/100;Save.write();applySettings()};
+/* ===================== PAUSA, OPCIONES Y CONTROLES ===================== */
+const show=id=>{$(id).style.display='flex'},hide=id=>{$(id).style.display='none'};
+function togglePause(){if(S.st==='pause'){hide('pause');S.st='play';mouse.l=mouse.r=0}else if(S.st==='play'){S.st='pause';show('pause');Snd.play('ui')}}
+$('pResume').onclick=togglePause;
+$('pQuit').onclick=()=>{hide('pause');S=null;show('menu');buildMenu()};  // la partida sigue guardada desde el inicio de la etapa
+let optsFrom='menu';
+function openOpts(from){optsFrom=from;syncOptions();hide(from);show('opts')}
+function openCtrls(from){optsFrom=from;buildControls();hide(from);show('ctrls')}
+$('mOpts').onclick=()=>openOpts('menu');$('pOpts').onclick=()=>openOpts('pause');
+$('mCtrls').onclick=()=>openCtrls('menu');$('pCtrls').onclick=()=>openCtrls('pause');
+$('oBack').onclick=()=>{hide('opts');show(optsFrom)};$('cBack').onclick=()=>{rebind=null;hide('ctrls');show(optsFrom)};
+$('cReset').onclick=()=>{BIND=JSON.parse(JSON.stringify(BIND_DEF));saveBinds();buildControls()};
+function syncOptions(){const st=Save.d.settings;if(!$('qual'))return;
+ $('qual').value=st.quality;$('shk').value=Math.round(st.shake*100);$('vMaster').value=Math.round(st.vol.master*100);$('vSfx').value=Math.round(st.vol.sfx*100);
+ $('vMusic').value=Math.round(st.vol.music*100);$('mute').checked=!!st.mute;$('tMode').value=st.touch;$('aMode').value=st.aim}
+function applySettings(){const st=Save.d.settings;setQuality(st.quality);SHAKE=st.shake;Snd.apply();loadBinds();syncOptions()}
+const setOpt=(id,f)=>{$(id).oninput=$(id).onchange=e=>{f(e.target);Save.write();applySettings();Snd.play('ui')}};
+setOpt('qual',t=>Save.d.settings.quality=t.value);setOpt('shk',t=>Save.d.settings.shake=+t.value/100);
+setOpt('vMaster',t=>Save.d.settings.vol.master=+t.value/100);setOpt('vSfx',t=>Save.d.settings.vol.sfx=+t.value/100);setOpt('vMusic',t=>Save.d.settings.vol.music=+t.value/100);
+setOpt('mute',t=>Save.d.settings.mute=t.checked);setOpt('tMode',t=>Save.d.settings.touch=t.value);setOpt('aMode',t=>Save.d.settings.aim=t.value);
+function buildControls(){
+ $('ctrlList').innerHTML=Object.keys(ACTIONS).map(a=>`<div class="crow"><span>${ACTIONS[a]}</span>${[0,1].map(i=>`<button class="kb ${rebind&&rebind.a===a&&rebind.i===i?'wait':''}" data-a="${a}" data-i="${i}">${rebind&&rebind.a===a&&rebind.i===i?'Pulsa una tecla…':esc(keyName(BIND[a][i]))}</button>`).join('')}</div>`).join('');
+ $('ctrlList').onclick=e=>{const b=e.target.closest('.kb');if(!b)return;e.stopPropagation();rebind={a:b.dataset.a,i:+b.dataset.i};buildControls()}}
+const helpText=()=>`${keyName(BIND.left[0])}/${keyName(BIND.right[0])} mover · ${keyName(BIND.jump[0])} saltar · ${keyName(BIND.down[0])} bajar · ${keyName(BIND.primary[0])} primario · ${keyName(BIND.secondary[0])} secundaria · ${keyName(BIND.move[0])} movimiento · ${keyName(BIND.ult[0])} definitiva · ${keyName(BIND.interact[0])} interactuar · ${keyName(BIND.inventory[0])} inventario · ${keyName(BIND.pause[0])} pausa · ${keyName(BIND.mute[0])} silenciar · también con mando`;
 
 /* ===================== ARRANQUE ===================== */
 applySettings();buildMenu();requestAnimationFrame(loop);

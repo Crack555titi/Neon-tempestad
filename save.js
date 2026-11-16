@@ -6,9 +6,10 @@ const SAVE_KEY='neonTempestad.v1',RUN_KEY='neonTempestad.run';
 const STORE=(()=>{try{localStorage.setItem('_nt','1');localStorage.removeItem('_nt');return localStorage}
  catch(e){const m={};return {getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}}}})();
 const Save={
- d:{stats:{},ach:{},settings:{}},
+ d:{stats:{},ach:{},settings:{vol:{}},records:{}},
  load(){let raw=null;try{raw=JSON.parse(STORE.getItem(SAVE_KEY))}catch(e){}  // guardado corrupto: se empieza de cero
-  this.d={stats:Object.assign({},raw&&raw.stats),ach:Object.assign({},raw&&raw.ach),settings:Object.assign({quality:'alta',shake:1},raw&&raw.settings)};
+  this.d={stats:Object.assign({},raw&&raw.stats),ach:Object.assign({},raw&&raw.ach),settings:Object.assign({quality:'alta',shake:1,mute:false,touch:'auto',aim:'auto',binds:null},raw&&raw.settings),records:Object.assign({},raw&&raw.records)};
+  this.d.settings.vol=Object.assign({master:.8,sfx:.8,music:.6},this.d.settings.vol);
   if(!QUALITY[this.d.settings.quality])this.d.settings.quality='alta'},
  write(){try{STORE.setItem(SAVE_KEY,JSON.stringify(this.d))}catch(e){}},
  val(k){const v=this.d.stats[k];return Array.isArray(v)?v.length:v||0},
@@ -38,6 +39,10 @@ function trackRun(){
 function recordRunEnd(win){
  Save.add('runs');Save.add('playTime',S.t);Save.max('bestTime',S.t);
  if(win){Save.add('wins');if(DIFFS.indexOf(S.df)>=2)Save.add('hardWins');Save.addSet('winFams',S.ch.fam)}else Save.add('deaths');
+ // récords por dificultad: etapa más lejana (y más rápida), victorias, mejor tiempo de victoria y más bajas
+ const did=DIFFS.indexOf(S.df),r=Save.d.records[did]||(Save.d.records[did]={stage:0,time:0,wins:0,best:0,kills:0,ch:''}),st=S.stage+1;
+ if(st>r.stage||(st===r.stage&&S.t<r.time)){r.stage=st;r.time=S.t;r.ch=S.ch.name}
+ if(win){r.wins++;if(!r.best||S.t<r.best)r.best=S.t}r.kills=Math.max(r.kills,S.kills);
  Save.write();
 }
 

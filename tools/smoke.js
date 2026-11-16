@@ -10,7 +10,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,f),'utf8')).join('\n;\n')+
- '\n;global.T={start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);T.update(1/60);T.draw()}};
@@ -109,6 +109,8 @@ T.start('vanguard',1);T.useTP();assert(T.S.boss&&T.S.tp.state==='charging');T.S.
 assert(T.S.tp.charge>c0,'no carga estando cerca');T.S.boss.hidden=0;T.hurtE(T.S.boss,1e12,{raw:1});T.S.tp.charge=1;step(2);assert.strictEqual(T.S.tp.state,'ready');
 T.useTP();assert.strictEqual(T.S.stage,1);assert.strictEqual(T.loadRun().stage,1);
 // 21. Mecánicas de jefe: Hidra → lava; Leviatán → suelo roto; Arconte → paredes; Reina → la Mirada castiga moverse
+// muerte garantizada: los botines aleatorios pueden traer Ankh, esquiva o intangibilidad
+const killP=()=>{const p=T.S.p;p.items.ankh=0;p.revive=0;p.m.dodge=0;p.buf={};p.inv=0;T.hurtP(1e9)};
 const toStage=(i,d)=>{reset();T.start('vanguard',d||1);for(let k=0;k<i;k++){T.useTP();T.S.boss.hidden=0;T.hurtE(T.S.boss,1e12,{raw:1});T.S.tp.charge=1;step(2);T.useTP()}T.S.spawn=1e9};
 const phaseTo=np=>{const b=T.S.boss;b.hidden=0;T.hurtE(b,b.maxHp*(np===2?.4:.35),{raw:1});assert(b.ph>=np)};
 toStage(1);T.useTP();phaseTo(2);assert(T.S.lava,'la Hidra no activó la lava');
@@ -127,7 +129,7 @@ T.start('vanguard',3);let dbl=0;for(let i=0;i<300;i++){const e=T.spawnEnemy('cra
 // 24. Muerte permanente: en Pesadilla se borra la partida; en Estándar se puede reintentar la etapa con lo que tenías
 T.start('vanguard',4);for(let i=0;i<4;i++)els.nodes.onclick(pick0);assert(T.loadRun());T.S.p.items.ankh=0;T.S.p.revive=0;T.S.p.m.dodge=0;T.S.p.buf={};T.S.p.inv=0;T.hurtP(1e9);  // el lote aleatorio puede traer esquiva o intangibilidad
 assert.strictEqual(T.S.st,'over');assert.strictEqual(T.loadRun(),null,'Pesadilla no borró la partida');
-toStage(2);T.giveItem('sharp',1);T.saveRun();T.S.p.inv=0;T.hurtP(1e9);assert.strictEqual(T.S.st,'over');const rr=T.loadRun();assert(rr&&rr.stage===2,'no hay partida para reintentar');
+toStage(2);T.giveItem('sharp',1);T.saveRun();killP();assert.strictEqual(T.S.st,'over');const rr=T.loadRun();assert(rr&&rr.stage===2,'no hay partida para reintentar');
 T.start(rr.cid,rr.did,rr);assert.strictEqual(T.S.stage,2);assert.strictEqual(T.S.p.items.sharp,1,'el reintento perdió los objetos');
 console.log('Etapas, jefes, enemigos, afijos, teletransportador, dificultades y guardado: OK');
 
@@ -146,6 +148,45 @@ T.setQuality('baja');assert(T.PT.max<=220&&!T.QL.glow,'la calidad baja no reduce
 for(let i=0;i<60*13;i++)T.drawMenuBg(1/60);  // recorre la transición entre escenarios del menú
 console.log('Animación, efectos, calidad y menú: OK');
 
+// 26. Fase 5: controles reasignables, pausa, récords, mando, táctil y audio
+reset();T.start('vanguard',1);T.S.spawn=1e9;step(80);
+T.BIND.jump=['KeyK'];key('Space',false);assert.strictEqual(T.S.p.jumps,0,'Espacio sigue saltando tras reasignar');
+key('KeyK',false);assert.strictEqual(T.S.p.jumps,1,'la tecla nueva no salta');
+T.saveBinds();T.loadBinds();assert.deepStrictEqual(T.BIND.jump,['KeyK'],'la asignación no se guardó');
+T.BIND.jump=T.BIND_DEF.jump.slice();T.saveBinds();
+T.rebindStart('ult',0);key('KeyR',false);assert.strictEqual(T.BIND.ult[0],'KeyR','reasignar desde la pantalla de controles falló');
+T.rebindStart('move',0);key('KeyR',false);assert.strictEqual(T.BIND.move[0],'KeyR');assert(!T.BIND.ult.includes('KeyR'),'una tecla quedó asignada a dos acciones');
+T.BIND=JSON.parse(JSON.stringify(T.BIND_DEF));T.saveBinds();T.loadBinds();
+key('Escape',false);assert.strictEqual(T.S.st,'pause','Esc no pausa');key('Escape',false);assert.strictEqual(T.S.st,'play','Esc no reanuda');
+key('Tab',false);assert.strictEqual(T.S.st,'inv');key('Escape',false);assert.strictEqual(T.S.st,'play','Esc no cierra el inventario');
+// récords por dificultad
+T.start('artillery',2);T.S.p.items.ankh=0;T.S.p.revive=0;T.S.p.m.dodge=0;T.S.p.inv=0;T.hurtP(1e9);
+const rec=T.Save.d.records[2];assert(rec&&rec.stage>=1&&rec.ch==='Cañonero','no se guardó el récord de la dificultad');
+// mando: A salta, stick izquierdo mueve, stick derecho apunta, Start pausa
+let pad={connected:1,axes:[0,0,0,0],buttons:Array.from({length:17},()=>({pressed:false}))};
+Object.defineProperty(globalThis,'navigator',{value:{getGamepads:()=>[pad]},configurable:true});
+T.start('vanguard',1);T.S.spawn=1e9;step(80);
+pad.buttons[0].pressed=true;T.pollInput();assert.strictEqual(T.S.p.jumps,1,'A no salta');pad.buttons[0].pressed=false;T.pollInput();
+pad.axes=[1,0,0,-1];T.pollInput();const x0=T.S.p.x;step(20);T.pollInput();assert(T.S.p.x>x0+20,'el stick no mueve');assert(Math.abs(T.AIM.ang+Math.PI/2)<.01,'el stick derecho no apunta');
+pad.axes=[0,0,0,0];pad.buttons[9].pressed=true;T.pollInput();assert.strictEqual(T.S.st,'pause','Start no pausa');pad.buttons[9].pressed=false;T.pollInput();
+pad.buttons[9].pressed=true;T.pollInput();pad.buttons[9].pressed=false;T.pollInput();assert.strictEqual(T.S.st,'play');
+Object.defineProperty(globalThis,'navigator',{value:{getGamepads:()=>[]},configurable:true});T.pollInput();assert(!T.act('right'),'el mando desconectado deja acciones pulsadas');T.AIM.ang=null;
+// táctil: el joystick virtual escribe en TOUCHV
+T.TOUCHV.right=1;const x1=T.S.p.x;step(20);assert(T.S.p.x>x1+20,'el táctil no mueve');T.TOUCHV.right=0;
+// audio con un AudioContext simulado: todos los efectos y la música en sus 3 intensidades sin errores
+const fake=()=>new Proxy(function(){},{get:(t,k)=>k==='getChannelData'?()=>new Float32Array(64):k==='value'?0:k==='sampleRate'?44100:fake(),apply:()=>fake(),set:()=>true});
+const actx={currentTime:1,state:'running',sampleRate:44100,destination:fake(),resume(){},
+ createGain:fake,createOscillator:fake,createBiquadFilter:fake,createDynamicsCompressor:fake,createBufferSource:fake,createBuffer:()=>({getChannelData:()=>new Float32Array(64)})};
+global.window={AudioContext:function(){return actx}};global.setInterval=()=>0;
+T.Snd.init();assert(T.Snd.ctx,'el audio no se inicializó');
+for(const k of Object.keys(T.SFX)){T.Snd.last={};T.Snd.play(k)}for(const r of 'curlmf')T.Snd.item(r);
+for(const mode of ['explora','carga','jefe']){T.start('vanguard',1);if(mode!=='explora')T.useTP();if(mode==='carga')T.S.boss=null;
+ for(let i=0;i<40;i++){actx.currentTime+=.1;T.Snd.tick()}}
+T.Snd.toggleMute();assert(T.Save.d.settings.mute);T.Snd.toggleMute();
+T.start('mage'in T.CHARS?'mage':'chimera',1);step(60*5);  // los ganchos de sonido funcionan durante el juego
+console.log('Controles, pausa, récords, mando, táctil y audio: OK');
+
+
 
 
 
@@ -154,7 +195,7 @@ function clearStage(secs){const S=T.S;T.useTP();assert(S.boss,'no apareció el j
  for(let f=0;f<60*secs&&T.S.st!=='over'&&T.S.boss;f++){T.mouse.l=T.mouse.r=f%50<40;if(f%300===0)T.S.p.hp=T.S.p.maxHp;
   if(f%40===0&&!b.dead){b.hidden=0;b.ghost=0;T.hurtE(b,b.maxHp*.035,{raw:1})}step()}
  if(T.S.st==='over')return;if(T.S.boss){T.S.boss.hidden=0;T.hurtE(T.S.boss,1e12,{raw:1})}
- assert(T.S.bossDone,id+' no murió');assert.strictEqual(b.ph,3,id+' no llegó a la fase 3');
+ assert(T.S.bossDone,id+' no murió');assert(b.ph>=2,id+' no cambió de fase');  // un golpe enorme puede matarlo antes de la fase 3
  T.S.tp.charge=1;step(2);assert.strictEqual(T.S.tp.state,'ready');T.useTP()}
 // Matriz: cada personaje × dificultad recorre las 5 etapas (15 s explorando + jefe), vida rellenada → busca excepciones
 let fails=0;

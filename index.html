@@ -19,12 +19,11 @@
         <div class="row" id="diffs"></div>
         <div id="dd"></div>
         <div class="row"><button id="go">▶ NUEVA PARTIDA</button><button id="cont" style="display:none"></button></div>
-        <div class="row opts"><label>Calidad gráfica <select id="qual"><option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja (equipos lentos)</option></select></label>
-          <label>Temblor de pantalla <input id="shk" type="range" min="0" max="150" value="100"></label></div>
+        <div class="row"><button class="sec" id="mOpts">⚙ OPCIONES</button><button class="sec" id="mCtrls">🎮 CONTROLES</button></div>
       </div>
       <div id="info"></div>
     </div>
-    <p class="help">A/D mover · W/Espacio saltar (doble salto) · S bajar de plataforma · Ratón apuntar · Clic izq. disparo primario · Clic der. secundaria · Shift movimiento · Q definitiva · E abrir cofre, altar o teletransportador · Tab o I inventario</p>
+    <p class="help" id="help"></p>
   </div>
 
   <div id="inv" class="ov" style="display:none">
@@ -40,6 +39,38 @@
     <div class="row" id="altarOpts"></div>
     <button id="altarNo">Rechazar</button>
   </div>
+
+  <div id="pause" class="ov" style="display:none">
+    <h2>PAUSA</h2>
+    <button id="pResume">▶ CONTINUAR</button>
+    <div class="row"><button class="sec" id="pOpts">⚙ OPCIONES</button><button class="sec" id="pCtrls">🎮 CONTROLES</button></div>
+    <button class="sec" id="pQuit">ABANDONAR AL MENÚ</button>
+    <small class="help">La partida se guarda al empezar cada etapa: podrás continuarla desde el menú.</small>
+  </div>
+
+  <div id="opts" class="ov" style="display:none">
+    <h2>OPCIONES</h2>
+    <div class="optgrid">
+      <label for="qual">Calidad gráfica</label><select id="qual"><option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja (equipos lentos)</option></select>
+      <label for="shk">Temblor de pantalla</label><input id="shk" type="range" min="0" max="150">
+      <label for="vMaster">Volumen general</label><input id="vMaster" type="range" min="0" max="100">
+      <label for="vSfx">Efectos</label><input id="vSfx" type="range" min="0" max="100">
+      <label for="vMusic">Música</label><input id="vMusic" type="range" min="0" max="100">
+      <label for="mute">Silenciar</label><input id="mute" type="checkbox">
+      <label for="tMode">Controles táctiles</label><select id="tMode"><option value="auto">Automático</option><option value="on">Siempre</option><option value="off">Nunca</option></select>
+      <label for="aMode">Apuntado táctil</label><select id="aMode"><option value="auto">Automático (enemigo más cercano)</option><option value="stick">Joystick de apuntado</option></select>
+    </div>
+    <button id="oBack">VOLVER</button>
+  </div>
+
+  <div id="ctrls" class="ov" style="display:none">
+    <h2>CONTROLES</h2>
+    <div id="ctrlList"></div>
+    <small class="help">Haz clic en una tecla y pulsa la nueva (Esc cancela). Mando: stick/cruceta mover · A saltar · RT o stick derecho disparar · LT secundaria · B/RB movimiento · Y/LB definitiva · X interactuar · Select inventario · Start pausa.</small>
+    <div class="row"><button class="sec" id="cReset">RESTABLECER</button><button id="cBack">VOLVER</button></div>
+  </div>
+
+  <div id="rotate">↻ Gira el dispositivo para jugar en horizontal</div>
 
   <div id="mastery" class="ov" style="display:none">
     <h2>NODO DE MAESTRÍA <small id="mq"></small></h2>
@@ -66,6 +97,9 @@
 <script src="abilities.js"></script>
 <script src="loot.js"></script>
 <script src="save.js"></script>
+<script src="audio.js"></script>
+<script src="input.js"></script>
+<script src="touch.js"></script>
 <script src="ui.js"></script>
 </body>
 </html>

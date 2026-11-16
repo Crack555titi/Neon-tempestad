@@ -46,7 +46,7 @@ const AB={
   bolt(x1,y1,x2,y2,p.buf.void?'#d070ff':S.ch.color,p.buf.void?7:4,0,.09)},
  /* ---------- desplazamientos ---------- */
  dashHit(p,d,a){p.dash={t:.2,vx:sgn(Math.cos(a))*d.dist/.2,vy:0,dmg:d.dmg,hit:new Set(),reset:d.reset}},
- dash(p,d){const dir=(keys.KeyD?1:0)-(keys.KeyA?1:0)||p.face;p.dash={t:.17,vx:dir*d.dist/.17,vy:0,dmg:0,hit:new Set()}},
+ dash(p,d){const dir=(act('right')?1:0)-(act('left')?1:0)||p.face;p.dash={t:.17,vx:dir*d.dist/.17,vy:0,dmg:0,hit:new Set()}},
  blink(p,d,a){blinkTo(p,p.x+Math.cos(a)*d.dist,p.y+Math.sin(a)*d.dist*.6);p.inv=Math.max(p.inv,.3)},
  boltDash(p,d,a){const x1=p.x,y1=p.y-20;blinkTo(p,p.x+Math.cos(a)*d.dist,p.y+Math.sin(a)*d.dist);p.inv=Math.max(p.inv,.3);
   for(const e of S.en)if(!e.dead&&segD(e.x,e.y-e.h/2,x1,y1,p.x,p.y-20)<e.w/2+30){hurtE(e,d.dmg);stunE(e,.5)}

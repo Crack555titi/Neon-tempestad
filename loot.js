@@ -7,7 +7,7 @@ const RORD='curlm';
 function chance(pr){const p=S.p;if(p.items.entropy)return Math.random()<pr*.5;
  let ok=Math.random()<pr;for(let i=0;i<(p.m.luck|0)&&!ok;i++)ok=Math.random()<pr;return ok}
 const ib=()=>12*S.p.dmgMul;  // daño base de objetos: equivale a un golpe de 12 que escala con el nivel
-function boom(x,y,r,dmg,col,raw){ring(x,y,r,col,.25);aoe(x,y,r,dmg,raw?PROCRAW:PROC);S.shake=Math.max(S.shake,3)}
+function boom(x,y,r,dmg,col,raw){ring(x,y,r,col,.25);Snd.play('boom');aoe(x,y,r,dmg,raw?PROCRAW:PROC);S.shake=Math.max(S.shake,3)}
 
 function recalcHp(){const p=S.p,old=p.maxHp;
  p.maxHp=p.items.glass?1:Math.max(1,(S.ch.hp*(1+.02*(p.lvl-1))+p.m.hpf)*Math.max(.1,1+p.m.hpm));
@@ -19,7 +19,7 @@ function giveItem(id,quiet){
  if(it.pick)it.pick(n);
  if(it.dm&&n===1)p.dmItems.push(it);
  recalcHp();
- if(!quiet){const col=RARITY[it.r].col;S.note={it,n,t:3.5};ring(p.x,p.y-20,90,col,.5);burst(p.x,p.y-20,24,col,300,4);if('lmf'.includes(it.r))hitStop(60)}
+ if(!quiet){Snd.item(it.r);const col=RARITY[it.r].col;S.note={it,n,t:3.5};ring(p.x,p.y-20,90,col,.5);burst(p.x,p.y-20,24,col,300,4);if('lmf'.includes(it.r))hitStop(60)}
 }
 function pickW(w){let x=Math.random(),k;for(k in w){x-=w[k];if(x<=0)return k}return k}
 function rollR(w){let r=pickW(w);if(!S.p.items.entropy)for(let i=0;i<(S.p.m.luck|0);i++){const r2=pickW(w);if(RORD.indexOf(r2)>RORD.indexOf(r))r=r2}return r}

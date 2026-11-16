@@ -23,22 +23,7 @@ const DIFFS=[
 let S=null,chain=0,selC='vanguard',selD=1;
 const keys={},mouse={x:0,y:0,l:0,r:0};
 const SLOTS='psmu',SLOT={p:'primary',s:'secondary',m:'move',u:'ult'};
-const BTN={p:()=>mouse.l,s:()=>mouse.r,m:()=>keys.ShiftLeft||keys.ShiftRight,u:()=>keys.KeyQ};
-addEventListener('keydown',e=>{keys[e.code]=1;if(['Space','ArrowUp','ArrowDown','Tab'].includes(e.code))e.preventDefault();
- if(!S||e.repeat)return;  // e.repeat: mantener pulsado no debe gastar el doble salto
- if((e.code==='Tab'||e.code==='KeyI')&&(S.st==='play'||S.st==='inv'))return toggleInv();
- if(e.code==='Escape'&&S.st==='inv')return toggleInv();
- if(S.st!=='play')return;
- if(e.code==='Space'||e.code==='KeyW'||e.code==='ArrowUp')jump();
- if(e.code==='KeyE')interact();
- if(e.code==='KeyB'&&DEBUG&&S.tp.state==='idle')useTP()});
-addEventListener('keyup',e=>keys[e.code]=0);
-// Alt-Tab no envía keyup: soltar todo para que no se queden teclas pegadas
-addEventListener('blur',()=>{for(const k in keys)keys[k]=0;mouse.l=mouse.r=0});
-cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();mouse.x=(e.clientX-r.left)*W/r.width;mouse.y=(e.clientY-r.top)*H/r.height});
-cv.addEventListener('mousedown',e=>{e.button===0?mouse.l=1:mouse.r=1});
-addEventListener('mouseup',e=>{e.button===0?mouse.l=0:mouse.r=0});
-cv.addEventListener('contextmenu',e=>e.preventDefault());
+const BTN={p:()=>act('primary'),s:()=>act('secondary'),m:()=>act('move'),u:()=>act('ult')};  // entrada: input.js
 
 // dificultad: +0,5 por minuto de reloj y +0,3 por etapa superada
 const coef=()=>1+S.clock/60*.5+.3*S.stage, dmgScale=()=>1+.12*(coef()-1), hpScale=()=>1+.3*(coef()-1);
@@ -47,7 +32,7 @@ const say=m=>{S.msg=m;S.msgT=4};
 /* run: instantánea guardada al empezar una etapa (save.js) para continuar o reintentar */
 function start(cid,did,run){
  Ev.h={};fxReset();const ch=CHARS[cid],df=DIFFS[did];
- ['menu','end','mastery','inv','altar'].forEach(i=>$(i).style.display='none');
+ ['menu','end','mastery','inv','altar','pause','opts','ctrls'].forEach(i=>$(i).style.display='none');
  S={st:'play',cid,ch,df,t:0,clock:df.start||0,stage:0,phase:1,cam:0,shake:0,en:[],zn:[],dr:[],sch:[],freeze:0,spawn:2,boss:null,bossDone:0,bossName:'',msg:'',msgT:0,kills:0,mq:0,portal:{a:null,b:null},
   ints:[],near:null,note:null,chestT:40,altarT:150,tp:null,lava:0,walls:null,fade:1,lvlFx:null,
   p:{x:300,y:FLOOR,w:24,h:42,vx:0,vy:0,ground:0,wasG:1,plat:null,jumps:0,maxJ:2,face:1,aim:0,hp:ch.hp,maxHp:ch.hp,lvl:1,xp:0,need:40,dmgMul:1,inv:0,dash:null,drop:0,
@@ -69,6 +54,7 @@ function start(cid,did,run){
  else{while(p.lvl<(df.startLvl||1))giveXp(p.need-p.xp);loadStage(0);saveRun()}
  p.hp=p.maxHp;
  trackRun(); // después de los niveles regalados de Pesadilla: no cuentan para logros
+ Snd.hooks();
 }
 
 /* ===================== BUFFS DEL JUGADOR =====================
@@ -223,7 +209,7 @@ function updProj(q,dt){
  else if(q.bounce>0&&q.y>=FLOOR){q.vy=-Math.abs(q.vy)*.55;q.y=FLOOR-1;q.bounce--}
  else if(!q.ret&&(q.y>=FLOOR||out||(q.y<-80&&!q.gm)))q.life=Math.min(q.life,0);
  if(q.life<=0){const y=Math.min(q.y,FLOOR);
-  if(q.boom){ring(q.x,y,q.boom,q.col,.3);aoe(q.x,y,q.boom,q.dmg);s.shake=Math.max(s.shake,4)}
+  if(q.boom){ring(q.x,y,q.boom,q.col,.3);aoe(q.x,y,q.boom,q.dmg);s.shake=Math.max(s.shake,4);Snd.play('boom')}
   if(q.zone)Z(Object.assign({x:q.x,y},q.zone));
   if(q.hostile&&!q.harmless&&s.df.hazard)puddle(q.x,y)}
 }
@@ -256,11 +242,11 @@ function update(dt){
   pl.on=s.phase>=pl.ph[0]&&s.phase<=pl.ph[1]&&!(pl.bl&&s.phase>=pl.bl&&Math.sin(s.t*1.6+pl.x*.01)<-.3)}  // bl: parpadea
  updBuffs(dt);drainP(p.maxHp*bsum('drain')*dt);if(s.st!=='play')return;
  // jugador
- const root=bany('root'),ax=root?0:(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);
- p.aim=Math.atan2(mouse.y-(p.y-p.h/2),mouse.x+s.cam-p.x);if(Math.abs(Math.cos(p.aim))>.15)p.face=sgn(Math.cos(p.aim));
+ const root=bany('root'),ax=root?0:(act('right')?1:0)-(act('left')?1:0);
+ p.aim=AIM.ang!==null?AIM.ang:Math.atan2(mouse.y-(p.y-p.h/2),mouse.x+s.cam-p.x);if(Math.abs(Math.cos(p.aim))>.15)p.face=sgn(Math.cos(p.aim));
  p.inv-=dt;p.drop-=dt;p.leapT-=dt;p.comboT-=dt;for(const k in p.cd)p.cd[k]-=dt;
  p.histT-=dt;if(p.histT<=0){p.histT=.1;p.hi=(p.hi+1)%p.hist.length;const h=p.hist[p.hi];h.x=p.x;h.y=p.y;h.hp=p.hp}
- if(keys.KeyS||keys.ArrowDown)p.drop=.25;
+ if(act('down'))p.drop=.25;
  p.gm=bm('grav');
  if(bany('jet')){p.vy=Math.max(p.vy-(G+1700)*dt,-430);p.ground=0}
  if(p.slam&&!p.ground&&p.vy>=0)p.vy=Math.max(p.vy,1500);
@@ -374,6 +360,6 @@ function drawPlayer(p){
 
 /* ===================== LOOP ===================== */
 let last=performance.now();
-function loop(now){const dt=Math.min(.033,(now-last)/1000);last=now;chroma=Math.max(0,chroma-dt*3);
+function loop(now){const dt=Math.min(.033,(now-last)/1000);last=now;chroma=Math.max(0,chroma-dt*3);pollInput();
  if(S){if(S.st==='play'){if(hitstop>0)hitstop-=dt;else update(dt)}draw()}else drawMenuBg(dt);
  requestAnimationFrame(loop)}

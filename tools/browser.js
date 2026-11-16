@@ -20,10 +20,10 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  const ws=new WebSocket(tabs.find(t=>t.type==='page').webSocketDebuggerUrl);await new Promise(r=>ws.onopen=r);
  let id=0;const pend={},errors=[];
  ws.onmessage=m=>{const d=JSON.parse(m.data);if(d.id&&pend[d.id]){pend[d.id](d);delete pend[d.id]}
-  if(d.method==='Runtime.exceptionThrown')errors.push(d.params.exceptionDetails.exception?.description||d.params.exceptionDetails.text);
-  if(d.method==='Runtime.consoleAPICalled'&&d.params.type==='error')errors.push(d.params.args.map(a=>a.value||a.description).join(' '))};
+  if(d.method==='Runtime.exceptionThrown'){const x=d.params.exceptionDetails;errors.push((x.exception?.description||x.text)+` @${x.url||'?'}:${x.lineNumber}`)}
+  if(d.method==='Runtime.consoleAPICalled'&&d.params.type==='error')errors.push('console.error: '+d.params.args.map(a=>a.value??a.description??a.type).join(' '))};
  const cmd=(method,params={})=>new Promise(r=>{const i=++id;pend[i]=r;ws.send(JSON.stringify({id:i,method,params}))});
- const js=async e=>{const r=await cmd('Runtime.evaluate',{expression:e,awaitPromise:true,returnByValue:true});if(r.result.exceptionDetails)errors.push(r.result.exceptionDetails.exception?.description);return r.result.result?.value};
+ const js=async e=>{const r=await cmd('Runtime.evaluate',{expression:e,awaitPromise:true,returnByValue:true});if(r.result.exceptionDetails)errors.push('[evaluate] '+e.slice(0,60)+' → '+(r.result.exceptionDetails.exception?.description||JSON.stringify(r.result.exceptionDetails).slice(0,300)));return r.result.result?.value};
  const shot=async name=>{const r=await cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(out,name+'.png'),Buffer.from(r.result.data,'base64'));console.log('captura',name)};
  await cmd('Runtime.enable');await cmd('Page.enable');
  await cmd('Page.navigate',{url:'file:///'+path.join(root,'index.html').replace(/\\/g,'/')+'?unlockall&debug'});await sleep(2500);
@@ -38,6 +38,14 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await js(`if(S.st!=='play')document.querySelector('#nodes .card')?.click();loadStage(${i});useTP();S.boss.hidden=0;hurtE(S.boss,S.boss.maxHp*.5,{raw:1});S.p.hp=S.p.maxHp`);
   await sleep(4500);await shot(`04-jefe-${i+1}-${b}`)}
  await js("toggleInv()");await sleep(500);await shot('05-inventario');await js("toggleInv()");
+ // audio real: el contexto debe arrancar y la música programar notas
+ await cmd('Input.dispatchKeyEvent',{type:'keyDown',code:'KeyM',key:'m'});await cmd('Input.dispatchKeyEvent',{type:'keyUp',code:'KeyM',key:'m'});
+ await js("Save.d.settings.mute=false;Snd.apply()");await sleep(400);
+ console.log('Audio:',await js("Snd.ctx?Snd.ctx.state+' · pasos de música '+Snd.step:'sin AudioContext'"));
+ await js("togglePause()");await sleep(400);await shot('07-pausa');
+ await js("openOpts('pause')");await sleep(400);await shot('08-opciones');
+ await js("hide('opts');openCtrls('pause')");await sleep(400);await shot('09-controles');
+ await js("hide('ctrls');togglePause();Save.d.settings.touch='on'");await sleep(800);await shot('10-tactil');await js("Save.d.settings.touch='off'");
  await js("setQuality('baja')");await sleep(1500);await shot('06-calidad-baja');
  const fps=await js("new Promise(r=>{let n=0,t0=performance.now();(function f(){n++;if(performance.now()-t0<2000)requestAnimationFrame(f);else r(n/2)})()})");
  console.log('FPS (headless, calidad baja):',fps);
