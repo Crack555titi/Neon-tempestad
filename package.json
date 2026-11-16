@@ -1,7 +1,7 @@
 {
   "name": "neon-tempestad",
   "productName": "Neón Tempestad",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Roguelike de acción 2D en HTML5 Canvas y JavaScript puro",
   "main": "js/main.js",
   "author": "thaigo naboni",
@@ -14,7 +14,9 @@
     "test:browser": "node tools/browser.js",
     "www": "node tools/build-www.js",
     "android": "node tools/build-www.js && npx cap sync android && node tools/android-setup.js",
-    "android:open": "npx cap open android"
+    "android:open": "npx cap open android",
+    "bump": "node tools/bump.js",
+    "apk": "node tools/build-apk.js"
   },
   "devDependencies": {
     "@capacitor/android": "^7.6.10",

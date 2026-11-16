@@ -134,3 +134,11 @@ button.sec{border-color:#3cf0ff;box-shadow:0 0 12px #3cf0ff;background:#0a1e30;f
 #rTable tr.me td{background:#ff3cf222;color:#fff}
 #endScore{font-size:18px;font-weight:700;color:#ffd23c;text-shadow:0 0 10px #ffd23c88;min-height:1em}
 @media (max-width:640px){#rTable th:nth-child(3),#rTable td:nth-child(3){display:none}#rTable{font-size:12px}}
+
+/* ===== Actualizaciones ===== */
+#update{z-index:20;background:radial-gradient(ellipse at center,rgba(60,10,40,.6),rgba(5,3,13,.97))}
+#update h2{color:#ffd23c;text-shadow:0 0 14px #ffd23c;letter-spacing:3px}
+#updV{font-size:16px;max-width:520px}
+#updBar{position:absolute;top:10px;left:14px;font-size:13px;color:#ffd23c;z-index:1}
+#updBar a{color:#3cf0ff}
+#verTag{position:absolute;bottom:8px;right:12px;font-size:11px;color:#6a6390}

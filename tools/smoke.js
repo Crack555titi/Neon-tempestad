@@ -5,12 +5,13 @@ const fs=require('fs'),path=require('path'),assert=require('assert');
 const root=path.join(__dirname,'..');
 const files=[...fs.readFileSync(path.join(root,'html','index.html'),'utf8').matchAll(/<script src="([^"]+)"/g)].map(m=>m[1]);
 
-global.Path2D=function(){};const ctx=new Proxy({},{get:(t,k)=>k in t?t[k]:(k==='createLinearGradient'||k==='createRadialGradient'?()=>({addColorStop(){}}):k==='measureText'?s=>({width:String(s).length*7}):()=>{}),set:(t,k,v)=>(t[k]=v,true)});
+global.Path2D=function(){};let fakeVersion=null;global.fetch=async()=>fakeVersion?{ok:true,json:async()=>fakeVersion}:{ok:false};  // sin red en las pruebas
+const ctx=new Proxy({},{get:(t,k)=>k in t?t[k]:(k==='createLinearGradient'||k==='createRadialGradient'?()=>({addColorStop(){}}):k==='measureText'?s=>({width:String(s).length*7}):()=>{}),set:(t,k,v)=>(t[k]=v,true)});
 const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);T.update(1/60);T.draw()}};
@@ -146,6 +147,8 @@ T.S.p.hp=1;T.heal(30);step(40);assert(T.TX.a.slice(0,T.TX.n).some(t=>String(t.s)
 for(const q of ['baja','media','alta']){T.setQuality(q);T.start('summoner',3);T.S.spawn=.1;for(let f=0;f<60*6;f++){T.mouse.l=f%30<20;step()}}
 T.setQuality('baja');assert(T.PT.max<=220&&!T.QL.glow,'la calidad baja no reduce');T.setQuality('alta');
 for(let i=0;i<60*13;i++)T.drawMenuBg(1/60);  // recorre la transición entre escenarios del menú
+// el primer fotograma puede traer una marca de tiempo anterior: el menú no debe romperse con dt negativo
+el('again').onclick();assert.strictEqual(T.S,null);T.loop(5000);T.MENU.t=0;T.MENU.i=-1;T.loop(4990);assert(T.MENU.t>=0&&T.MENU.i>=0,'dt negativo en el menú');
 console.log('Animación, efectos, calidad y menú: OK');
 
 // 26. Fase 5: controles reasignables, pausa, récords, mando, táctil y audio
@@ -260,4 +263,18 @@ async function authTests(){const A=T.Auth;
  const b=A.board(2);assert(b[0].user==='Piloto'&&b.every((e,i)=>!i||b[i-1].score>=e.score),'clasificación mal ordenada');
  A.setUser(null);const n=A.board(2).length;assert(!A.submit(false).rank&&A.board(2).length===n,'el invitado entró en la clasificación');
  console.log('Cuentas, contraseñas con sal, puntuación y clasificación: OK')}
-authTests().then(()=>process.exit(fails?1:0),e=>{console.error(e);process.exit(1)});
+// 29. Actualizaciones obligatorias
+async function updateTests(){const U=T.Update;
+ assert.strictEqual(T.APP_VERSION,require('../package.json').version,'js/update.js y package.json tienen versiones distintas');
+ assert.strictEqual(require('../version.json').latest,T.APP_VERSION,'version.json no coincide con la versión del juego');
+ assert(T.cmpVer('1.10.0','1.9.9')>0&&T.cmpVer('1.1.0','1.1.0')===0&&T.cmpVer('1.0.9','1.1.0')<0);
+ // versión opcional: aviso en el menú, sin bloquear
+ fakeVersion={latest:'9.0.0',min:T.APP_VERSION,url:'https://github.com/x'};el('update').style.display='none';await U.check();
+ assert(!U.required&&el('update').style.display==='none'&&el('updBar').style.display==='block','una versión opcional bloqueó el juego');
+ // versión obligatoria en mitad de una partida: espera a que termine y luego bloquea
+ T.start('vanguard',1);fakeVersion={latest:'9.0.0',min:'9.0.0'};await U.check();assert(U.required);assert.notStrictEqual(el('update').style.display,'flex','bloqueó en mitad de la partida');
+ T.S.st='over';U.block();assert.strictEqual(el('update').style.display,'flex','no bloqueó al terminar la partida');assert.strictEqual(el('menu').style.display,'none');
+ // sin conexión se puede jugar
+ U.required=false;fakeVersion=null;await U.check();assert(!U.required);
+ console.log('Actualizaciones: versión sincronizada, aviso opcional, bloqueo obligatorio y modo sin red: OK')}
+authTests().then(updateTests).then(()=>process.exit(fails?1:0),e=>{console.error(e);process.exit(1)});

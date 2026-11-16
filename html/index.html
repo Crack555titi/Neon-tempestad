@@ -31,8 +31,19 @@
     <button id="rBack">VOLVER</button>
   </div>
 
+  <div id="update" class="ov" style="display:none">
+    <h1>NEÓN <span>TEMPESTAD</span></h1>
+    <h2>⬆ ACTUALIZACIÓN OBLIGATORIA</h2>
+    <p id="updV"></p>
+    <p id="updN" class="help"></p>
+    <button id="updDl">DESCARGAR LA NUEVA VERSIÓN</button>
+    <small class="help">Instálala y vuelve a abrir el juego. Tu progreso, cuentas y récords se conservan.</small>
+  </div>
+
   <div id="menu" class="ov">
     <div id="who"></div>
+    <div id="updBar" style="display:none"></div>
+    <small id="verTag"></small>
     <h1>NEÓN <span>TEMPESTAD</span></h1>
     <div id="sel">
       <div class="left">
@@ -125,5 +136,6 @@
 <script src="../js/touch.js"></script>
 <script src="../js/ui.js"></script>
 <script src="../js/auth.js"></script>
+<script src="../js/update.js"></script>
 </body>
 </html>
