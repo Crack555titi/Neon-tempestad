@@ -62,6 +62,10 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   - Mientras haya pocas partidas reales, la tabla se completa con jugadores ficticios, atenuados y marcados «IA», que no cuentan para tu puesto.
   - Las reglas del servidor solo permiten publicar con tu propio nombre y con valores razonables. Nadie puede editar ni borrar puntuaciones.
 - **Personajes articulados.** Cada héroe tiene esqueleto (cabeza, torso, piernas y brazos animados), una capa con física y un arma que apunta al cursor. Además lleva equipo propio: los aros del Cronista, los planos holográficos de la Mecánica, la cola de la Quimera, etc.
+- **Tienda de cosméticos.**
+  - Con los cristales 💎 que ganas al terminar cada partida (según la puntuación) compras cosméticos puramente visuales: 9 skins, 7 estelas y 6 auras.
+  - La vista previa los muestra en movimiento antes de comprarlos.
+- **Pantalla de inicio.** Logo animado, desfile de héroes con tus cosméticos equipados y accesos a jugar, tienda, ranking y opciones.
 - **Guardado.** Logros, desbloqueos, récords por dificultad, ajustes y la partida en curso, que se puede continuar desde el inicio de la etapa.
 
 ![Selección de personaje](docs/capturas/seleccion.png)
@@ -113,14 +117,15 @@ npm test             # pruebas automáticas sin navegador: personajes × dificul
 npm run test:browser # prueba en Chrome/Edge/Brave real: capturas, FPS y errores de consola
 ```
 
-### Escritorio (Windows, `.exe` portable)
+### Escritorio (Windows, instalador)
 
 ```bash
 npm start      # abre el juego en una ventana de Electron (F11 pantalla completa)
-npm run dist   # genera dist/NeonTempestad-<versión>-portable.exe (y borra los de versiones anteriores)
+npm run dist   # genera dist/NeonTempestad-Setup-<versión>.exe (y borra los de versiones anteriores)
 ```
 
-El `.exe` portable no necesita instalación y guarda las partidas en el perfil del usuario.
+El instalador no pide permisos de administrador. Instala el juego en `%LOCALAPPDATA%\Programs
+eon-tempestad`, con acceso directo en el escritorio y en el menú Inicio. Cada versión nueva **se instala encima de la anterior**, y las partidas y la configuración (guardadas en el perfil del usuario) se conservan.
 
 `npm run dist` construye en una carpeta temporal y solo copia el `.exe` a `dist/`. Así evita el bloqueo con el que VS Code deja abiertos los `.asar` dentro del proyecto.
 
@@ -150,6 +155,8 @@ Para abrir el proyecto en Android Studio: `npm run android && npm run android:op
 ### Publicar una actualización (obligatoria)
 
 **Cómo funciona:**
+- **Escritorio:** el botón «Actualizar ahora» descarga el instalador nuevo de la release y comprueba su huella SHA-256, publicada en `version.json`. Después lo instala encima en silencio y vuelve a abrir el juego. Si algo falla, abre la página de descargas.
+- **Android:** descarga el APK nuevo directamente. Al abrirlo se instala encima, porque está firmado con la misma clave.
 - Al abrirse, y cada 30 minutos, el juego lee [`version.json`](version.json) de la rama `main` de GitHub.
 - Si la versión instalada es menor que `min`, aparece una pantalla de **actualización obligatoria**. No se puede cerrar y lleva a la página de descarga.
 - Si llega en mitad de una partida, espera a que termine.
@@ -161,7 +168,7 @@ npm run release -- 1.3.0 "Qué trae esta versión"
 ```
 El comando hace todo esto en orden:
 1. Comprueba que estás en `desarrollo`, sin cambios pendientes, y que las pruebas pasan.
-2. Sube la versión y genera el `.exe` y el APK. Antes borra de `dist/` los de versiones anteriores.
+2. Sube la versión y genera el instalador `.exe` y el APK. Antes borra de `dist/` los de versiones anteriores, y publica la huella del instalador en `version.json`.
 3. Hace commit y push, y crea la release `v1.3.0` en GitHub con los dos archivos.
 4. Por último lleva `desarrollo` a `main`. Desde ese momento, todas las copias anteriores quedan bloqueadas hasta actualizar.
 
@@ -191,7 +198,8 @@ Para borrar una puntuación (trampas, pruebas…) entra en la consola de Firebas
 | `js/audio.js`, `js/save.js`, `js/input.js`, `js/touch.js`, `js/ui.js` | Sonido, guardado, controles, táctil, interfaz |
 | `js/auth.js` | Cuentas y clasificación online (Firebase), puntuación |
 | `js/update.js`, `version.json` | Comprobación de versión y actualización obligatoria |
-| `js/main.js` | Ventana de escritorio (Electron) |
+| `js/main.js`, `js/preload.js`, `js/updater.js` | Ventana de escritorio (Electron) y actualización automática verificada |
+| `js/cosmetics.js` | Tienda: skins, estelas y auras |
 | `tools/` | Pruebas (`smoke.js`, `browser.js`) y scripts de empaquetado |
 
 Las sinergias entre objetos van por un bus de eventos: `onHit`, `onKill`, `onJump`, `onTakeDamage`, `onLevelUp`, `onCast`, `onDash`, `onHeal`, `onChestOpen` y `onBossPhase`.

@@ -98,7 +98,7 @@ function drawMenuBg(dt){MENU.t+=dt;const i=Math.floor(MENU.t/12)%STAGES.length,p
  c.save();c.translate(-((MENU.t*45)%(WORLD-W)),0);for(const q of PLAT)if(q.on){c.fillStyle=q.solid?STAGE.plat.floor:STAGE.plat.fill;c.globalAlpha=.6;c.fillRect(q.rx,q.ry,q.w,q.h)}c.restore();c.globalAlpha=1;
  drawFog(MENU.t*45,MENU.t);bloom();vignette(0);
  const f=ph<1?1-ph:ph>11?ph-11:0;if(f>0){c.fillStyle=`rgba(5,3,13,${f})`;c.fillRect(0,0,W,H)}
- drawPreview(MENU.t);
+ drawPreview(MENU.t);drawShopPreview(MENU.t);if($('title').style.display!=='none')drawParade(MENU.t);
 }
 function drawSil(ly,o,x){const b=FLOOR+10;c.beginPath();
  switch(ly.type){
@@ -131,3 +131,12 @@ function drawTP(){const T=S.tp,col=T.state==='ready'?'#4cff7a':T.state==='chargi
   c.save();c.translate(x,y);c.rotate(S.t*2*s);c.setLineDash([4,6]);c.beginPath();c.ellipse(0,0,r*.38,r*.7,0,0,6.283);c.stroke();c.restore();c.setLineDash([]);
   c.font='bold 11px monospace';c.textAlign='center';c.fillStyle=cl;c.fillText(lb,x,y-r-8)}
  c.shadowBlur=0}
+
+/* pantalla de inicio: héroes corriendo por el suelo; el primero es el tuyo con la skin, estela y aura equipadas */
+const PARADE={capes:{},trails:[]};
+function drawParade(t){const ids=[selC,...Object.keys(CHARS).filter(k=>k!==selC&&isUnlocked(k))].slice(0,5),eq=Save.d.shop.eq;
+ screen();ids.forEach((id,i)=>{const sp=150+i*14,x=((t*sp+i*W/5)%(W+160))-80,y=FLOOR,v=CHARS[id],mine=i===0,col=mine?skinColor(eq.skin,v.color,t):v.color;
+  if(mine){const tr=PARADE.trails;tr.push({x,y:y-22,t});while(tr.length&&(t-tr[0].t>.45||tr[0].x>x))tr.shift();
+   drawTrail(c,eq.trail,tr.map(q=>({x:q.x,y:q.y,a:(t-q.t)/.45})).reverse(),col,t);drawAura(c,eq.aura,x,y,t,col,true)}
+  c.globalAlpha=mine?1:.55;const o={cid:id,col:v.color,face:1,aim:Math.sin(t*1.5+i)*.4-.2,run:t*sp/14,moving:1,t,cape:PARADE.capes[id]||(PARADE.capes[id]={})};
+  mine?drawSkinned(c,x,y,o,eq.skin):drawHero(c,x,y,o);c.globalAlpha=1;if(mine)drawAura(c,eq.aura,x,y,t,col,false)})}

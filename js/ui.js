@@ -120,7 +120,8 @@ function openMastery(){
 
 function endGame(win,cashout){
  S.st='over';recordRunEnd(win);const sc=Auth.submit(win);
- const pts=sc?`Puntuación ${sc.score.toLocaleString('es')}`:'',dn=S.df.name;
+ const gain=sc?Math.max(5,Math.round(sc.score/200)):0;Save.d.shop.gems+=gain;Save.write();  // cristales para la tienda
+ const pts=sc?`Puntuación ${sc.score.toLocaleString('es')} · +${gain} 💎`:'',dn=S.df.name;
  $('endScore').textContent=!sc?'':!sc.done?pts+' · entra con una cuenta para aparecer en la clasificación':pts+' · subiendo al ranking…';
  if(sc&&sc.done)sc.done.then(r=>{$('endScore').textContent=pts+(r.queued?' · sin conexión: se subirá al ranking cuando vuelva la red':r.rank?` · puesto #${r.rank} mundial en ${dn}`:'')}).catch(()=>{$('endScore').textContent=pts});
  // muerte permanente estricta: se borra la partida guardada y no hay reintento
@@ -170,7 +171,7 @@ $('diffs').onclick=e=>{const k=e.target.closest('.diff');if(k){selD=+k.dataset.i
 $('go').onclick=()=>start(selC,selD);
 $('cont').onclick=()=>{const r=loadRun();if(r)start(r.cid,r.did,r)};
 $('retry').onclick=()=>{const r=loadRun();if(r){$('end').style.display='none';start(r.cid,r.did,r)}};
-$('again').onclick=()=>{$('end').style.display='none';$('menu').style.display='flex';S=null;buildMenu()};
+$('again').onclick=()=>goHome();
 
 /* vista previa animada del personaje: corre, se detiene, apunta y ataca en bucle */
 let previewC='vanguard';const prevCape={};
@@ -184,12 +185,12 @@ function drawPreview(t){const k=$('prev');if(!k||!k.getContext)return;const g=k.
 const show=id=>{$(id).style.display='flex'},hide=id=>{$(id).style.display='none'};
 function togglePause(){if(S.st==='pause'){hide('pause');S.st='play';mouse.l=mouse.r=0}else if(S.st==='play'){S.st='pause';show('pause');Snd.play('ui')}}
 $('pResume').onclick=togglePause;
-$('pQuit').onclick=()=>{hide('pause');S=null;show('menu');buildMenu()};  // la partida sigue guardada desde el inicio de la etapa
+$('pQuit').onclick=()=>goHome();  // la partida sigue guardada desde el inicio de la etapa
 let optsFrom='menu';
 function openOpts(from){optsFrom=from;syncOptions();hide(from);show('opts')}
 function openCtrls(from){optsFrom=from;buildControls();hide(from);show('ctrls')}
-$('mOpts').onclick=()=>openOpts('menu');$('pOpts').onclick=()=>openOpts('pause');
-$('mCtrls').onclick=()=>openCtrls('menu');$('pCtrls').onclick=()=>openCtrls('pause');
+$('mOpts').onclick=()=>openOpts('title');$('pOpts').onclick=()=>openOpts('pause');
+$('mCtrls').onclick=()=>openCtrls('title');$('pCtrls').onclick=()=>openCtrls('pause');
 $('oBack').onclick=()=>{hide('opts');show(optsFrom)};$('cBack').onclick=()=>{rebind=null;hide('ctrls');show(optsFrom)};
 $('cReset').onclick=()=>{BIND=JSON.parse(JSON.stringify(BIND_DEF));saveBinds();buildControls()};
 function syncOptions(){const st=Save.d.settings;if(!$('qual'))return;
@@ -206,4 +207,12 @@ function buildControls(){
 const helpText=()=>`${keyName(BIND.left[0])}/${keyName(BIND.right[0])} mover · ${keyName(BIND.jump[0])} saltar · ${keyName(BIND.down[0])} bajar · ${keyName(BIND.primary[0])} primario · ${keyName(BIND.secondary[0])} secundaria · ${keyName(BIND.move[0])} movimiento · ${keyName(BIND.ult[0])} definitiva · ${keyName(BIND.interact[0])} interactuar · ${keyName(BIND.inventory[0])} inventario · ${keyName(BIND.pause[0])} pausa · ${keyName(BIND.mute[0])} silenciar · también con mando`;
 
 /* ===================== ARRANQUE ===================== */
-applySettings();buildMenu();requestAnimationFrame(loop);
+/* ===================== PANTALLA DE INICIO ===================== */
+// vuelta a la pantalla de inicio desde cualquier sitio (fin de partida, pausa, ranking, tienda); la partida guardada se conserva
+function goHome(){for(const id of ['menu','end','rank','shop','opts','ctrls','pause','inv','altar','mastery'])hide(id);S=null;show('title');updateTitle()}
+function updateTitle(){$('tGems').textContent=`💎 ${Save.d.shop.gems.toLocaleString('es')}`;buildMenu()}
+$('tPlay').onclick=()=>{hide('title');show('menu');buildMenu();Snd.play('ui')};
+$('mBack').onclick=()=>{hide('menu');show('title');updateTitle();Snd.play('ui')};
+$('tShop').onclick=()=>openShop();
+applySettings();updateTitle();
+addEventListener('DOMContentLoaded',()=>requestAnimationFrame(loop));  // el bucle arranca cuando ya cargaron todos los scripts (cosmetics, auth, update…)

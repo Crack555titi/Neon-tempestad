@@ -34,7 +34,7 @@ const say=m=>{S.msg=m;S.msgT=4};
 /* run: instantánea guardada al empezar una etapa (save.js) para continuar o reintentar */
 function start(cid,did,run){
  Ev.h={};fxReset();const ch=CHARS[cid],df=DIFFS[did];
- ['menu','end','mastery','inv','altar','pause','opts','ctrls'].forEach(i=>$(i).style.display='none');
+ ['title','menu','shop','rank','login','end','mastery','inv','altar','pause','opts','ctrls'].forEach(i=>$(i).style.display='none');
  S={st:'play',cid,ch,df,t:0,clock:df.start||0,stage:0,phase:1,cam:0,shake:0,en:[],zn:[],dr:[],sch:[],freeze:0,spawn:2,loop:0,bosses:[],boss:null,bossDone:0,bossName:'',msg:'',msgT:0,kills:0,mq:0,portal:{a:null,b:null},
   ints:[],near:null,note:null,chestT:40,altarT:150,tp:null,lava:0,walls:null,fade:1,lvlFx:null,
   p:{x:300,y:FLOOR,w:24,h:42,vx:0,vy:0,ground:0,wasG:1,plat:null,jumps:0,maxJ:2,face:1,aim:0,hp:ch.hp,maxHp:ch.hp,lvl:1,xp:0,need:40,dmgMul:1,inv:0,dash:null,drop:0,
@@ -351,8 +351,11 @@ function drawPlayer(p){
  for(const gh of p.ghosts){c.globalAlpha=gh.l*1.6;drawHero(c,gh.x,gh.y,{cid,col,face:gh.face,aim:gh.aim,run:gh.run,moving:1,t:s.t,ghost:1})}
  c.globalAlpha=bany('intang')?.35:p.inv>0&&Math.floor(s.t*20)%2?.45:1;
  if(p.buf.void){glow('#9b30ff',30);c.fillStyle='#9b30ff44';c.beginPath();c.arc(p.x,cy,34+Math.sin(s.t*9)*4,0,6.283);c.fill();c.shadowBlur=0}
- light(c,p.x,cy,90,col,.22);  // el héroe ilumina lo que le rodea
- drawHero(c,p.x,p.y,{cid,col,face:p.face,aim:p.aim,sx:p.sx,sy:p.sy,lean,run:p.run,moving,atk:p.atk,t:s.t,air:!p.ground,vy:p.vy,form:p.form,cape:p.cape||(p.cape={})});
+ const eq=Save.d.shop.eq,cc=p.form==='b'?col:skinColor(eq.skin,col,s.t);  // cosméticos equipados (la forma bestia conserva su color)
+ drawTrail(c,eq.trail,playerTrail(p,s.t,moving||p.dash||!p.ground),cc,s.t);drawAura(c,eq.aura,p.x,p.y,s.t,cc,true);
+ light(c,p.x,cy,90,cc,.22);  // el héroe ilumina lo que le rodea
+ drawSkinned(c,p.x,p.y,{cid,col,face:p.face,aim:p.aim,sx:p.sx,sy:p.sy,lean,run:p.run,moving,atk:p.atk,t:s.t,air:!p.ground,vy:p.vy,form:p.form,cape:p.cape||(p.cape={})},p.form==='b'?'':eq.skin);
+ drawAura(c,eq.aura,p.x,p.y,s.t,cc,false);
  c.globalAlpha=1;
  if(p.buf.frost){c.strokeStyle='#bff4ff';c.lineWidth=2;c.strokeRect(p.x-p.w/2-3,p.y-p.h-3,p.w+6,p.h+6)}
  if(p.sh>0){c.strokeStyle='#5ab4ff';c.lineWidth=2;c.globalAlpha=.6;c.beginPath();c.arc(p.x,cy,30,0,6.283);c.stroke();c.globalAlpha=1}

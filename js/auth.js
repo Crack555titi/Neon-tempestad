@@ -105,14 +105,14 @@ function seedBoard(diff){if(seedCache[diff])return seedCache[diff];
 /* ===================== PANTALLAS ===================== */
 const fmtTime=t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`;
 let rankTab=1,rankReq=0;
-function showLogin(){$('menu').style.display='none';$('login').style.display='flex';$('lErr').textContent='';$('lPass').value='';setTimeout(()=>$('lUser').focus(),50)}
-function enterMenu(){$('login').style.display='none';$('menu').style.display='flex';updateWho();buildMenu()}
+function showLogin(){$('menu').style.display=$('title').style.display='none';$('login').style.display='flex';$('lErr').textContent='';$('lPass').value='';setTimeout(()=>$('lUser').focus(),50)}
+function enterMenu(){$('login').style.display='none';updateWho();goHome()}
 function updateWho(){$('who').innerHTML=Auth.user?`👤 <b>${esc(Auth.user)}</b> · <a href="#" id="logout">salir</a>`:'👤 Invitado · <a href="#" id="logout">entrar</a>';
  $('logout').onclick=e=>{e.preventDefault();Auth.logout()}}
 async function doAuth(reg){const u=$('lUser').value,p=$('lPass').value;$('lErr').textContent='Conectando…';$('lIn').disabled=$('lReg').disabled=true;
  const err=await (reg?Auth.register(u,p):Auth.login(u,p));$('lIn').disabled=$('lReg').disabled=false;
  if(err){$('lErr').textContent=err;Snd.play('hurt');return}$('lErr').textContent='';Snd.init();Snd.play('ui');enterMenu()}
-async function openRank(tab){if(tab!==undefined)rankTab=tab;$('menu').style.display='none';$('rank').style.display='flex';
+async function openRank(tab){if(tab!==undefined)rankTab=tab;$('menu').style.display=$('title').style.display='none';$('rank').style.display='flex';
  $('rTabs').innerHTML=DIFFS.map((d,i)=>`<button class="sec tab${i===rankTab?' on':''}" data-i="${i}">${esc(d.name)}</button>`).join('');
  $('rBody').innerHTML='<tr><td colspan="7" class="loading">Cargando clasificación…</td></tr>';$('rNote').textContent='';
  const req=++rankReq,{rows,online}=await Auth.board(rankTab);if(req!==rankReq)return;  // otra pestaña pedida mientras tanto
@@ -121,7 +121,7 @@ async function openRank(tab){if(tab!==undefined)rankTab=tab;$('menu').style.disp
  $('rNote').textContent=(online?'🌐 Clasificación global':'📴 Sin conexión: última clasificación descargada')+
   (Auth.user?` · Tus partidas resaltadas${rows.some(r=>r.pending)?' (⏳ = pendiente de subir)':''}`:' · Entra con una cuenta para competir')+` · ×${DIFF_MULT[rankTab]} en ${DIFFS[rankTab].name}`}
 $('rTabs').onclick=e=>{const b=e.target.closest('.tab');if(b){openRank(+b.dataset.i);Snd.play('ui')}};
-$('rBack').onclick=()=>{rankReq++;$('rank').style.display='none';$('menu').style.display='flex'};
+$('rBack').onclick=()=>{rankReq++;goHome()};
 $('mRank').onclick=()=>openRank(selD);
 $('lForm').onsubmit=e=>{e.preventDefault();doAuth(false)};
 $('lReg').onclick=()=>doAuth(true);

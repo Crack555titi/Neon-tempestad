@@ -30,7 +30,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);T.update(1/60);T.draw()}};
@@ -264,6 +264,18 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  T.start('vanguard',1);T.useTP();for(let i=0;i<3;i++)T.hurtE(T.S.bosses[0],1e12,{raw:1});T.S.tp.charge=1;step(2);T.S.p.x=T.S.tp.x-30;
  T.useTP('end');assert.strictEqual(T.S.st,'over');assert.strictEqual(T.loadRun(),null,'terminar la run no borró la partida guardada');
  console.log('Modo Infinito: paletas, escalado, jefes duales, guardado y portal dual: OK')}
+// 30. Tienda de cosméticos
+{const sd=T.Save.d.shop;sd.gems=0;sd.own={};sd.eq={};
+ assert(!T.buyOrEquip('skin','oro'),'compró sin cristales');assert(!sd.own['skin:oro']&&!sd.eq.skin);
+ sd.gems=350;assert(T.buyOrEquip('skin','oro'));assert.strictEqual(sd.gems,50,'no descontó el precio');assert(sd.own['skin:oro']&&sd.eq.skin==='oro');
+ T.buyOrEquip('skin','');T.buyOrEquip('skin','oro');assert.strictEqual(sd.gems,50,'volver a equipar algo comprado cobró de nuevo');
+ // al terminar una partida se ganan cristales según la puntuación
+ T.start('vanguard',1);T.S.kills=100;const g0=sd.gems;T.S.p.items.ankh=0;T.S.p.revive=0;T.S.p.m.dodge=0;T.S.p.buf={};T.S.p.inv=0;T.hurtP(1e9);assert(sd.gems>g0,'no se ganaron cristales');
+ // cada cosmético se dibuja en partida, en la tienda y en la pantalla de inicio sin errores
+ for(const cat in T.COSMETICS)for(const c of T.COSMETICS[cat]){sd.eq={[cat]:c.id};T.start('duelist',1);T.S.spawn=1e9;
+  T.keys.KeyD=1;step(30);T.keys.KeyD=0;T.drawShopPreview(1.5);T.drawParade(2.5)}
+ sd.eq={};sd.gems=0;sd.own={};T.goHome();assert.strictEqual(T.S,null);
+ console.log('Tienda: compras, cristales y dibujo de todos los cosméticos: OK')}
 // 27. Cuentas y clasificación online (contra el Firebase simulado)
 async function authTests(){const A=T.Auth;
  assert(A.valid('ab','123456')&&A.valid('ñandú','123456')&&A.valid('Piloto','12345'),'aceptó un nombre o contraseña inválidos');
@@ -304,5 +316,17 @@ async function updateTests(){const U=T.Update;
  T.S.st='over';U.block();assert.strictEqual(el('update').style.display,'flex','no bloqueó al terminar la partida');assert.strictEqual(el('menu').style.display,'none');
  // sin conexión se puede jugar
  U.required=false;fakeVersion=null;await U.check();assert(!U.required);
- console.log('Actualizaciones: versión sincronizada, aviso opcional, bloqueo obligatorio y modo sin red: OK')}
+ // botón de actualizar: escritorio instalado → descarga verificada del instalador; Android → APK directo
+ const base='https://github.com/Crack555titi/Neon-tempestad/releases/download/v1.3.0/',sha='ab'.repeat(32);let asked=null;const w0=global.window;
+ U.info={latest:'1.3.0',min:'1.3.0',exe:'NeonTempestad-Setup-1.3.0.exe',apk:'NeonTempestad-1.3.0.apk',sha256:sha};
+ global.window={neonDesktop:{update:async i=>{asked=i},onProgress(){}}};await U.open();
+ assert.deepStrictEqual(asked,{url:base+'NeonTempestad-Setup-1.3.0.exe',sha256:sha},'el escritorio no pidió el instalador correcto');
+ global.window={Capacitor:{}};global.location={href:''};U.open();assert.strictEqual(global.location.href,base+'NeonTempestad-1.3.0.apk','Android no fue al APK');
+ global.window=w0;
+ // el actualizador de escritorio solo acepta instaladores de las releases del repositorio
+ const {ALLOWED}=require('../js/updater.js');
+ assert(ALLOWED.test(base+'NeonTempestad-Setup-1.3.0.exe'));
+ for(const bad of ['https://evil.com/NeonTempestad-Setup-1.3.0.exe','https://github.com/otro/Neon-tempestad/releases/download/v1.3.0/NeonTempestad-Setup-1.3.0.exe',base+'NeonTempestad-1.3.0.apk',base+'../x.exe'])
+  assert(!ALLOWED.test(bad),'aceptó una URL no permitida: '+bad);
+ console.log('Actualizaciones: versión sincronizada, aviso opcional, bloqueo obligatorio, modo sin red e instalación verificada: OK')}
 authTests().then(updateTests).then(()=>process.exit(fails?1:0),e=>{console.error(e);process.exit(1)});

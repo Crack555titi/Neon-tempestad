@@ -76,6 +76,7 @@ function pollInput(){pollPad();pollTouch();syncAim()}
 
 /* ---------- menú con mando/teclado: ←/→ personaje · ↑/↓ dificultad · saltar = jugar ---------- */
 function menuPress(a){
+ if($('title').style.display!=='none'){if(a==='jump'&&padUsed)$('tPlay').click();return}
  if($('menu').style.display==='none')return;
  const un=Object.keys(CHARS).filter(isUnlocked);
  if(a==='left'||a==='right'){selC=un[(un.indexOf(selC)+(a==='right'?1:-1)+un.length)%un.length];buildMenu();Snd.play('ui')}

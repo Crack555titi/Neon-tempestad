@@ -40,10 +40,46 @@
     <small class="help">Instálala y vuelve a abrir el juego. Tu progreso, cuentas y récords se conservan.</small>
   </div>
 
-  <div id="menu" class="ov">
+  <div id="title" class="ov">
     <div id="who"></div>
     <div id="updBar" style="display:none"></div>
     <small id="verTag"></small>
+    <div class="logo">
+      <svg class="emblem" viewBox="-50 -50 100 100" aria-hidden="true">
+        <circle r="38" fill="none" stroke="#3cf0ff" stroke-width="5" stroke-dasharray="190 12 6 30" stroke-linecap="round"/>
+        <path d="M14 0L3 14h7l-3 10 12-14h-7l4-10z" transform="scale(2.6) translate(-11 -12)" fill="#ff3cf2" stroke="#ffd6fb" stroke-width=".7" stroke-linejoin="round"/>
+        <circle cx="34" cy="-22" r="2.6" fill="#ffd23c"/><circle cx="-35" cy="21" r="2.6" fill="#ffd23c"/><circle cx="16" cy="44" r="2.6" fill="#ffd23c"/>
+      </svg>
+      <h1 class="big">NEÓN <span>TEMPESTAD</span></h1>
+      <p class="tagline">Roguelike de acción · 20 héroes · 5 jefes · loops infinitos</p>
+    </div>
+    <div class="tmenu">
+      <button id="tPlay">▶ JUGAR</button>
+      <button id="cont" class="sec" style="display:none"></button>
+      <div class="row"><button class="sec" id="tShop">🛒 TIENDA</button><button class="sec" id="mRank">🏆 RANKING</button></div>
+      <div class="row"><button class="sec" id="mOpts">⚙ OPCIONES</button><button class="sec" id="mCtrls">🎮 CONTROLES</button></div>
+    </div>
+    <div id="tGems"></div>
+  </div>
+
+  <div id="shop" class="ov" style="display:none">
+    <h2>🛒 TIENDA <span id="shopGems"></span></h2>
+    <div class="row" id="shopTabs"></div>
+    <div class="shopBody">
+      <div id="shopGrid"></div>
+      <div class="shopSide">
+        <canvas id="shopPrev" width="340" height="230"></canvas>
+        <h3 id="shopName"></h3>
+        <p id="shopDesc" class="help"></p>
+        <button id="shopBuy"></button>
+        <small id="shopHint" class="help"></small>
+      </div>
+    </div>
+    <button class="sec" id="shopBack">← VOLVER</button>
+  </div>
+
+  <div id="menu" class="ov" style="display:none">
+    <button class="sec" id="mBack">← VOLVER</button>
     <h1>NEÓN <span>TEMPESTAD</span></h1>
     <div id="sel">
       <div class="left">
@@ -51,8 +87,7 @@
         <small id="unl"></small>
         <div class="row" id="diffs"></div>
         <div id="dd"></div>
-        <div class="row"><button id="go">▶ NUEVA PARTIDA</button><button id="cont" style="display:none"></button></div>
-        <div class="row"><button class="sec" id="mOpts">⚙ OPCIONES</button><button class="sec" id="mCtrls">🎮 CONTROLES</button><button class="sec" id="mRank">🏆 RANKING</button></div>
+        <div class="row"><button id="go">▶ NUEVA PARTIDA</button></div>
       </div>
       <div id="info"></div>
     </div>
@@ -135,6 +170,7 @@
 <script src="../js/input.js"></script>
 <script src="../js/touch.js"></script>
 <script src="../js/ui.js"></script>
+<script src="../js/cosmetics.js"></script>
 <script src="../js/auth.js"></script>
 <script src="../js/update.js"></script>
 </body>

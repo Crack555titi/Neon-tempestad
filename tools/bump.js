@@ -12,5 +12,5 @@ const up=path.join(root,'js','update.js'),s=fs.readFileSync(up,'utf8');
 if(!/const APP_VERSION='[^']*'/.test(s))throw new Error('No encontré APP_VERSION en js/update.js');
 fs.writeFileSync(up,s.replace(/const APP_VERSION='[^']*'/,`const APP_VERSION='${ver}'`));
 const vj=path.join(root,'version.json'),v=JSON.parse(fs.readFileSync(vj,'utf8'));
-Object.assign(v,{latest:ver,min:ver},notes?{notes}:{});fs.writeFileSync(vj,JSON.stringify(v,null,2)+'\n');
+Object.assign(v,{latest:ver,min:ver,exe:`NeonTempestad-Setup-${ver}.exe`,apk:`NeonTempestad-${ver}.apk`},notes?{notes}:{});delete v.sha256;fs.writeFileSync(vj,JSON.stringify(v,null,2)+'\n');
 console.log(`${old} → ${ver}. Ahora: genera el .exe y el .apk, súbelos a una release v${ver} en GitHub y haz push de version.json a main.`);

@@ -39,10 +39,17 @@
       "js/**"
     ],
     "win": {
-      "target": "portable"
+      "target": "nsis"
     },
-    "portable": {
-      "artifactName": "NeonTempestad-${version}-portable.exe"
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "runAfterFinish": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Neón Tempestad",
+      "artifactName": "NeonTempestad-Setup-${version}.${ext}",
+      "deleteAppDataOnUninstall": false
     }
   },
   "allowScripts": {

@@ -25,8 +25,11 @@ console.log('▶ Pruebas…');run('npm',['test']);
 // 2. versión e instalables
 run('node',['tools/bump.js',ver,notes]);
 run('node',['tools/build-exe.js']);run('node',['tools/build-apk.js']);
-const files=[`dist/NeonTempestad-${ver}-portable.exe`,`dist/NeonTempestad-${ver}.apk`];
+const files=[`dist/NeonTempestad-Setup-${ver}.exe`,`dist/NeonTempestad-${ver}.apk`];
 for(const f of files)if(!fs.existsSync(path.join(root,f)))fail('No se generó '+f);
+// huella del instalador: el juego instalado solo ejecuta una actualización cuyo SHA-256 coincida con esta
+const vj=path.join(root,'version.json'),v=JSON.parse(fs.readFileSync(vj,'utf8'));
+v.sha256=require('crypto').createHash('sha256').update(fs.readFileSync(path.join(root,files[0]))).digest('hex');fs.writeFileSync(vj,JSON.stringify(v,null,2)+'\n');
 
 // 3. commit, push y release
 run('git',['add','package.json','js/update.js','version.json']);run('git',['commit','-q','-m',`Versión ${ver}: ${notes}`]);

@@ -27,7 +27,12 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  const shot=async name=>{const r=await cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(out,name+'.png'),Buffer.from(r.result.data,'base64'));console.log('captura',name)};
  await cmd('Runtime.enable');await cmd('Page.enable');
  await cmd('Page.navigate',{url:'file:///'+path.join(root,'html','index.html').replace(/\\/g,'/')+'?unlockall&debug'});await sleep(2500);
- await shot('01-menu');
+ // pantalla de inicio con cosméticos equipados (desfile de héroes)
+ await js("Save.d.shop.eq={skin:'prisma',trail:'arcoiris',aura:'alas'};selC='hemo'");await sleep(1500);await shot('01-inicio');
+ // tienda: pestaña de estelas mirando una de pago
+ await js("Save.d.shop.gems=650;openShop();shopCat='trail';shopSel='fuego';buildShop()");await sleep(900);await shot('01b-tienda');
+ await js("shopCat='skin';shopSel='glitch';buildShop()");await sleep(700);await shot('01c-tienda-skin');
+ await js("Save.d.shop.eq={};Save.d.shop.gems=0;$('shopBack').click();$('tPlay').click()");
  await js("document.querySelector('[data-k=\"chimera\"]').click()");await sleep(600);await shot('02-seleccion');
  await js("showLogin()");await sleep(400);await shot('02b-cuenta');await js("enterMenu();openRank(3)");await sleep(400);await shot('02c-ranking');await js("$('rBack').click()");
  // galería: los 20 héroes en plena carrera, apuntando y con la capa en movimiento
