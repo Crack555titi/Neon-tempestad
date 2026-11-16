@@ -22,5 +22,9 @@ ipcMain.handle('neon-update',async(e,{url,sha256})=>{
  spawn(file,['/S','--force-run'],{detached:true,stdio:'ignore'}).unref();
  setTimeout(()=>app.quit(),400);return true});
 
-app.whenReady().then(createWindow);
+// borra instaladores de actualizaciones anteriores que quedaron en la carpeta temporal (~100 MB cada uno)
+function cleanOldInstallers(){const fs=require('fs'),os=require('os');
+ try{for(const f of fs.readdirSync(os.tmpdir()))if(/^NeonTempestad-Setup-\d+\.\d+\.\d+\.exe$/.test(f))fs.rm(path.join(os.tmpdir(),f),{force:true},()=>{})}catch(e){}}
+
+app.whenReady().then(()=>{createWindow();cleanOldInstallers()});
 app.on('window-all-closed',()=>app.quit());
