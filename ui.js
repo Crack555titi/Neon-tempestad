@@ -5,8 +5,10 @@ function hud(){
  const s=S,p=s.p;screen();c.textAlign='left';c.font='bold 13px monospace';c.shadowBlur=0;
  bar(16,H-34,240,16,p.hp/p.maxHp,'#4cff7a');c.fillStyle='#fff';c.fillText(`${Math.ceil(p.hp)}/${Math.ceil(p.maxHp)}`,22,H-21);
  bar(16,H-14,240,6,p.xp/p.need,'#ffd23c');c.fillText(`NIV ${p.lvl}  ·  ${s.ch.name}`,16,H-42);
- const slots=[['p','LMB',s.ch.primary],['s','RMB',s.ch.secondary],['m','SHIFT',s.ch.move],['u','Q',s.ch.ult]];
- slots.forEach(([k,lb,d],i)=>{const x=W/2-130+i*68,y=H-58,cd=p.cd[k],mx=k==='p'?d.cd/p.m.as:d.cd*(1-p.m.cdr);
+ if(s.ch.passive&&s.ch.passive.t==='corrupt'){bar(16,H-62,240,6,p.corr/100,'#9b30ff');c.fillStyle='#d070ff';c.font='10px monospace';c.fillText(p.buf.void?'FORMA DEL VACÍO':'Corrupción',262,H-56)}
+ if(s.ch.primary.forms){c.fillStyle=p.form==='b'?'#2aff1a':'#7dff6a';c.font='bold 11px monospace';c.fillText(p.form==='b'?'BESTIA':'ESPINAS',262,H-21)}
+ const slots=[['p','LMB'],['s','RMB'],['m','SHIFT'],['u','Q']];
+ slots.forEach(([k,lb],i)=>{const d=ab(k),x=W/2-130+i*68,y=H-58,cd=p.cd[k],mx=maxCd(k,d);
   c.fillStyle='#120a26';c.fillRect(x,y,60,44);c.strokeStyle=cd<=0?s.ch.color:'#444';c.lineWidth=2;c.strokeRect(x,y,60,44);
   if(cd>0){c.fillStyle='#000a';c.fillRect(x,y+44*(1-cd/mx),60,44*cd/mx)}
   c.fillStyle='#fff';c.font='10px monospace';c.textAlign='center';c.fillText(lb,x+30,y+14);c.fillText(d.name.slice(0,9),x+30,y+34)});
@@ -28,20 +30,44 @@ function openMastery(){
 }
 
 function endGame(win){
- S.st='over';$('endT').textContent=win?`¡${S.bossName.toUpperCase()} DERROTADO!`:(S.df.perma?'MUERTE PERMANENTE':'HAS CAÍDO');
+ S.st='over';recordRunEnd(win);
+ $('endT').textContent=win?`¡${S.bossName.toUpperCase()} DERROTADO!`:(S.df.perma?'MUERTE PERMANENTE':'HAS CAÍDO');
  $('endS').textContent=`${S.ch.name} · Nivel ${S.p.lvl} · ${S.kills} bajas · ${Math.floor(S.t/60)}:${String(Math.floor(S.t%60)).padStart(2,'0')} · ${S.df.name}`;
  setTimeout(()=>$('end').style.display='flex',win?1500:600);
 }
 
+/* ===================== SELECCIÓN DE PERSONAJE ===================== */
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+function abHtml(lbl,a){
+ if(a.forms)return Object.values(a.forms).map(f=>abHtml(lbl,f)).join('');
+ return `<li><kbd>${lbl}</kbd><b>${esc(a.name)}</b>${a.hold?' <em>mantener</em>':''}<span>${esc(a.desc||'')}</span></li>`;
+}
 function buildMenu(){
- $('chars').innerHTML=Object.entries(CHARS).map(([k,v])=>`<div class="card ${k===selC?'sel':''}" data-k="${k}" style="--c:${v.color}"><b>${v.name}</b><i>${v.fam}</i><small>${[v.primary,v.secondary,v.move,v.ult].map(a=>a.name).join(' · ')}</small></div>`).join('');
+ if(!isUnlocked(selC))selC='vanguard';
+ $('fams').innerHTML=FAMILIES.map(f=>`<div class="fam"><h3>${f}</h3>${Object.entries(CHARS).filter(([,v])=>v.fam===f).map(([k,v])=>{const lk=!isUnlocked(k);
+  return `<div class="card mini ${k===selC?'sel':''} ${lk?'lock':''}" data-k="${k}" style="--c:${v.color}"><b>${lk?'🔒 ':''}${esc(v.name)}</b></div>`}).join('')}</div>`).join('');
+ const v=CHARS[selC];
+ $('info').style.setProperty('--c',v.color);
+ $('info').innerHTML=`<h2 style="color:${v.color}">${esc(v.name)}</h2><i>${esc(v.fam)} · ${esc(v.role)}</i>
+  <div class="stats">Vida ${v.hp} · Velocidad ${v.spd} · Salto ${v.jump}</div>
+  ${v.passive?`<p class="passive">◆ ${esc(v.passive.desc)}</p>`:''}
+  <ul>${abHtml('LMB',v.primary)}${abHtml('RMB',v.secondary)}${abHtml('SHIFT',v.move)}${abHtml('Q',v.ult)}</ul>`;
  $('diffs').innerHTML=DIFFS.map((d,i)=>`<div class="diff ${i===selD?'sel':''}" data-i="${i}">${i+1}. ${d.name}</div>`).join('');
  $('dd').textContent=DIFFS[selD].desc;
+ const n=Object.keys(CHARS).filter(isUnlocked).length;$('unl').textContent=`${n}/${Object.keys(CHARS).length} desbloqueados`;
 }
-$('chars').onclick=e=>{const k=e.target.closest('.card');if(k){selC=k.dataset.k;buildMenu()}};
+function showLocked(k){
+ const v=CHARS[k],a=ACHIEVEMENTS[v.unlock];
+ $('info').style.setProperty('--c','#555');
+ $('info').innerHTML=`<h2>🔒 ${esc(v.name)}</h2><i>${esc(v.fam)} · ${esc(v.role)}</i>
+  <p class="passive">Logro «${esc(a.name)}»: ${esc(a.desc)}</p>
+  <div class="prog"><div style="width:${Math.min(100,Save.val(a.stat)/a.goal*100)}%"></div></div>
+  <small>${Math.floor(Math.min(Save.val(a.stat),a.goal))} / ${a.goal}</small>`;
+}
+$('fams').onclick=e=>{const k=e.target.closest('.card');if(!k)return;if(isUnlocked(k.dataset.k)){selC=k.dataset.k;buildMenu()}else showLocked(k.dataset.k)};
 $('diffs').onclick=e=>{const k=e.target.closest('.diff');if(k){selD=+k.dataset.i;buildMenu()}};
 $('go').onclick=()=>start(selC,selD);
-$('again').onclick=()=>{$('end').style.display='none';$('menu').style.display='flex';S=null;screen();c.clearRect(0,0,W,H)};
+$('again').onclick=()=>{$('end').style.display='none';$('menu').style.display='flex';S=null;screen();c.clearRect(0,0,W,H);buildMenu()};
 
 /* ===================== ARRANQUE ===================== */
 buildMenu();requestAnimationFrame(loop);

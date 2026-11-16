@@ -20,3 +20,27 @@ button{padding:10px 34px;font-size:16px;font-weight:700;letter-spacing:2px;borde
 button:hover{background:#4a1360}
 .help{font-size:11px;color:#8a84b8;max-width:760px}
 #nodes .card{width:240px;padding:16px}
+/* selección de personaje: 5 familias × 4 + panel de detalle */
+#menu{justify-content:flex-start;overflow-y:auto;gap:8px}
+#menu h1{font-size:clamp(20px,3.6vw,40px)}
+#sel{display:flex;gap:12px;width:100%;max-width:1100px;align-items:stretch}
+#fams{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;flex:1.3}
+.fam h3{font-size:11px;color:#9a93c8;letter-spacing:1px;margin-bottom:4px;text-transform:uppercase}
+.card.mini{width:auto;padding:6px 8px;margin-bottom:5px}
+.card.mini b{font-size:13px}
+.card.lock{opacity:.45;filter:grayscale(.8)}
+#info{--c:#fff;flex:1;text-align:left;background:#120a26;border:2px solid var(--c);border-radius:8px;padding:10px 14px;box-shadow:0 0 14px var(--c);min-height:260px}
+#info h2{font-size:20px;text-shadow:0 0 10px currentColor}
+#info i{font-size:11px;color:#9a93c8}
+#info .stats{font-size:11px;color:#b9b3e6;margin:4px 0}
+#info .passive{font-size:11px;color:#ffb13c;margin:6px 0}
+#info ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:5px}
+#info li{font-size:11px;line-height:1.35}
+#info li b{color:var(--c);margin-right:4px}
+#info li em{font-size:9px;color:#ffd23c}
+#info li span{display:block;color:#cfc9f5}
+#info kbd{display:inline-block;min-width:40px;font-size:9px;color:#000;background:var(--c);border-radius:3px;padding:0 4px;margin-right:6px;text-align:center}
+.prog{height:8px;background:#1a1030;border:1px solid #fff4;border-radius:4px;margin:6px 0}
+.prog div{height:100%;background:#ffd23c;border-radius:4px}
+#unl{font-size:11px;color:#9a93c8}
+@media (max-width:760px){#sel{flex-direction:column}#fams{grid-template-columns:repeat(2,1fr)}}

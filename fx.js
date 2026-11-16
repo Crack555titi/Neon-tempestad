@@ -12,12 +12,17 @@ class Pool{
 const PT=new Pool(()=>({}),800);              // partículas y anillos
 const PR=new Pool(()=>({hit:new Set()}),600); // proyectiles (aliados y hostiles)
 const TX=new Pool(()=>({}),200);              // números flotantes
+const BL=new Pool(()=>({}),120);              // rayos / haces (líneas)
 const deadL=o=>o.l<=0,deadLife=o=>o.life<=0;
-const PR_DEF={x:0,y:0,vx:0,vy:0,dmg:0,r:5,life:1,hostile:0,col:'#fff',pierce:0,home:0,boom:0};
+// Todos los campos que puede llevar un proyectil: el pool reutiliza objetos y hay que reiniciarlos
+const PR_DEF={x:0,y:0,vx:0,vy:0,dmg:0,r:5,life:1,t0:0,hostile:0,col:'#fff',pierce:0,home:0,boom:0,gm:0,bounce:0,wb:0,ret:0,back:0,
+ split:0,grow:0,dotK:0,dps:0,dur:0,mark:0,stun:0,hook:0,pull:0,ls:0,crit:0,zone:null,ported:0};
 
 let hitstop=0;
 const hitStop=ms=>{hitstop=Math.max(hitstop,ms/1000)};
-function fxReset(){PT.clear();PR.clear();TX.clear();hitstop=0}
+function fxReset(){PT.clear();PR.clear();TX.clear();BL.clear();hitstop=0}
+// jag>0: rayo quebrado (se redibuja aleatorio cada frame); jag=0: haz recto
+function bolt(x1,y1,x2,y2,col,w,jag,l){const b=BL.get();if(!b)return;b.x1=x1;b.y1=y1;b.x2=x2;b.y2=y2;b.c=col;b.w=w||2;b.jag=jag===undefined?10:jag;b.l=b.ml=l||.14}
 
 function spark(x,y,vx,vy,l,col,s){const q=PT.get();if(!q)return;q.ring=0;q.x=x;q.y=y;q.vx=vx;q.vy=vy;q.l=q.ml=l;q.c=col;q.s=s}
 function burst(x,y,n,col,sp,sz){for(let i=0;i<n;i++){const a=R(0,6.283),v=R(.2,1)*sp,q=PT.get();if(!q)return;
