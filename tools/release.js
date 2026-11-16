@@ -9,7 +9,7 @@ const root=path.join(__dirname,'..'),[ver,notes]=process.argv.slice(2),win=proce
 const fail=m=>{console.error('✗ '+m);process.exit(1)};
 if(!/^\d+\.\d+\.\d+$/.test(ver||'')||!notes)fail('Uso: npm run release -- 1.3.0 "Qué trae esta versión"');
 const GH=[process.env.GH_PATH,'C:/Program Files/GitHub CLI/gh.exe'].find(f=>f&&fs.existsSync(f))||'gh';
-const run=(cmd,args)=>execFileSync(cmd,args,{cwd:root,stdio:'inherit',shell:win&&!path.isAbsolute(cmd)});
+const run=(cmd,args)=>execFileSync(cmd,args,{cwd:root,stdio:'inherit',shell:win&&/^(npm|npx)$/.test(cmd)});  // shell solo para npm/npx (.cmd): con shell, git partiría en palabras los mensajes con espacios
 const out=(cmd,args)=>execFileSync(cmd,args,{cwd:root,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
 
 // 1. comprobaciones previas: nada se publica si algo no está en orden
