@@ -55,11 +55,12 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   - Imagen: bloom, viñeta, aberración cromática, hit-stop, temblor de pantalla configurable, animación procedural, parallax de 4 capas y soporte HiDPI.
   - Calidad gráfica alta, media o baja.
   - Música y efectos sintetizados con Web Audio. La música cambia al cargar el teletransportador y al pelear contra el jefe.
-- **Cuentas y clasificación.**
-  - Cuentas locales con contraseña (se guarda con sal y SHA-256, nunca en claro).
-  - Clasificación con una pestaña por dificultad: posición, usuario, personaje, nivel, loop, tiempo y puntuación.
-  - Viene precargada con 12 partidas ficticias por dificultad. La puntuación premia el progreso y se multiplica según la dificultad.
-  - Las cuentas y la clasificación se guardan solo en este dispositivo; quien juega como invitado no entra en el ranking.
+- **Cuentas y clasificación online (Firebase).**
+  - Una cuenta, con usuario y contraseña, sirve en cualquier dispositivo.
+  - Ranking global con una pestaña por dificultad: posición, usuario, personaje, nivel, loop, tiempo y puntuación. Compite con tus amigos.
+  - Sin conexión se juega igual: las partidas quedan en cola y se suben al volver la red.
+  - Mientras haya pocas partidas reales, la tabla se completa con jugadores ficticios, atenuados y marcados «IA», que no cuentan para tu puesto.
+  - Las reglas del servidor solo permiten publicar con tu propio nombre y con valores razonables. Nadie puede editar ni borrar puntuaciones.
 - **Personajes articulados.** Cada héroe tiene esqueleto (cabeza, torso, piernas y brazos animados), una capa con física y un arma que apunta al cursor. Además lleva equipo propio: los aros del Cronista, los planos holográficos de la Mecánica, la cola de la Quimera, etc.
 - **Guardado.** Logros, desbloqueos, récords por dificultad, ajustes y la partida en curso, que se puede continuar desde el inicio de la etapa.
 
@@ -168,6 +169,12 @@ Haz el paso 4 al final: si `version.json` llega a `main` antes que la release, l
 
 El icono del `.exe` (`build/icon.png`), los iconos de Android y su pantalla de carga (`build/android/res/`) también se dibujan por código. Para regenerarlos después de cambiar el diseño en `tools/make-icons.js`, ejecuta `node tools/make-icons.js`. Hace falta Chrome, Edge o Brave.
 
+### Servidor (Firebase)
+
+El proyecto de Firebase es `neon-tempestad`. Usa **Authentication** (correo y contraseña; el juego convierte el usuario en `usuario@neontempestad.game`) y **Firestore**, con la clasificación en `boards/{0-4}/scores`. Las reglas de seguridad están en la consola de Firebase, en Firestore › Reglas. El juego habla con la API REST directamente, sin librerías, y la `apiKey` va en `js/auth.js`: no es secreta, lo que protege los datos son las reglas.
+
+Para borrar una puntuación (trampas, pruebas…) entra en la consola de Firebase › Firestore › `boards` › dificultad › `scores` y elimina el documento.
+
 ### Estructura
 
 | Archivo | Contenido |
@@ -180,7 +187,7 @@ El icono del `.exe` (`build/icon.png`), los iconos de Android y su pantalla de c
 | `js/data_characters.js`, `js/data_items.js`, `js/data_enemies.js`, `js/data_stages.js` | Contenido declarativo |
 | `js/abilities.js`, `js/loot.js`, `js/enemies.js`, `js/bosses.js`, `js/stages.js` | Lógica de habilidades, objetos, enemigos, jefes y escenarios |
 | `js/audio.js`, `js/save.js`, `js/input.js`, `js/touch.js`, `js/ui.js` | Sonido, guardado, controles, táctil, interfaz |
-| `js/auth.js` | Cuentas, puntuación y clasificación |
+| `js/auth.js` | Cuentas y clasificación online (Firebase), puntuación |
 | `js/update.js`, `version.json` | Comprobación de versión y actualización obligatoria |
 | `js/main.js` | Ventana de escritorio (Electron) |
 | `tools/` | Pruebas (`smoke.js`, `browser.js`) y scripts de empaquetado |

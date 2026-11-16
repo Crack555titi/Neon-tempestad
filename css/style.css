@@ -142,3 +142,7 @@ button.sec{border-color:#3cf0ff;box-shadow:0 0 12px #3cf0ff;background:#0a1e30;f
 #updBar{position:absolute;top:10px;left:14px;font-size:13px;color:#ffd23c;z-index:1}
 #updBar a{color:#3cf0ff}
 #verTag{position:absolute;bottom:8px;right:12px;font-size:11px;color:#6a6390}
+#rTable tr.seed td{opacity:.45;font-style:italic}
+#rTable td small{font-size:10px;color:#9a93c8;font-style:normal}
+#rTable td.loading{text-align:center!important;color:#9a93c8;padding:20px}
+.lbox button:disabled{opacity:.5;cursor:wait}

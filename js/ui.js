@@ -120,7 +120,9 @@ function openMastery(){
 
 function endGame(win,cashout){
  S.st='over';recordRunEnd(win);const sc=Auth.submit(win);
- $('endScore').textContent=sc?`Puntuación ${sc.score.toLocaleString('es')}${sc.rank?` · puesto #${sc.rank} en ${S.df.name}`:Auth.user?'':' · entra con una cuenta para aparecer en la clasificación'}`:'';
+ const pts=sc?`Puntuación ${sc.score.toLocaleString('es')}`:'',dn=S.df.name;
+ $('endScore').textContent=!sc?'':!sc.done?pts+' · entra con una cuenta para aparecer en la clasificación':pts+' · subiendo al ranking…';
+ if(sc&&sc.done)sc.done.then(r=>{$('endScore').textContent=pts+(r.queued?' · sin conexión: se subirá al ranking cuando vuelva la red':r.rank?` · puesto #${r.rank} mundial en ${dn}`:'')}).catch(()=>{$('endScore').textContent=pts});
  // muerte permanente estricta: se borra la partida guardada y no hay reintento
  if(win||cashout||S.df.perma)clearRun();
  $('endT').textContent=cashout?(win?`¡TEMPESTAD SUPERADA${S.loop?` · LOOP ${S.loop+1}`:''}!`:'RUN TERMINADA'):win?'¡HAS SUPERADO LA TEMPESTAD!':(S.df.perma?'MUERTE PERMANENTE · PARTIDA BORRADA':'HAS CAÍDO');

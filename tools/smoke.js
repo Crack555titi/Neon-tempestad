@@ -5,7 +5,26 @@ const fs=require('fs'),path=require('path'),assert=require('assert');
 const root=path.join(__dirname,'..');
 const files=[...fs.readFileSync(path.join(root,'html','index.html'),'utf8').matchAll(/<script src="([^"]+)"/g)].map(m=>m[1]);
 
-global.Path2D=function(){};let fakeVersion=null;global.fetch=async()=>fakeVersion?{ok:true,json:async()=>fakeVersion}:{ok:false};  // sin red en las pruebas
+global.Path2D=function(){};let fakeVersion=null;
+// Firebase simulado en memoria: cuentas (Identity Toolkit), renovación de token y Firestore con las mismas reglas que el servidor real
+const FAKE={users:{},docs:{0:[],1:[],2:[],3:[],4:[]},offline:false};
+const fsVal=v=>'integerValue' in v?+v.integerValue:'booleanValue' in v?v.booleanValue:v.stringValue;
+global.fetch=async(url,opt={})=>{const res=(status,j)=>({ok:status<300,status,json:async()=>j});
+ if(url.includes('version.json'))return fakeVersion?res(200,fakeVersion):res(404,{});
+ if(FAKE.offline)throw new TypeError('Failed to fetch');
+ const b=typeof opt.body==='string'&&opt.body[0]==='{'?JSON.parse(opt.body):opt.body,byTok=t=>Object.entries(FAKE.users).find(([,u])=>t==='t-'+u.uid);
+ if(url.includes('accounts:signUp')){if(FAKE.users[b.email])return res(400,{error:{message:'EMAIL_EXISTS'}});
+  const uid='u'+Object.keys(FAKE.users).length;FAKE.users[b.email]={pass:b.password,uid,name:''};return res(200,{idToken:'t-'+uid,refreshToken:'r-'+uid,localId:uid,expiresIn:'3600'})}
+ if(url.includes('accounts:update')){const u=byTok(b.idToken);if(u)u[1].name=b.displayName;return res(200,{})}
+ if(url.includes('signInWithPassword')){const u=FAKE.users[b.email];if(!u||u.pass!==b.password)return res(400,{error:{message:'INVALID_LOGIN_CREDENTIALS'}});
+  return res(200,{idToken:'t-'+u.uid,refreshToken:'r-'+u.uid,localId:u.uid,expiresIn:'3600',displayName:u.name})}
+ if(url.includes('securetoken')){const uid=decodeURIComponent(String(b).split('refresh_token=')[1]).slice(2);return res(200,{id_token:'t-'+uid,refresh_token:'r-'+uid,expires_in:'3600'})}
+ const m=url.match(/boards\/(\d)(:runQuery|\/scores)$/);
+ if(m&&m[2]===':runQuery')return res(200,FAKE.docs[m[1]].slice().sort((x,y)=>y.score-x.score).slice(0,50).map(d=>({document:{fields:Object.fromEntries(Object.entries(d).map(([k,v])=>[k,typeof v==='boolean'?{booleanValue:v}:typeof v==='number'?{integerValue:String(v)}:{stringValue:v}]))}})));
+ if(m){const d=Object.fromEntries(Object.entries(b.fields).map(([k,v])=>[k,fsVal(v)])),u=byTok(String((opt.headers||{}).Authorization).slice(7));
+  if(!u||d.uid!==u[1].uid||d.user.toLowerCase()+'@neontempestad.game'!==u[0]||d.score>1e8)return res(403,{error:{message:'Missing or insufficient permissions.'}});
+  FAKE.docs[m[1]].push(d);return res(200,{name:'doc'})}
+ return res(404,{})};
 const ctx=new Proxy({},{get:(t,k)=>k in t?t[k]:(k==='createLinearGradient'||k==='createRadialGradient'?()=>({addColorStop(){}}):k==='measureText'?s=>({width:String(s).length*7}):()=>{}),set:(t,k,v)=>(t[k]=v,true)});
 const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
@@ -245,24 +264,33 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  T.start('vanguard',1);T.useTP();for(let i=0;i<3;i++)T.hurtE(T.S.bosses[0],1e12,{raw:1});T.S.tp.charge=1;step(2);T.S.p.x=T.S.tp.x-30;
  T.useTP('end');assert.strictEqual(T.S.st,'over');assert.strictEqual(T.loadRun(),null,'terminar la run no borró la partida guardada');
  console.log('Modo Infinito: paletas, escalado, jefes duales, guardado y portal dual: OK')}
-// 27. Cuentas y clasificación (asíncrono: SHA-256 con crypto.subtle)
+// 27. Cuentas y clasificación online (contra el Firebase simulado)
 async function authTests(){const A=T.Auth;
- assert(await A.register('ab','1234'),'aceptó un nombre de 2 letras');assert(await A.register('Piloto','12'),'aceptó una contraseña de 2');
- assert.strictEqual(await A.register('Piloto','clave1'),'');assert.strictEqual(A.user,'Piloto');
- assert(await A.register('piloto','otra'),'permitió un nombre repetido cambiando mayúsculas');
- A.setUser(null);assert(await A.login('Piloto','mala'),'entró con contraseña incorrecta');assert.strictEqual(A.user,null);
- assert.strictEqual(await A.login('PILOTO','clave1'),'');assert.strictEqual(A.user,'Piloto');
- assert(!/clave1/.test(JSON.stringify(A.users())),'la contraseña se guardó en claro');
+ assert(A.valid('ab','123456')&&A.valid('ñandú','123456')&&A.valid('Piloto','12345'),'aceptó un nombre o contraseña inválidos');
+ assert.strictEqual(await A.register('Piloto','clave1'),'');assert.strictEqual(A.user,'Piloto');assert(A.ses.uid&&A.ses.refresh);
+ assert(/en uso/.test(await A.register('piloto','otra123')),'permitió un nombre repetido cambiando mayúsculas');
+ A.setSession(null);assert(/incorrectos/.test(await A.login('Piloto','malamala')));assert.strictEqual(A.user,null);
+ assert.strictEqual(await A.login('PILOTO','clave1'),'');assert.strictEqual(A.user,'Piloto','no recuperó el nombre visible');
+ assert(!/clave1/.test(JSON.stringify(A.ses)),'la contraseña quedó guardada en el dispositivo');
  // la puntuación sube con el progreso y con la dificultad
  const r={kills:100,lvl:10,stages:3,loop:1,win:false,time:600,diff:1};
  assert(T.scoreRun({...r,stages:4})>T.scoreRun(r)&&T.scoreRun({...r,loop:2})>T.scoreRun(r)&&T.scoreRun({...r,diff:3})>T.scoreRun(r));
- // datos precargados: 12 por dificultad, deterministas y coherentes con la fórmula
  for(let d=0;d<5;d++){const b=T.seedBoard(d);assert.strictEqual(b.length,12);for(const e of b)assert(e.score===T.scoreRun(e)&&e.loop>=1&&e.user&&e.ch)}
- // una partida real entra en su dificultad, ordenada, y el invitado no entra
- T.start('vanguard',2);T.S.kills=5000;T.S.stage=4;const res=A.submit(true);assert(res.rank===1,'la partida récord no quedó primera');
- const b=A.board(2);assert(b[0].user==='Piloto'&&b.every((e,i)=>!i||b[i-1].score>=e.score),'clasificación mal ordenada');
- A.setUser(null);const n=A.board(2).length;assert(!A.submit(false).rank&&A.board(2).length===n,'el invitado entró en la clasificación');
- console.log('Cuentas, contraseñas con sal, puntuación y clasificación: OK')}
+ // una partida real sube al ranking global y queda primera; el relleno ficticio va marcado
+ T.start('vanguard',2);T.S.kills=5000;T.S.stage=4;T.S.bossDone=1;let res=A.submit(true);const r1=await res.done;
+ assert.strictEqual(r1.rank,1,'la partida récord no quedó primera');assert.strictEqual(FAKE.docs[2].length,1);assert.strictEqual(FAKE.docs[2][0].user,'Piloto');
+ let bd=await A.board(2);assert(bd.online&&bd.rows.every((e,i)=>!i||bd.rows[i-1].score>=e.score)&&bd.rows.some(e=>e.seed)&&!bd.rows[0].seed);
+ // sin conexión: la partida queda en cola, el ranking usa la copia guardada y se sube al volver la red
+ FAKE.offline=true;T.start('vanguard',2);T.S.kills=10;res=A.submit(false);const r2=await res.done;assert(r2.queued,'sin red no quedó en cola');
+ bd=await A.board(2);assert(!bd.online&&bd.rows.some(e=>e.pending)&&bd.rows.some(e=>e.user==='Piloto'&&!e.pending),'sin red no usó la copia guardada');
+ FAKE.offline=false;await A.flush();assert.strictEqual(FAKE.docs[2].length,2,'la partida en cola no se subió al volver la red');
+ // una puntuación manipulada (otro nombre) la rechaza el servidor y se descarta de la cola
+ T.start('vanguard',2);A.user='OtroJugador';A.submit(false).done.catch(()=>{});await A.flush();A.user='Piloto';
+ assert.strictEqual(FAKE.docs[2].length,2,'aceptó una puntuación con otro nombre');
+ // token caducado: se renueva solo; invitado: no sube nada
+ A.ses.exp=0;assert.strictEqual(await A.token(),'t-'+A.ses.uid);assert(A.ses.exp>Date.now());
+ A.setSession(null);T.start('vanguard',2);assert(!A.submit(false).done);assert.strictEqual(FAKE.docs[2].length,2,'el invitado subió una puntuación');
+ console.log('Cuentas online, ranking global, cola sin conexión y rechazo de suplantación: OK')}
 // 29. Actualizaciones obligatorias
 async function updateTests(){const U=T.Update;
  assert.strictEqual(T.APP_VERSION,require('../package.json').version,'js/update.js y package.json tienen versiones distintas');
