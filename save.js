@@ -1,12 +1,15 @@
 'use strict';
-/* ===================== GUARDADO (mínimo: estadísticas, logros, desbloqueos) =====================
-   shortcut: solo progreso permanente; ajustes, récords y borrado por muerte permanente llegan en la Fase 5. */
-const SAVE_KEY='neonTempestad.v1';
+/* ===================== GUARDADO: progreso permanente + partida en curso =====================
+   shortcut: ajustes y récords por dificultad llegan en la Fase 5. */
+const SAVE_KEY='neonTempestad.v1',RUN_KEY='neonTempestad.run';
+// localStorage puede no existir o estar bloqueado (modo privado): entonces se guarda solo en memoria
+const STORE=(()=>{try{localStorage.setItem('_nt','1');localStorage.removeItem('_nt');return localStorage}
+ catch(e){const m={};return {getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}}}})();
 const Save={
  d:{stats:{},ach:{}},
- load(){let raw=null;try{raw=JSON.parse(localStorage.getItem(SAVE_KEY))}catch(e){}  // sin localStorage (privado/bloqueado): se juega sin guardar
+ load(){let raw=null;try{raw=JSON.parse(STORE.getItem(SAVE_KEY))}catch(e){}  // guardado corrupto: se empieza de cero
   this.d={stats:Object.assign({},raw&&raw.stats),ach:Object.assign({},raw&&raw.ach)}},
- write(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(this.d))}catch(e){}},
+ write(){try{STORE.setItem(SAVE_KEY,JSON.stringify(this.d))}catch(e){}},
  val(k){const v=this.d.stats[k];return Array.isArray(v)?v.length:v||0},
  add(k,n){this.d.stats[k]=(this.d.stats[k]||0)+(n===undefined?1:n);checkAch()},
  max(k,v){if(v>(this.d.stats[k]||0)){this.d.stats[k]=v;checkAch()}},
@@ -36,5 +39,14 @@ function recordRunEnd(win){
  if(win){Save.add('wins');if(DIFFS.indexOf(S.df)>=2)Save.add('hardWins');Save.addSet('winFams',S.ch.fam)}else Save.add('deaths');
  Save.write();
 }
+
+/* Partida en curso: instantánea al empezar cada etapa. Continuar / reintentar cargan desde aquí.
+   Muerte permanente (Pesadilla Absoluta): al morir se borra y no hay reintento. */
+function saveRun(){const p=S.p;
+ try{STORE.setItem(RUN_KEY,JSON.stringify({cid:S.cid,did:DIFFS.indexOf(S.df),stage:S.stage,clock:S.clock,t:S.t,kills:S.kills,
+  lvl:p.lvl,xp:p.xp,gold:p.gold,revive:p.revive,items:Object.assign({},p.items),mastery:p.mastery.slice()}))}catch(e){}}
+function loadRun(){try{const r=JSON.parse(STORE.getItem(RUN_KEY));return r&&CHARS[r.cid]&&DIFFS[r.did]&&STAGES[r.stage]?r:null}catch(e){return null}}
+function clearRun(){try{STORE.removeItem(RUN_KEY)}catch(e){}}
+
 addEventListener('pagehide',()=>Save.write());
 Save.load();

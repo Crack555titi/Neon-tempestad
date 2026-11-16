@@ -38,12 +38,11 @@ function spot(){const ps=PLAT.filter(q=>q.ph[0]===1&&q.ph[1]===3&&!q.sp);
 function spawnChest(){let r=Math.random(),tier='small';for(const k in CHESTS){r-=CHESTS[k].spawn;if(r<=0){tier=k;break}}S.ints.push(Object.assign({k:'chest',tier,open:0},spot()))}
 function spawnAltar(){S.ints.push(Object.assign({k:'altar',open:0},spot()))}
 
-function lootInit(){
+function lootInit(kit){
  // un único despachador por evento: llama a los ganchos de los objetos que tengas con sus acumulaciones
  for(const ev of IEV)Ev.on(ev,(...a)=>{if(ev==='onHit'&&(a[2].proc||a[2].dot))return;const it=S.p.items;
   for(const id in it){const n=it[id],f=n>0&&ITEM[id].on&&ITEM[id].on[ev];if(f)f(n,...a)}});
- for(let i=0;i<5;i++)spawnChest();spawnAltar();
- if(S.df.kit)for(const r in S.df.kit)for(let i=0;i<S.df.kit[r];i++)giveItem(rollItem(r),1);
+ if(kit&&S.df.kit)for(const r in S.df.kit)for(let i=0;i<S.df.kit[r];i++)giveItem(rollItem(r),1);
 }
 function updLoot(dt){
  const s=S,p=s.p;
@@ -54,6 +53,7 @@ function updLoot(dt){
 }
 function interact(){
  const o=S.near,p=S.p;if(!o)return;
+ if(o.k==='tp')return useTP();
  if(o.k==='altar')return openAltar(o);
  const pr=priceOf(o);if(p.gold<pr){say(`Oro insuficiente (${pr})`);return}
  p.gold-=pr;o.open=1;
@@ -65,6 +65,7 @@ function chooseFragment(o,id){const p=S.p;p.hp=Math.max(1,p.hp*(1-ALTAR.cost));o
 
 function drawLoot(){
  for(const o of S.ints){
+  if(o.k==='tp'){drawTP();continue}
   if(o.k==='chest'){const C=CHESTS[o.tier],w=o.tier==='small'?32:40,h=o.tier==='small'?20:26;
    c.globalAlpha=o.open?.35:1;glow(C.col,o.open?0:14);c.fillStyle='#1a1030';c.strokeStyle=C.col;c.lineWidth=2;
    c.fillRect(o.x-w/2,o.y-h,w,h);c.strokeRect(o.x-w/2,o.y-h,w,h);
@@ -75,7 +76,9 @@ function drawLoot(){
    if(!o.open){const fy=o.y-64+Math.sin(S.t*2.5)*5;c.fillStyle=ALTAR.col;c.beginPath();c.moveTo(o.x,fy-9);c.lineTo(o.x+7,fy);c.lineTo(o.x,fy+9);c.lineTo(o.x-7,fy);c.fill()}}
  }
  c.globalAlpha=1;c.shadowBlur=0;
- const o=S.near;if(o){const pr=o.k==='chest'?priceOf(o):0,ok=o.k==='altar'||S.p.gold>=pr;
+ const o=S.near;if(o){const pr=o.k==='chest'?priceOf(o):0,ok=o.k!=='chest'||S.p.gold>=pr,T=S.tp;
   c.font='bold 12px monospace';c.textAlign='center';c.fillStyle=ok?'#fff':'#ff6a6a';
-  c.fillText(o.k==='chest'?`[E] ${CHESTS[o.tier].name} · ${pr} oro`:`[E] ${ALTAR.name} · −${ALTAR.cost*100}% de vida`,o.x,o.y-(o.k==='altar'?82:40))}
+  const msg=o.k==='chest'?`[E] ${CHESTS[o.tier].name} · ${pr} oro`:o.k==='altar'?`[E] ${ALTAR.name} · −${ALTAR.cost*100}% de vida`:
+   T.state==='idle'?'[E] Activar teletransportador (despierta al jefe)':T.state==='ready'?'[E] Viajar a la siguiente etapa':'';
+  if(msg)c.fillText(msg,o.x,o.y-(o.k==='altar'?82:o.k==='tp'?96:40))}
 }

@@ -10,7 +10,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,f),'utf8')).join('\n;\n')+
- '\n;global.T={start,get S(){return S},update,draw,keys,mouse,CHARS,DIFFS,PLAT,hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,cast,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);T.update(1/60);T.draw()}};
@@ -82,8 +82,8 @@ const [ea,eb]=T.S.en;eb.hp=eb.maxHp=1e5;T.applyDot(ea,'bleed',1,3);T.hurtE(ea,1e
 // 14. Fragmentados con efecto duro: Vidrio fija la vida en 1; Ankh resucita y se consume
 T.start('vanguard',1);T.giveItem('glass',1);assert.strictEqual(T.S.p.maxHp,1);step(60);assert.strictEqual(T.S.p.maxHp,1);
 T.start('vanguard',1);T.giveItem('ankh',1);T.S.p.inv=0;T.hurtP(1e6);assert(T.S.st==='play'&&T.S.p.hp===T.S.p.maxHp&&!T.S.p.items.ankh,'el Ankh no funcionó');
-// 15. Pesadilla empieza con 35 objetos
-T.start('vanguard',4);assert.strictEqual(Object.values(T.S.p.items).reduce((a,b)=>a+b,0),35);
+// 15. Pesadilla empieza con 24 objetos
+T.start('vanguard',4);assert.strictEqual(Object.values(T.S.p.items).reduce((a,b)=>a+b,0),24);
 // 16. Todos los objetos ×2 a la vez en cada personaje (20 s, vida rellenada): busca excepciones y bucles infinitos de procs
 for(const ch of Object.keys(T.CHARS)){reset();T.start(ch,1);for(const it of T.ITEMS)for(let k=0;k<2;k++)T.giveItem(it.id,1);
  Object.assign(T.mouse,{x:700,y:300});T.keys.ShiftLeft=T.keys.KeyQ=1;
@@ -93,21 +93,68 @@ for(const fr of T.FRAGMENTS){reset();T.start('artillery',1);T.giveItem(fr.id,1);
  for(let f=0;f<60*15&&T.S.st!=='over';f++){if(f%60===0)T.S.p.hp=T.S.p.maxHp;if(f%20===0&&T.S.near&&T.S.near.k==='chest'){T.S.p.gold=1e6;T.interact()}step()}}
 console.log('Objetos, economía, cofres, altares y sinergias: OK');
 
+// 18. Contenido de la Fase 3: recuentos
+const types=Object.keys(T.ENEMIES).filter(k=>T.ENEMIES[k].wt);assert(types.length>=12,'tipos de enemigo: '+types.length);
+for(const ai of ['fly','shooter','kamikaze','tank'])assert(types.some(k=>T.ENEMIES[k].ai===ai),'falta comportamiento '+ai);
+assert(T.AFX.length>=8);assert(T.STAGES.length>=4);assert(Object.keys(T.BOSSES).length>=5);
+for(const st of T.STAGES){assert(T.BOSSES[st.boss],st.id);for(const k of st.enemies)assert(T.ENEMIES[k],st.id+':'+k);
+ // el teletransportador siempre sobre algo que existe en las 3 fases
+ for(const t of st.tp)assert(st.plats.some(q=>q.y===t.y&&t.x>q.x&&t.x<q.x+q.w&&q.ph[0]===1&&q.ph[1]===3)||[1,2,3].every(ph=>st.plats.some(q=>q.y===t.y&&t.x>q.x&&t.x<q.x+q.w&&q.ph[0]<=ph&&q.ph[1]>=ph)),st.id+' tp en el aire')}
+for(const [k,b] of Object.entries(T.BOSSES))for(const ph of [1,2,3])assert(b.moves.some(m=>m.ph===ph),k+' sin ataques nuevos en fase '+ph);
+// 19. Cada tipo de enemigo y cada afijo de élite funcionan 8 s junto al jugador
+for(const k of Object.keys(T.ENEMIES)){T.start('vanguard',1);T.S.spawn=1e9;T.spawnEnemy(k,T.S.p.x+150);step(60*8)}
+for(const a of T.AFX){T.start('vanguard',3);T.S.spawn=1e9;const e=T.spawnEnemy('crawler',T.S.p.x+150,undefined,1);e.elite=1;e.aff=[a];step(60*8);T.S.p.hp=T.S.p.maxHp}
+// 20. Teletransportador: activar → jefe; jefe muerto + carga completa → listo → etapa 2 guardada
+T.start('vanguard',1);T.useTP();assert(T.S.boss&&T.S.tp.state==='charging');T.S.p.x=T.S.tp.x;T.S.p.y=T.S.tp.y;const c0=T.S.tp.charge;T.S.spawn=1e9;step(120);
+assert(T.S.tp.charge>c0,'no carga estando cerca');T.S.boss.hidden=0;T.hurtE(T.S.boss,1e12,{raw:1});T.S.tp.charge=1;step(2);assert.strictEqual(T.S.tp.state,'ready');
+T.useTP();assert.strictEqual(T.S.stage,1);assert.strictEqual(T.loadRun().stage,1);
+// 21. Mecánicas de jefe: Hidra → lava; Leviatán → suelo roto; Arconte → paredes; Reina → la Mirada castiga moverse
+const toStage=(i,d)=>{reset();T.start('vanguard',d||1);for(let k=0;k<i;k++){T.useTP();T.S.boss.hidden=0;T.hurtE(T.S.boss,1e12,{raw:1});T.S.tp.charge=1;step(2);T.useTP()}T.S.spawn=1e9};
+const phaseTo=np=>{const b=T.S.boss;b.hidden=0;T.hurtE(b,b.maxHp*(np===2?.4:.35),{raw:1});assert(b.ph>=np)};
+toStage(1);T.useTP();phaseTo(2);assert(T.S.lava,'la Hidra no activó la lava');
+toStage(3);T.useTP();phaseTo(2);step(2);assert(!T.PLAT[0].on&&T.PLAT.some(q=>q.solid&&q.on),'el Leviatán no rompió el suelo');
+toStage(4);T.useTP();phaseTo(2);phaseTo(3);assert(T.S.walls,'el Arconte no cerró las paredes');
+toStage(2);T.useTP();const qb=T.S.boss;qb.t=99;qb.gaze={warn:0,act:2,tk:0};const hq=T.S.p.hp;T.S.p.inv=0;T.S.p.vx=0;step(1);
+assert.strictEqual(T.S.p.hp,hq,'la Mirada castigó estar quieto');T.S.p.vx=300;T.S.p.inv=0;qb.gaze.tk=0;T.update(1/60);assert(T.S.p.hp<hq,'la Mirada no castigó moverse');
+// 22. Telegraph que te sigue y se fija antes del impacto
+T.start('vanguard',1);T.S.spawn=1e9;const z=T.Z({x:0,y:500,r:60,warn:1,track:.3,hostile:1,dmg:5});T.S.p.x=900;step(20);assert(Math.abs(z.x-900)<1,'el aviso no te sigue');step(25);
+T.S.p.x=1300;step(5);assert(Math.abs(z.x-900)<1,'el aviso no se fijó');
+// 23. Dificultades: Tormenta cura −20%; Pesadilla empieza en el minuto 45 y deja zonas al caer proyectiles; Cataclismo doble afijo
+T.start('vanguard',2);T.S.p.hp=1;T.heal(100);assert(Math.abs(T.S.p.hp-81)<.5,'Tormenta no reduce la curación');
+T.start('vanguard',4);assert.strictEqual(T.S.clock,45*60);for(let i=0;i<4;i++)els.nodes.onclick(pick0);
+T.S.spawn=1e9;T.S.en.length=0;T.PR.n=0;T.S.zn.length=0;T.fxProj({x:500,y:400,vx:0,vy:900,dmg:5,r:5,life:2,hostile:1,col:'#f00'});step(30);assert(T.S.zn.some(q=>q.hostile&&q.dot),'Pesadilla no dejó zona de daño');
+T.start('vanguard',3);let dbl=0;for(let i=0;i<300;i++){const e=T.spawnEnemy('crawler',100);if(e.elite)dbl+=e.aff.length===2?1:-1000}assert(dbl>0,'Cataclismo sin doble afijo');
+// 24. Muerte permanente: en Pesadilla se borra la partida; en Estándar se puede reintentar la etapa con lo que tenías
+T.start('vanguard',4);for(let i=0;i<4;i++)els.nodes.onclick(pick0);assert(T.loadRun());T.S.p.items.ankh=0;T.S.p.revive=0;T.S.p.inv=0;T.hurtP(1e9);
+assert.strictEqual(T.S.st,'over');assert.strictEqual(T.loadRun(),null,'Pesadilla no borró la partida');
+toStage(2);T.giveItem('sharp',1);T.saveRun();T.S.p.inv=0;T.hurtP(1e9);assert.strictEqual(T.S.st,'over');const rr=T.loadRun();assert(rr&&rr.stage===2,'no hay partida para reintentar');
+T.start(rr.cid,rr.did,rr);assert.strictEqual(T.S.stage,2);assert.strictEqual(T.S.p.items.sharp,1,'el reintento perdió los objetos');
+console.log('Etapas, jefes, enemigos, afijos, teletransportador, dificultades y guardado: OK');
 
-// Matriz: cada personaje × dificultad, 4 min simulados, vida rellenada y jefe forzado por fases → solo busca excepciones
+
+
+// Supera una etapa a la fuerza: activa el teletransportador, juega el jefe por sus fases y viaja
+function clearStage(secs){const S=T.S;T.useTP();assert(S.boss,'no apareció el jefe');const b=S.boss,id=b.def.name;
+ for(let f=0;f<60*secs&&T.S.st!=='over'&&T.S.boss;f++){T.mouse.l=T.mouse.r=f%50<40;if(f%300===0)T.S.p.hp=T.S.p.maxHp;
+  if(f%40===0&&!b.dead){b.hidden=0;b.ghost=0;T.hurtE(b,b.maxHp*.035,{raw:1})}step()}
+ if(T.S.st==='over')return;if(T.S.boss){T.S.boss.hidden=0;T.hurtE(T.S.boss,1e12,{raw:1})}
+ assert(T.S.bossDone,id+' no murió');assert.strictEqual(b.ph,3,id+' no llegó a la fase 3');
+ T.S.tp.charge=1;step(2);assert.strictEqual(T.S.tp.state,'ready');T.useTP()}
+// Matriz: cada personaje × dificultad recorre las 5 etapas (15 s explorando + jefe), vida rellenada → busca excepciones
 let fails=0;
 for(const ch of Object.keys(T.CHARS))for(let d=0;d<T.DIFFS.length;d++){
- try{reset();T.start(ch,d);Object.assign(T.mouse,{l:1,r:1,x:700,y:300});T.keys.ShiftLeft=T.keys.KeyQ=1;
-  let f=0;for(;f<60*240&&T.S.st!=='over';f++){T.keys.KeyD=(f/120|0)%2;T.keys.KeyA=!T.keys.KeyD;T.mouse.l=T.mouse.r=f%50<40; // soltar a ratos: las habilidades de carga se lanzan al soltar
-   if(f%300===0)T.S.p.hp=T.S.p.maxHp;if(T.S.boss&&f%30===0)T.hurtE(T.S.boss,200);step()}
-  if(T.S.st!=='over')throw new Error('el jefe no murió en 4 min');
+ try{reset();T.start(ch,d);Object.assign(T.mouse,{x:700,y:300});T.keys.ShiftLeft=T.keys.KeyQ=1;
+  for(let st=0;st<T.STAGES.length&&T.S.st!=='over';st++){assert.strictEqual(T.S.stage,st);
+   for(let f=0;f<60*15;f++){T.keys.KeyD=(f/120|0)%2;T.keys.KeyA=!T.keys.KeyD;T.mouse.l=T.mouse.r=f%50<40;if(f%300===0)T.S.p.hp=T.S.p.maxHp;step()}
+   clearStage(30)}
+  assert.strictEqual(T.S.st,'over','la partida no terminó tras la etapa 5');
  }catch(e){fails++;console.log('FALLO',ch,d,e.stack.split('\n').slice(0,3).join(' | '))}}
 
 // Bot que apunta al enemigo más cercano y suelta los botones a ratos
 function bot(ch,d,secs){reset();T.start(ch,d);T.keys.ShiftLeft=T.keys.KeyQ=1;let f=0;
  for(;f<60*secs&&T.S.st!=='over';f++){const e=T.S.en.reduce((b,e)=>!b||Math.abs(e.x-T.S.p.x)<Math.abs(b.x-T.S.p.x)?e:b,null);T.mouse.l=T.mouse.r=f%50<40;
   if(e){T.mouse.x=e.x-T.S.cam;T.mouse.y=e.y-e.h/2;T.keys.KeyA=e.x>T.S.p.x&&Math.abs(e.x-T.S.p.x)<200;T.keys.KeyD=!T.keys.KeyA}
-  if(f%20===0&&T.S.near&&(T.S.near.k==='altar'||T.S.p.gold>=T.priceOf(T.S.near)))T.interact();step()}
+  if(f%20===0&&T.S.near&&(T.S.near.k!=='chest'||T.S.p.gold>=T.priceOf(T.S.near)))T.interact();step()}
  return {t:f/60,k:T.S.kills,items:Object.values(T.S.p.items).reduce((a,b)=>a+b,0)}}
 // DPS contra muñecos aturdidos e inmortales (20 s, sin habilidad de movimiento): 1 objetivo y grupo de 5
 function dps(ch,n){reset();T.start(ch,1);const S=T.S;S.spawn=1e9;

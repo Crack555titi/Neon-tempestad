@@ -21,6 +21,14 @@ function hud(){
  c.fillText(`${String(m).padStart(2,'0')}:${String(sc).padStart(2,'0')}  ·  ${s.df.name}`,W-14,22);c.fillStyle='#ff9a5a';c.fillText(`Dificultad x${coef().toFixed(1)}`,W-14,40);
  if(s.p.revive>0){c.fillStyle='#4cff9a';c.fillText('♥ Resurrección x'+s.p.revive,W-14,58)}
  if(s.boss){const b=s.boss;c.textAlign='center';c.fillStyle=b.def.color;c.fillText(`${b.def.name.toUpperCase()} · FASE ${b.ph}`,W/2,22);bar(W/2-250,28,500,14,b.hp/b.maxHp,'#ff3c6a');bar(W/2-250,45,500,6,b.stag/b.stagMax,'#ffd23c')}
+ else{c.textAlign='center';c.font='bold 12px monospace';c.fillStyle=STAGE.plat.edge;c.fillText(`ETAPA ${s.stage+1}/${STAGES.length} · ${STAGE.name.toUpperCase()}`,W/2,20)}
+ // teletransportador: estado y flecha cuando está fuera de pantalla
+ const T=s.tp;c.textAlign='center';c.font='bold 12px monospace';
+ const tl=T.state==='idle'?'Encuentra el teletransportador (E)':T.state==='ready'?'¡Teletransportador listo! (E)':`Teletransportador ${Math.floor(T.charge*100)}%${T.out?' · ¡vuelve a la zona!':''}${s.boss?' · derrota al jefe':''}`;
+ c.fillStyle=T.state==='ready'?'#4cff7a':T.out?'#ff6a6a':'#ffd23c';c.fillText(tl,W/2,s.boss?66:38);
+ if(T.state==='charging'){bar(W/2-120,s.boss?70:42,240,5,T.charge,'#ffd23c')}
+ const tx=T.x-s.cam;if(tx<0||tx>W){const ex=tx<0?18:W-18,ey=clamp(T.y-40,60,H-80),d=tx<0?-1:1;c.fillStyle=T.state==='ready'?'#4cff7a':'#3cf0ff';
+  c.beginPath();c.moveTo(ex+d*10,ey);c.lineTo(ex-d*6,ey-9);c.lineTo(ex-d*6,ey+9);c.fill()}
  if(s.msgT>0){c.globalAlpha=Math.min(1,s.msgT);c.textAlign='center';c.font='bold 18px monospace';c.fillStyle='#fff';c.fillText(s.msg,W/2,s.boss?90:70);c.globalAlpha=1}
  // aviso al recoger un objeto
  if(s.note){const {it,n,t}=s.note,col=RARITY[it.r].col,y=s.boss?104:86,sl=Math.min(1,(3.5-t)*6);c.globalAlpha=Math.min(1,t*2);
@@ -60,15 +68,18 @@ function openMastery(){
  S.st='mastery';const pool=MASTERY.slice().sort(()=>Math.random()-.5).slice(0,2);
  $('nodes').innerHTML=pool.map((n,i)=>`<div class="card sel" data-i="${i}" style="--c:#ffd23c"><b>${n.name}</b><small>${n.desc}</small></div>`).join('');
  $('mq').textContent=S.mq>1?`(${S.mq} pendientes)`:'';
- $('nodes').onclick=e=>{const k=e.target.closest('.card');if(!k)return;pool[+k.dataset.i].fx(S.p);mouse.l=mouse.r=0;
+ $('nodes').onclick=e=>{const k=e.target.closest('.card');if(!k)return;pool[+k.dataset.i].fx(S.p);S.p.mastery.push(pool[+k.dataset.i].name);mouse.l=mouse.r=0;
   if(--S.mq>0)openMastery();else{$('mastery').style.display='none';S.st='play'}};
  $('mastery').style.display='flex';
 }
 
 function endGame(win){
  S.st='over';recordRunEnd(win);
- $('endT').textContent=win?`¡${S.bossName.toUpperCase()} DERROTADO!`:(S.df.perma?'MUERTE PERMANENTE':'HAS CAÍDO');
- $('endS').textContent=`${S.ch.name} · Nivel ${S.p.lvl} · ${S.kills} bajas · ${Math.floor(S.t/60)}:${String(Math.floor(S.t%60)).padStart(2,'0')} · ${S.df.name}`;
+ // muerte permanente estricta: se borra la partida guardada y no hay reintento
+ if(win||S.df.perma)clearRun();
+ $('endT').textContent=win?'¡HAS SUPERADO LA TEMPESTAD!':(S.df.perma?'MUERTE PERMANENTE · PARTIDA BORRADA':'HAS CAÍDO');
+ $('endS').textContent=`${S.ch.name} · Etapa ${S.stage+1}/${STAGES.length} · Nivel ${S.p.lvl} · ${S.kills} bajas · ${Math.floor(S.t/60)}:${String(Math.floor(S.t%60)).padStart(2,'0')} · ${S.df.name}`;
+ $('retry').style.display=!win&&loadRun()?'inline-block':'none';
  setTimeout(()=>$('end').style.display='flex',win?1500:600);
 }
 
@@ -91,6 +102,8 @@ function buildMenu(){
  $('diffs').innerHTML=DIFFS.map((d,i)=>`<div class="diff ${i===selD?'sel':''}" data-i="${i}">${i+1}. ${d.name}</div>`).join('');
  $('dd').textContent=DIFFS[selD].desc;
  const n=Object.keys(CHARS).filter(isUnlocked).length;$('unl').textContent=`${n}/${Object.keys(CHARS).length} desbloqueados`;
+ const run=loadRun();$('cont').style.display=run?'inline-block':'none';
+ if(run)$('cont').textContent=`▶ CONTINUAR · ${CHARS[run.cid].name} · Etapa ${run.stage+1} · ${DIFFS[run.did].name}`;
 }
 function showLocked(k){
  const v=CHARS[k],a=ACHIEVEMENTS[v.unlock];
@@ -103,6 +116,8 @@ function showLocked(k){
 $('fams').onclick=e=>{const k=e.target.closest('.card');if(!k)return;if(isUnlocked(k.dataset.k)){selC=k.dataset.k;buildMenu()}else showLocked(k.dataset.k)};
 $('diffs').onclick=e=>{const k=e.target.closest('.diff');if(k){selD=+k.dataset.i;buildMenu()}};
 $('go').onclick=()=>start(selC,selD);
+$('cont').onclick=()=>{const r=loadRun();if(r)start(r.cid,r.did,r)};
+$('retry').onclick=()=>{const r=loadRun();if(r){$('end').style.display='none';start(r.cid,r.did,r)}};
 $('again').onclick=()=>{$('end').style.display='none';$('menu').style.display='flex';S=null;screen();c.clearRect(0,0,W,H);buildMenu()};
 
 /* ===================== ARRANQUE ===================== */

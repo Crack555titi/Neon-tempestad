@@ -19,8 +19,8 @@
     <small id="unl"></small>
     <div class="row" id="diffs"></div>
     <div id="dd"></div>
-    <button id="go">▶ JUGAR</button>
-    <p class="help">A/D mover · W/Espacio saltar (doble salto) · S bajar de plataforma · Ratón apuntar · Clic izq. disparo primario · Clic der. secundaria · Shift movimiento · Q definitiva · E abrir cofre / altar · Tab o I inventario · B invoca al jefe ya</p>
+    <div class="row"><button id="go">▶ NUEVA PARTIDA</button><button id="cont" style="display:none"></button></div>
+    <p class="help">A/D mover · W/Espacio saltar (doble salto) · S bajar de plataforma · Ratón apuntar · Clic izq. disparo primario · Clic der. secundaria · Shift movimiento · Q definitiva · E abrir cofre, altar o teletransportador · Tab o I inventario</p>
   </div>
 
   <div id="inv" class="ov" style="display:none">
@@ -45,7 +45,7 @@
   <div id="end" class="ov" style="display:none">
     <h2 id="endT"></h2>
     <p id="endS"></p>
-    <button id="again">VOLVER AL MENÚ</button>
+    <div class="row"><button id="retry" style="display:none">↻ REINTENTAR ETAPA</button><button id="again">VOLVER AL MENÚ</button></div>
   </div>
 </div>
 <!-- Scripts clásicos (no módulos) para que funcione abriendo index.html con doble clic. El orden importa. -->
@@ -54,7 +54,10 @@
 <script src="data_characters.js"></script>
 <script src="data_enemies.js"></script>
 <script src="data_items.js"></script>
+<script src="data_stages.js"></script>
+<script src="enemies.js"></script>
 <script src="bosses.js"></script>
+<script src="stages.js"></script>
 <script src="abilities.js"></script>
 <script src="loot.js"></script>
 <script src="save.js"></script>

@@ -130,17 +130,17 @@ const ACHIEVEMENTS={
  guard:{name:'Rompeguardias',desc:'Rompe la guardia de un jefe 5 veces',stat:'guardBreaks',goal:5},
  kills:{name:'Pirotecnia',desc:'Consigue 1.000 bajas en total',stat:'kills',goal:1000},
  level:{name:'Paciencia',desc:'Alcanza el nivel 10 en una partida',stat:'bestLvl',goal:10},
- boss:{name:'Alto Voltaje',desc:'Derrota al Coloso Prisma',stat:'bossKills',goal:1},
+ boss:{name:'Alto Voltaje',desc:'Derrota a un jefe',stat:'bossKills',goal:1},
  ults:{name:'Legión',desc:'Usa 50 habilidades definitivas',stat:'ults',goal:50},
  time:{name:'Superviviente',desc:'Sobrevive 5 minutos en una partida',stat:'bestTime',goal:300},
  jumps:{name:'Gran Saltador',desc:'Salta 500 veces',stat:'jumps',goal:500},
  runs:{name:'Bucle',desc:'Juega 10 partidas',stat:'runs',goal:10},
- hardwin:{name:'Masa Crítica',desc:'Gana en Tormenta de Riesgo o superior',stat:'hardWins',goal:1},
+ hardwin:{name:'Masa Crítica',desc:'Completa la Tempestad (5 etapas) en Tormenta de Riesgo o superior',stat:'hardWins',goal:1},
  playtime:{name:'Reloj Roto',desc:'Juega 30 minutos en total',stat:'playTime',goal:1800},
  lowkills:{name:'Sangre Fría',desc:'Mata 150 enemigos con menos del 25% de vida',stat:'lowHpKills',goal:150},
  neardeath:{name:'Al Borde',desc:'Sobrevive a un golpe quedando por debajo del 5% de vida',stat:'nearDeath',goal:1},
  deaths:{name:'Pacto con el Vacío',desc:'Muere 10 veces',stat:'deaths',goal:10},
- families:{name:'Híbrido',desc:'Gana con personajes de 3 familias distintas',stat:'winFams',goal:3}
+ families:{name:'Híbrido',desc:'Completa la Tempestad con personajes de 3 familias distintas',stat:'winFams',goal:3}
 };
 
 /* Nodos de maestría (cada 5 niveles se elige 1 de 2) */
