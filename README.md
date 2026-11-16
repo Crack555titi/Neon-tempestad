@@ -129,9 +129,13 @@ npm run android:open      # abre el proyecto en Android Studio
 También se puede generar desde la terminal con `cd android && gradlew assembleDebug`.
 
 **Notas:**
-- La orientación horizontal se bloquea en `AndroidManifest.xml` con `sensorLandscape`, mediante `tools/android-landscape.js`.
+- `tools/android-setup.js` bloquea la orientación horizontal en `AndroidManifest.xml` con `sensorLandscape`, y copia el icono y la pantalla de carga.
 - Además, el juego pide pantalla completa en horizontal al tocar la pantalla.
 - Cada vez que cambies el código del juego, vuelve a ejecutar `npm run android`.
+
+### Icono y pantalla de carga
+
+El icono del `.exe` (`build/icon.png`), los iconos de Android y su pantalla de carga (`build/android/res/`) también se dibujan por código. Para regenerarlos después de cambiar el diseño en `tools/make-icons.js`, ejecuta `node tools/make-icons.js`. Hace falta Chrome, Edge o Brave.
 
 ### Estructura
 
@@ -159,5 +163,4 @@ Las sinergias entre objetos van por un bus de eventos: `onHit`, `onKill`, `onJum
 
 **Pendiente**
 - [ ] Probar en móviles y mandos reales: ajustar el tamaño de los botones táctiles y la sensibilidad.
-- [ ] Icono propio para el `.exe` y el APK.
 - [ ] Más escenarios y un modo infinito tras el Arconte.

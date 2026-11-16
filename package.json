@@ -13,7 +13,7 @@
     "test": "node tools/smoke.js",
     "test:browser": "node tools/browser.js",
     "www": "node tools/build-www.js",
-    "android": "node tools/build-www.js && npx cap sync android && node tools/android-landscape.js",
+    "android": "node tools/build-www.js && npx cap sync android && node tools/android-setup.js",
     "android:open": "npx cap open android"
   },
   "devDependencies": {
