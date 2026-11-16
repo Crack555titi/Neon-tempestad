@@ -1,0 +1,10 @@
+{
+  "appId": "com.neontempestad.juego",
+  "appName": "Neón Tempestad",
+  "webDir": "www",
+  "backgroundColor": "#05030d",
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true
+  }
+}

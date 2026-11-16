@@ -1,0 +1,55 @@
+{
+  "name": "neon-tempestad",
+  "productName": "Neón Tempestad",
+  "version": "1.0.0",
+  "description": "Roguelike de acción 2D en HTML5 Canvas y JavaScript puro",
+  "main": "main.js",
+  "author": "thaigo naboni",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win portable",
+    "test": "node tools/smoke.js",
+    "test:browser": "node tools/browser.js",
+    "www": "node tools/build-www.js",
+    "android": "node tools/build-www.js && npx cap sync android && node tools/android-landscape.js",
+    "android:open": "npx cap open android"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^7.6.10",
+    "@capacitor/cli": "^7.6.10",
+    "@capacitor/core": "^7.6.10",
+    "electron": "^38.8.6",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "com.neontempestad.juego",
+    "productName": "Neón Tempestad",
+    "electronDist": "node_modules/electron/dist",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "index.html",
+      "style.css",
+      "*.js",
+      "!tools/**",
+      "!www/**",
+      "!android/**",
+      "!docs/**",
+      "!capacitor.config.json"
+    ],
+    "win": {
+      "target": "portable"
+    },
+    "portable": {
+      "artifactName": "NeonTempestad-${version}-portable.exe"
+    }
+  },
+  "allowScripts": {
+    "electron@38.8.6": true,
+    "electron-winstaller@5.4.0": true
+  }
+}
