@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neón Tempestad</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game" width="960" height="540"></canvas>
+
+  <div id="menu" class="ov">
+    <h1>NEÓN <span>TEMPESTAD</span></h1>
+    <div class="row" id="chars"></div>
+    <div class="row" id="diffs"></div>
+    <div id="dd"></div>
+    <button id="go">▶ JUGAR</button>
+    <p class="help">A/D mover · W/Espacio saltar (doble salto) · S bajar de plataforma · Ratón apuntar · Clic izq. disparo primario · Clic der. secundaria · Shift movimiento · Q definitiva · B invoca al jefe ya</p>
+  </div>
+
+  <div id="mastery" class="ov" style="display:none">
+    <h2>NODO DE MAESTRÍA</h2>
+    <div class="row" id="nodes"></div>
+  </div>
+
+  <div id="end" class="ov" style="display:none">
+    <h2 id="endT"></h2>
+    <p id="endS"></p>
+    <button id="again">VOLVER AL MENÚ</button>
+  </div>
+</div>
+<!-- Fases siguientes: data_characters.js, data_items.js, bosses.js (se cargarán antes de engine.js) -->
+<script src="engine.js"></script>
+</body>
+</html>
