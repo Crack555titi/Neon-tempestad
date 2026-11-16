@@ -78,9 +78,13 @@ const BOSSES={
    // Guadaña Espectral: barrido a la altura de tu torso; hay que cambiar de altura (con las plataformas parpadeando)
    {ph:3,cd:3.2,f(b,f,dm){const s=Math.random()<.5?-1:1,y=S.p.y-S.p.h/2-25;TG.rect(s<0?WORLD:-160,y,160,50,.9,32*dm,'#c8d2ff',{vx:-s*700,life:4,sweep:1});say('¡Guadaña Espectral!')}}],
   onPhase(b,np){if(np===3)for(const q of PLAT)if(!q.solid&&!(S.tp.y===q.y&&S.tp.x>q.x&&S.tp.x<q.x+q.w))q.bl=3},
-  draw(e){const cx=e.x,top=e.y-e.h;c.fillStyle=e.flash>0?'#fff':'#c8d2ffcc';c.beginPath();c.moveTo(cx-40,e.y);c.lineTo(cx-14,top+30);c.lineTo(cx+14,top+30);c.lineTo(cx+40,e.y);c.fill();
-   c.beginPath();c.arc(cx,top+22,18,0,6.283);c.fill();c.fillStyle='#ffd23c';for(let k=-1;k<=1;k++){c.beginPath();c.moveTo(cx+k*10-5,top+6);c.lineTo(cx+k*10,top-8);c.lineTo(cx+k*10+5,top+6);c.fill()}
-   const g=e.gaze,open=g&&g.warn<=0;c.fillStyle=open?'#ff3c6a':g?'#ffd23c':'#000';c.beginPath();c.ellipse(cx,top+22,open?9:7,open?7:2,0,0,6.283);c.fill();
+  // cuerpo oscuro translúcido con borde luminoso: relleno claro + bloom la volvía una mancha blanca
+  draw(e){const cx=e.x,top=e.y-e.h,gr=c.createLinearGradient(0,top,0,e.y);gr.addColorStop(0,'#3b3070ee');gr.addColorStop(1,'#140f2a22');
+   c.fillStyle=e.flash>0?'#fff':gr;c.strokeStyle='#c8d2ff';c.lineWidth=2.5;
+   c.beginPath();c.moveTo(cx-14,top+30);c.lineTo(cx+14,top+30);c.lineTo(cx+40,e.y);  // dobladillo deshilachado
+   for(let i=1;i<8;i++)c.lineTo(cx+40-i*10,e.y-(i%2?14+6*Math.sin(S.t*4+i):0));c.lineTo(cx-40,e.y);c.closePath();c.fill();c.stroke();
+   c.beginPath();c.arc(cx,top+22,18,0,6.283);c.fill();c.stroke();c.fillStyle='#ffd23c';for(let k=-1;k<=1;k++){c.beginPath();c.moveTo(cx+k*10-5,top+6);c.lineTo(cx+k*10,top-8);c.lineTo(cx+k*10+5,top+6);c.fill()}
+   const g=e.gaze,open=g&&g.warn<=0;c.fillStyle=open?'#ff3c6a':g?'#ffd23c':'#c8d2ff';c.beginPath();c.ellipse(cx,top+22,open?9:7,open?7:2,0,0,6.283);c.fill();
    if(g){c.fillStyle=open?'#ff3c6a':'#ffd23c';c.font='bold 14px monospace';c.textAlign='center';c.fillText(open?'👁 NO TE MUEVAS':'👁 …',cx,top-20)}c.shadowBlur=0}},
 
  /* ---------- 4. LEVIATÁN DE DATOS (Abismo Digital) ---------- */

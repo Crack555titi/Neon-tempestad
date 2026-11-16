@@ -37,7 +37,9 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  for(const [i,b] of [[0,'prisma'],[1,'hydra'],[2,'queen'],[3,'leviathan'],[4,'archon']]){
   await js(`if(S.st!=='play')document.querySelector('#nodes .card')?.click();loadStage(${i});useTP();S.boss.hidden=0;hurtE(S.boss,S.boss.maxHp*.5,{raw:1});S.p.hp=S.p.maxHp`);
   await sleep(4500);await shot(`04-jefe-${i+1}-${b}`)}
- await js("toggleInv()");await sleep(500);await shot('05-inventario');await js("toggleInv()");
+ // inventario con objetos de todas las rarezas (sin los fragmentados, que cambian la vida máxima) y HUD con habilidades listas
+ await js("Object.values(ITEM).filter(it=>it.r!=='f').filter((it,i)=>i%4===0).forEach(it=>giveItem(it.id,1));S.p.hp=S.p.maxHp;for(const k in S.p.cd)S.p.cd[k]=0");
+ await sleep(300);await shot('05b-hud');await js("toggleInv()");await sleep(500);await shot('05-inventario');await js("toggleInv()");
  // audio real: el contexto debe arrancar y la música programar notas
  await cmd('Input.dispatchKeyEvent',{type:'keyDown',code:'KeyM',key:'m'});await cmd('Input.dispatchKeyEvent',{type:'keyUp',code:'KeyM',key:'m'});
  await js("Save.d.settings.mute=false;Snd.apply()");await sleep(400);

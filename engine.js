@@ -114,6 +114,7 @@ function hurtE(e,d,o){
  for(const a of e.aff)if(a.taken)d=a.taken(e,d);
  if(e.sh>0){const a=Math.min(e.sh,d);e.sh-=a;d-=a}
  if(d<=0)return;
+ if(e.boss&&e.ph<3)d=Math.min(d,e.hp-e.maxHp*(e.ph===1?.655:.325));  // un golpe no puede saltarse una fase: se queda en el umbral
  e.hp-=d;e.flash=.1;e.lastCrit=crit;txt(e.x+R(-10,10),e.y-e.h-6,Math.round(d)+(crit?'!':''),crit?'#ffd23c':o.dot?'#d9a0ff':o.proc?'#9ae6ff':'#fff',crit?20:o.dot?11:o.proc?12:14);
  if(crit&&(e.elite||e.boss)&&!o.proc&&hsCd<=0){hitStop(30);hsCd=.25}
  // Guillotina: ejecuta a los no-jefes por debajo del umbral

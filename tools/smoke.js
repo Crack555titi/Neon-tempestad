@@ -5,7 +5,7 @@ const fs=require('fs'),path=require('path'),assert=require('assert');
 const root=path.join(__dirname,'..');
 const files=[...fs.readFileSync(path.join(root,'index.html'),'utf8').matchAll(/<script src="([^"]+)"/g)].map(m=>m[1]);
 
-const ctx=new Proxy({},{get:(t,k)=>k in t?t[k]:(k==='createLinearGradient'||k==='createRadialGradient'?()=>({addColorStop(){}}):k==='measureText'?s=>({width:String(s).length*7}):()=>{}),set:(t,k,v)=>(t[k]=v,true)});
+global.Path2D=function(){};const ctx=new Proxy({},{get:(t,k)=>k in t?t[k]:(k==='createLinearGradient'||k==='createRadialGradient'?()=>({addColorStop(){}}):k==='measureText'?s=>({width:String(s).length*7}):()=>{}),set:(t,k,v)=>(t[k]=v,true)});
 const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
@@ -106,12 +106,12 @@ for(const k of Object.keys(T.ENEMIES)){T.start('vanguard',1);T.S.spawn=1e9;T.spa
 for(const a of T.AFX){T.start('vanguard',3);T.S.spawn=1e9;const e=T.spawnEnemy('crawler',T.S.p.x+150,undefined,1);e.elite=1;e.aff=[a];step(60*8);T.S.p.hp=T.S.p.maxHp}
 // 20. Teletransportador: activar → jefe; jefe muerto + carga completa → listo → etapa 2 guardada
 T.start('vanguard',1);T.useTP();assert(T.S.boss&&T.S.tp.state==='charging');T.S.p.x=T.S.tp.x;T.S.p.y=T.S.tp.y;const c0=T.S.tp.charge;T.S.spawn=1e9;step(120);
-assert(T.S.tp.charge>c0,'no carga estando cerca');T.S.boss.hidden=0;T.hurtE(T.S.boss,1e12,{raw:1});T.S.tp.charge=1;step(2);assert.strictEqual(T.S.tp.state,'ready');
+assert(T.S.tp.charge>c0,'no carga estando cerca');{const b=T.S.boss;b.hidden=0;T.hurtE(b,1e12,{raw:1});assert(!b.dead&&b.ph===2,'un golpe enorme se saltó fases');T.hurtE(b,1e12,{raw:1});assert(!b.dead&&b.ph===3);T.hurtE(b,1e12,{raw:1});assert(b.dead)}T.S.tp.charge=1;step(2);assert.strictEqual(T.S.tp.state,'ready');
 T.useTP();assert.strictEqual(T.S.stage,1);assert.strictEqual(T.loadRun().stage,1);
 // 21. Mecánicas de jefe: Hidra → lava; Leviatán → suelo roto; Arconte → paredes; Reina → la Mirada castiga moverse
 // muerte garantizada: los botines aleatorios pueden traer Ankh, esquiva o intangibilidad
 const killP=()=>{const p=T.S.p;p.items.ankh=0;p.revive=0;p.m.dodge=0;p.buf={};p.inv=0;T.hurtP(1e9)};
-const toStage=(i,d)=>{reset();T.start('vanguard',d||1);for(let k=0;k<i;k++){T.useTP();T.S.boss.hidden=0;T.hurtE(T.S.boss,1e12,{raw:1});T.S.tp.charge=1;step(2);T.useTP()}T.S.spawn=1e9};
+const toStage=(i,d)=>{reset();T.start('vanguard',d||1);for(let k=0;k<i;k++){T.useTP();const b=T.S.boss;b.hidden=0;for(let j=0;j<3;j++)T.hurtE(b,1e12,{raw:1});T.S.tp.charge=1;step(2);T.useTP()}T.S.spawn=1e9};
 const phaseTo=np=>{const b=T.S.boss;b.hidden=0;T.hurtE(b,b.maxHp*(np===2?.4:.35),{raw:1});assert(b.ph>=np)};
 toStage(1);T.useTP();phaseTo(2);assert(T.S.lava,'la Hidra no activó la lava');
 toStage(3);T.useTP();phaseTo(2);step(2);assert(!T.PLAT[0].on&&T.PLAT.some(q=>q.solid&&q.on),'el Leviatán no rompió el suelo');
@@ -194,8 +194,8 @@ console.log('Controles, pausa, récords, mando, táctil y audio: OK');
 function clearStage(secs){const S=T.S;T.useTP();assert(S.boss,'no apareció el jefe');const b=S.boss,id=b.def.name;
  for(let f=0;f<60*secs&&T.S.st!=='over'&&T.S.boss;f++){T.mouse.l=T.mouse.r=f%50<40;if(f%300===0)T.S.p.hp=T.S.p.maxHp;
   if(f%40===0&&!b.dead){b.hidden=0;b.ghost=0;T.hurtE(b,b.maxHp*.035,{raw:1})}step()}
- if(T.S.st==='over')return;if(T.S.boss){T.S.boss.hidden=0;T.hurtE(T.S.boss,1e12,{raw:1})}
- assert(T.S.bossDone,id+' no murió');assert(b.ph>=2,id+' no cambió de fase');  // un golpe enorme puede matarlo antes de la fase 3
+ if(T.S.st==='over')return;for(let i=0;i<3&&T.S.boss&&!b.dead;i++){b.hidden=0;b.ghost=0;T.hurtE(b,1e12,{raw:1})}
+ assert(T.S.bossDone,id+' no murió');assert.strictEqual(b.ph,3,id+' se saltó una fase');
  T.S.tp.charge=1;step(2);assert.strictEqual(T.S.tp.state,'ready');T.useTP()}
 // Matriz: cada personaje × dificultad recorre las 5 etapas (15 s explorando + jefe), vida rellenada → busca excepciones
 let fails=0;

@@ -14,9 +14,10 @@ const KEYS={p:'LMB',s:'RMB',m:'SHIFT',u:'Q'};
 function hud(){
  const s=S,p=s.p,t=s.t;screen();c.shadowBlur=0;c.textBaseline='alphabetic';
  // ---- arriba a la izquierda: oro y objetos ----
- const ids=sortedItems(),rows=Math.ceil(ids.length/16);panel(10,8,Math.max(150,Math.min(16,ids.length)*22+14),26+rows*22,'#ffd23c55');
+ const ids=sortedItems(),cols=Math.max(6,(W/2-262-36)/22|0),rows=Math.ceil(ids.length/cols);  // columnas que caben antes de la barra del jefe
+ panel(10,8,Math.max(150,Math.min(cols,ids.length)*22+14),26+rows*22,'#ffd23c55');
  c.textAlign='left';c.font='bold 13px monospace';c.fillStyle='#ffd23c';c.fillText(`◆ ${p.gold}`,20,26);
- ids.forEach((id,i)=>drawIcon(ITEM[id],18+(i%16)*22,32+(i/16|0)*22,19,p.items[id]));
+ ids.forEach((id,i)=>drawIcon(ITEM[id],18+(i%cols)*22,32+(i/cols|0)*22,19,p.items[id]));
  // ---- arriba a la derecha: reloj y medidor de dificultad ----
  const co=coef(),ti=Math.min(DIFF_TIERS.length-1,(co-1)/1.2|0),tier=DIFF_TIERS[ti],m=Math.floor(s.clock/60),sc=Math.floor(s.clock%60);
  panel(W-206,8,196,p.revive>0?66:52,tier[1]);
@@ -51,7 +52,7 @@ function hud(){
  // ---- habilidades con enfriamiento radial ----
  SLOTS.split('').forEach((k,i)=>{const d=ab(k),x=W/2-74+i*38,y=H-37,cd=p.cd[k],mx=maxCd(k,d),ready=cd<=0;
   panel(x,y,33,33,ready?col:'#444',.85);
-  c.textAlign='center';c.font='bold 14px monospace';c.fillStyle=ready?col:'#666';c.fillText(d.name[0],x+16.5,y+22);
+  drawGlyph(c,d,x+7.5,y+7.5,18,ready?col:'#666');c.textAlign='center';
   if(!ready){c.save();c.beginPath();c.moveTo(x+16.5,y+16.5);c.arc(x+16.5,y+16.5,15,-Math.PI/2,-Math.PI/2+6.283*clamp(cd/mx,0,1));c.closePath();c.fillStyle='rgba(0,0,0,.6)';c.fill();c.restore();
    c.font='bold 10px monospace';c.fillStyle='#fff';c.fillText(cd<1?cd.toFixed(1):Math.ceil(cd),x+16.5,y+21)}
   c.font='7px monospace';c.fillStyle='#cfc9f5';c.fillText(KEYS[k],x+16.5,y+8);
@@ -81,13 +82,13 @@ function drawMinimap(x,y,w,h){const s=S,sx=w/WORLD,sy=(h-8)/(FLOOR+40),X=v=>x+v*
  c.fillStyle='#fff';c.fillRect(X(s.p.x)-2,Y(s.p.y-20)-2,4,4);c.restore()}
 const sortedItems=()=>Object.keys(S.p.items).filter(id=>S.p.items[id]>0).sort((a,b)=>'curlmf'.indexOf(ITEM[a].r)-'curlmf'.indexOf(ITEM[b].r));
 function drawIcon(it,x,y,s,n){const rc=RARITY[it.r].col;c.fillStyle='#120a26';c.fillRect(x,y,s,s);c.fillStyle=it.col;c.fillRect(x+3,y+3,s-6,s-6);
- c.strokeStyle=rc;c.lineWidth=2;c.strokeRect(x,y,s,s);c.fillStyle='#000';c.font=`bold ${s*.5|0}px monospace`;c.textAlign='center';c.fillText(it.name[0],x+s/2,y+s*.68);
+ c.strokeStyle=rc;c.lineWidth=2;c.strokeRect(x,y,s,s);drawGlyph(c,it,x+s*.2,y+s*.2,s*.6,'#0b0618');
  if(n>1){c.fillStyle='#fff';c.font='bold 9px monospace';c.textAlign='right';c.fillText(n,x+s+2,y+s+2)}}
 function wrapText(t,x,y,w,lh){let line='';for(const word of t.split(' ')){const tl=line?line+' '+word:word;if(c.measureText(tl).width>w&&line){c.fillText(line,x,y);y+=lh;line=word}else line=tl}c.fillText(line,x,y)}
 
 /* ===================== INVENTARIO Y ALTAR ===================== */
 function itemCard(it,n){const rc=RARITY[it.r].col;
- return `<div class="item" style="--c:${rc}"><span class="ico" style="background:${it.col}">${esc(it.name[0])}</span><div><b>${esc(it.name)}${n>1?' ×'+n:''}</b> <em>${RARITY[it.r].n}</em>
+ return `<div class="item" style="--c:${rc}"><span class="ico" style="background:${it.col}">${glyphSvg(it,'#0b0618')}</span><div><b>${esc(it.name)}${n>1?' ×'+n:''}</b> <em>${RARITY[it.r].n}</em>
   <small>${esc(it.desc)}</small>${it.tags?`<i>Sinergia: ${it.tags.join(', ')}</i>`:''}</div></div>`}
 function toggleInv(){
  if(S.st==='inv'){$('inv').style.display='none';S.st='play';mouse.l=mouse.r=0;return}

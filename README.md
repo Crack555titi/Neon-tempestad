@@ -30,7 +30,7 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   | Abismo Digital | Leviatán de Datos |
   | Núcleo de la Tempestad | Arconte de la Tempestad |
 
-  Cada jefe tiene 3 fases, barra de ruptura de guardia, ataques telegrafiados que castigan el pánico y plataformas que cambian durante el combate.
+  Cada jefe tiene 3 fases (ningún golpe puede saltarse una), barra de ruptura de guardia, ataques telegrafiados que castigan el pánico y plataformas que cambian durante el combate.
 - **Enemigos.** 15 tipos (voladores, tiradores, kamikazes, tanques, etc.) y 11 afijos de élite.
 - **Dificultades.**
 
@@ -158,8 +158,6 @@ Las sinergias entre objetos van por un bus de eventos: `onHit`, `onKill`, `onJum
 - [x] Fase 6: escritorio con Electron, Android con Capacitor y este README.
 
 **Pendiente**
-- [ ] Iconos dibujados para objetos y habilidades (ahora son iniciales).
 - [ ] Probar en móviles y mandos reales: ajustar el tamaño de los botones táctiles y la sensibilidad.
-- [ ] Revisar el balance de Berserker en Pesadilla Absoluta: puede saltarse una fase de jefe de un golpe.
 - [ ] Icono propio para el `.exe` y el APK.
 - [ ] Más escenarios y un modo infinito tras el Arconte.
