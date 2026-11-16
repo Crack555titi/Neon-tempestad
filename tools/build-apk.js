@@ -20,6 +20,7 @@ if(!fs.existsSync(ks)){fs.mkdirSync(kdir,{recursive:true});const pass=crypto.ran
  fs.writeFileSync(kp,JSON.stringify({alias:'neon',password:pass},null,2));console.log('Clave de firma creada en',kdir,'— haz una copia de seguridad.')}
 const key=JSON.parse(fs.readFileSync(kp,'utf8'));
 
+require('./clean-dist')();  // quita de dist/ los instalables de versiones anteriores
 // web → www/ → proyecto Android (orientación horizontal, iconos) → APK de release firmado
 if(!fs.existsSync(path.join(root,'android')))run('npx',['cap','add','android']);
 run('node',['tools/build-www.js']);run('npx',['cap','sync','android']);run('node',['tools/android-setup.js']);

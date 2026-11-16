@@ -9,14 +9,15 @@
   "private": true,
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win portable",
+    "dist": "node tools/build-exe.js",
     "test": "node tools/smoke.js",
     "test:browser": "node tools/browser.js",
     "www": "node tools/build-www.js",
     "android": "node tools/build-www.js && npx cap sync android && node tools/android-setup.js",
     "android:open": "npx cap open android",
     "bump": "node tools/bump.js",
-    "apk": "node tools/build-apk.js"
+    "apk": "node tools/build-apk.js",
+    "release": "node tools/release.js"
   },
   "devDependencies": {
     "@capacitor/android": "^7.6.10",

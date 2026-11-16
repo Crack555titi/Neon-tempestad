@@ -117,15 +117,13 @@ npm run test:browser # prueba en Chrome/Edge/Brave real: capturas, FPS y errores
 
 ```bash
 npm start      # abre el juego en una ventana de Electron (F11 pantalla completa)
-npm run dist   # genera dist/NeonTempestad-1.0.0-portable.exe
+npm run dist   # genera dist/NeonTempestad-<versión>-portable.exe (y borra los de versiones anteriores)
 ```
 
 El `.exe` portable no necesita instalación y guarda las partidas en el perfil del usuario.
 
-> **Si `npm run dist` falla con `EBUSY` sobre un `.asar`:**
-> - **Causa:** VS Code (o una de sus extensiones) tiene abiertos los archivos de la carpeta `dist/` de una construcción anterior.
-> - **Solución:** cierra VS Code y borra `dist/`, o construye fuera del proyecto con `npx electron-builder --win portable -c.directories.output=../neon-dist`.
->
+`npm run dist` construye en una carpeta temporal y solo copia el `.exe` a `dist/`. Así evita el bloqueo con el que VS Code deja abiertos los `.asar` dentro del proyecto.
+
 > Si `npm start` abre una consola de Node en vez del juego, la variable de entorno `ELECTRON_RUN_AS_NODE` está activa (la terminal integrada de VS Code la define). Lánzalo desde otra terminal o con `env -u ELECTRON_RUN_AS_NODE npm start`.
 
 ### Android (APK con Capacitor)
@@ -157,13 +155,17 @@ Para abrir el proyecto en Android Studio: `npm run android && npm run android:op
 - Si llega en mitad de una partida, espera a que termine.
 - Sin conexión se puede seguir jugando.
 
-**Pasos para sacar una versión nueva:**
-1. `npm run bump -- 1.2.0 "Qué trae esta versión"`. Sube la versión en `package.json`, `js/update.js` y `version.json`.
-2. `npm run dist` y `npm run apk` generan `NeonTempestad-1.2.0-portable.exe` y `NeonTempestad-1.2.0.apk` en `dist/`.
-3. En GitHub › *Releases* › *Draft a new release*, crea la etiqueta `v1.2.0` y adjunta los dos archivos.
-4. Publica la release y después sube `version.json` a `main` con un merge y un push. **Desde ese momento**, todas las copias anteriores quedan bloqueadas hasta actualizar.
+**Sacar una versión nueva (un solo comando):**
+```bash
+npm run release -- 1.3.0 "Qué trae esta versión"
+```
+El comando hace todo esto en orden:
+1. Comprueba que estás en `desarrollo`, sin cambios pendientes, y que las pruebas pasan.
+2. Sube la versión y genera el `.exe` y el APK. Antes borra de `dist/` los de versiones anteriores.
+3. Hace commit y push, y crea la release `v1.3.0` en GitHub con los dos archivos.
+4. Por último lleva `desarrollo` a `main`. Desde ese momento, todas las copias anteriores quedan bloqueadas hasta actualizar.
 
-Haz el paso 4 al final: si `version.json` llega a `main` antes que la release, los jugadores quedan bloqueados sin nada que descargar.
+Necesita la herramienta [`gh`](https://cli.github.com) con la sesión iniciada (`gh auth login`), además de los requisitos del `.exe` y del APK. El orden importa: `version.json` llega a `main` solo cuando la descarga ya existe.
 
 ### Icono y pantalla de carga
 
