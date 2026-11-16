@@ -20,7 +20,21 @@
     <div class="row" id="diffs"></div>
     <div id="dd"></div>
     <button id="go">▶ JUGAR</button>
-    <p class="help">A/D mover · W/Espacio saltar (doble salto) · S bajar de plataforma · Ratón apuntar · Clic izq. disparo primario · Clic der. secundaria · Shift movimiento · Q definitiva · B invoca al jefe ya</p>
+    <p class="help">A/D mover · W/Espacio saltar (doble salto) · S bajar de plataforma · Ratón apuntar · Clic izq. disparo primario · Clic der. secundaria · Shift movimiento · Q definitiva · E abrir cofre / altar · Tab o I inventario · B invoca al jefe ya</p>
+  </div>
+
+  <div id="inv" class="ov" style="display:none">
+    <h2>INVENTARIO</h2>
+    <div id="invStats"></div>
+    <div id="invList"></div>
+    <small class="help">Tab / I / Esc para volver</small>
+  </div>
+
+  <div id="altar" class="ov" style="display:none">
+    <h2 style="color:#5ab4ff;text-shadow:0 0 14px #5ab4ff">ALTAR FRAGMENTADO</h2>
+    <p class="help">Sacrifica un 30% de tu vida actual por un objeto fragmentado. Su coste es permanente.</p>
+    <div class="row" id="altarOpts"></div>
+    <button id="altarNo">Rechazar</button>
   </div>
 
   <div id="mastery" class="ov" style="display:none">
@@ -39,8 +53,10 @@
 <script src="fx.js"></script>
 <script src="data_characters.js"></script>
 <script src="data_enemies.js"></script>
+<script src="data_items.js"></script>
 <script src="bosses.js"></script>
 <script src="abilities.js"></script>
+<script src="loot.js"></script>
 <script src="save.js"></script>
 <script src="ui.js"></script>
 </body>

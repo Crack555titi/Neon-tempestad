@@ -28,9 +28,9 @@ const AB={
  hammer(p,d,a,f){const k=1+2*f;AB.melee(p,{dmg:d.dmg*k,range:d.range*(.7+.6*f),arc:d.arc,kb:300*k},a);S.shake=Math.max(S.shake,3*k);
   if(f>=1){const x0=p.x,dir=sgn(Math.cos(a));for(let i=1;i<=3;i++)S.sch.push({t:i*.1,f:()=>{const x=x0+dir*i*100;aoe(x,FLOOR-30,70,d.dmg*1.5);ring(x,FLOOR-10,70,S.ch.color,.3)}})}},
  /* ---------- proyectiles ---------- */
- proj(p,d,a){const n=d.n||1,x=p.x,y=p.y-p.h/2;
-  const fire=()=>{for(let i=0;i<n;i++){const an=a+(i-(n-1)/2)*(d.spread||0)+R(-.02,.02),o={x,y,vx:Math.cos(an)*d.spd,vy:Math.sin(an)*d.spd};
-   for(const k of PK)if(d[k]!==undefined)o[k]=d[k];o.t0=o.life||1;spawnPr(o)}};
+ proj(p,d,a){const pf=p.items.prismfork||0,n=(d.n||1)+(pf?1+pf:0),sp=d.spread||(pf?.14:0),x=p.x,y=p.y-p.h/2;  // Prisma Bifurcado
+  const fire=()=>{for(let i=0;i<n;i++){const an=a+(i-(n-1)/2)*sp+R(-.02,.02),o={x,y,vx:Math.cos(an)*d.spd,vy:Math.sin(an)*d.spd};
+   for(const k of PK)if(d[k]!==undefined)o[k]=d[k];o.t0=o.life||1;if(pf)o.dmg*=.7;spawnPr(o)}};
   fire();if(d.echo)S.sch.push({t:d.echo,f:()=>{fire();ring(x,y,30,S.ch.color,.2)}});
   S.shake=Math.max(S.shake,d.pierce?3:.8)},
  ringshot(p,d){for(let i=0;i<d.n;i++){const an=i*6.283/d.n;spawnPr({x:p.x,y:p.y-p.h/2,vx:Math.cos(an)*d.spd,vy:Math.sin(an)*d.spd,dmg:d.dmg,r:d.r,life:d.life,pierce:1})}ring(p.x,p.y-20,60,S.ch.color,.3)},
@@ -110,7 +110,7 @@ const AB={
  surrender(p,d){enterVoid(d.time)},
  primal(p,d){buff('primal',d.time,{both:1,taken:1/1.3,end:()=>buff('exhaust',3,{spd:.7})});ring(p.x,p.y-20,160,S.ch.color,.4);say('¡FORMA PRIMORDIAL!')},
  /* ---------- invocaciones ---------- */
- summon(p,d){for(let i=0;i<d.n;i++){const o=count('orbit');if(o.length>=8)o[0].life=0;S.dr.push({k:'orbit',a:R(0,6.28),life:d.life,cd:0,dmg:d.dmg,x:p.x,y:p.y})}ring(p.x,p.y-20,80,S.ch.color,.4)},
+ summon(p,d){for(let i=0;i<d.n;i++){const o=count('orbit').filter(m=>!m.perm);if(o.length>=8)o[0].life=0;S.dr.push({k:'orbit',a:R(0,6.28),life:d.life,cd:0,dmg:d.dmg,x:p.x,y:p.y})}ring(p.x,p.y-20,80,S.ch.color,.4)},
  raise(p,d){for(let i=0;i<d.n;i++){const o=count('walker');if(o.length>=d.max)o[0].life=0;
   S.dr.push({k:'walker',x:p.x+R(-30,30),y:p.y,vx:0,vy:0,w:16,h:20,life:d.life,dmg:d.dmg,cd:0,ground:0})}ring(p.x,p.y-20,80,S.ch.color,.3)},
  sacrifice(p,d){for(const m of count('walker')){aoe(m.x,m.y-10,d.r,d.dmg);ring(m.x,m.y-10,d.r,S.ch.color,.3);burst(m.x,m.y-10,14,S.ch.color,300,4);m.life=0}
@@ -130,9 +130,12 @@ function cast(slot,f){
  AB[d.t](p,d,p.aim,f||0);
  if(base.forms&&slot!=='m'&&bany('both')){const o=base.forms[p.form==='a'?'b':'a'];AB[o.t](p,o,p.aim,0)}
  Ev.emit('onCast',slot);if(slot==='m')Ev.emit('onDash');
- p.cd[slot]=slot==='p'?d.cd/(p.m.as*bm('as')):d.cd*(1-p.m.cdr);
+ p.cd[slot]=maxCd(slot,d);
+ if(slot!=='p'&&bany('nocd'))p.cd[slot]=Math.min(p.cd[slot],.15);  // Mente Febril
 }
-const maxCd=(slot,d)=>slot==='p'?d.cd/(S.p.m.as*bm('as')):d.cd*(1-S.p.m.cdr);
+// primario: velocidad de ataque; resto: reducción general + la propia de la ranura (definitiva/movimiento) × buffs (cdm)
+function maxCd(slot,d){const m=S.p.m;if(slot==='p')return d.cd/(m.as*bm('as'));
+ const ex=slot==='u'?Math.min(.6,m.ucdr):slot==='m'?Math.min(.75,m.mcdr):0;return d.cd*(1-Math.min(.6,m.cdr))*(1-ex)*bm('cdm')}
 
 /* ===================== PASIVAS ===================== */
 function enterVoid(t){const p=S.p;p.corr=100;buff('void',t,{dmg:1.8,taken:1.5,drain:.03,tick:b=>{p.corr=100*Math.max(0,b.t)/t},end:()=>{p.corr=0}});

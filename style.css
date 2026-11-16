@@ -44,3 +44,16 @@ button:hover{background:#4a1360}
 .prog div{height:100%;background:#ffd23c;border-radius:4px}
 #unl{font-size:11px;color:#9a93c8}
 @media (max-width:760px){#sel{flex-direction:column}#fams{grid-template-columns:repeat(2,1fr)}}
+/* inventario y altar */
+#inv{justify-content:flex-start;overflow-y:auto}
+#invStats{font-size:11px;color:#ffd23c;max-width:900px}
+#invList{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;width:100%;max-width:1100px;text-align:left}
+.item{--c:#fff;display:flex;gap:8px;align-items:flex-start;background:#120a26;border:2px solid var(--c);border-radius:6px;padding:6px 8px}
+.item .ico{flex:none;width:30px;height:30px;border:2px solid var(--c);border-radius:4px;display:flex;align-items:center;justify-content:center;font:bold 15px monospace;color:#000}
+.item b{color:var(--c);font-size:13px}
+.item em{font-size:9px;color:#9a93c8;font-style:normal;text-transform:uppercase}
+.item small{display:block;font-size:11px;color:#cfc9f5;line-height:1.35}
+.item i{display:block;font-size:10px;color:#ffb13c}
+#altarOpts .pick{width:320px;cursor:pointer;transition:.15s}
+#altarOpts .pick:hover{transform:translateY(-3px);filter:drop-shadow(0 0 10px #5ab4ff)}
+#altarNo{border-color:#5ab4ff;box-shadow:0 0 14px #5ab4ff;background:#0c1a30}
