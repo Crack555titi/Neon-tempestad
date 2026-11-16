@@ -127,7 +127,7 @@ function cast(slot,f){
  const p=S.p,d=ab(slot),base=S.ch[SLOT[slot]];
  if(d.cost)p.hp=Math.max(1,p.hp*(1-d.cost));
  if(d.costMax){p.hp=Math.max(1,p.hp-p.maxHp*d.costMax);txt(p.x,p.y-56,'-'+Math.round(p.maxHp*d.costMax),'#ff1f4b')}
- AB[d.t](p,d,p.aim,f||0);
+ p.atk=1;AB[d.t](p,d,p.aim,f||0);  // atk: anticipación del brazo en la animación
  if(base.forms&&slot!=='m'&&bany('both')){const o=base.forms[p.form==='a'?'b':'a'];AB[o.t](p,o,p.aim,0)}
  Ev.emit('onCast',slot);if(slot==='m')Ev.emit('onDash');
  p.cd[slot]=maxCd(slot,d);

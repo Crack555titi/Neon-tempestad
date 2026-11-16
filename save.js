@@ -6,9 +6,10 @@ const SAVE_KEY='neonTempestad.v1',RUN_KEY='neonTempestad.run';
 const STORE=(()=>{try{localStorage.setItem('_nt','1');localStorage.removeItem('_nt');return localStorage}
  catch(e){const m={};return {getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}}}})();
 const Save={
- d:{stats:{},ach:{}},
+ d:{stats:{},ach:{},settings:{}},
  load(){let raw=null;try{raw=JSON.parse(STORE.getItem(SAVE_KEY))}catch(e){}  // guardado corrupto: se empieza de cero
-  this.d={stats:Object.assign({},raw&&raw.stats),ach:Object.assign({},raw&&raw.ach)}},
+  this.d={stats:Object.assign({},raw&&raw.stats),ach:Object.assign({},raw&&raw.ach),settings:Object.assign({quality:'alta',shake:1},raw&&raw.settings)};
+  if(!QUALITY[this.d.settings.quality])this.d.settings.quality='alta'},
  write(){try{STORE.setItem(SAVE_KEY,JSON.stringify(this.d))}catch(e){}},
  val(k){const v=this.d.stats[k];return Array.isArray(v)?v.length:v||0},
  add(k,n){this.d.stats[k]=(this.d.stats[k]||0)+(n===undefined?1:n);checkAch()},

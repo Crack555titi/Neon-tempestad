@@ -77,29 +77,14 @@ function enemyDeath(e){
  if(e.d.split)for(let i=-1;i<=1;i+=2){const c2=spawnEnemy(e.d.split,e.x+i*14,e.y-4,1);c2.vx=i*220;c2.vy=-300}
 }
 
-/* ---------- dibujo ---------- */
-function drawShape(e,col){const cx=e.x,cy=e.y-e.h/2,w=e.w,h=e.h,f=e.face||1;c.fillStyle=col;c.beginPath();
- switch(e.d.shape){
-  case 'diamond':c.moveTo(cx,cy-h/2);c.lineTo(cx+w/2,cy);c.lineTo(cx,cy+h/2);c.lineTo(cx-w/2,cy);break;
-  case 'circle':c.arc(cx,cy,w/2,0,6.283);break;
-  case 'dome':c.moveTo(cx-w/2,e.y);c.quadraticCurveTo(cx-w/2,e.y-h*1.3,cx,e.y-h);c.quadraticCurveTo(cx+w/2,e.y-h*1.3,cx+w/2,e.y);break;
-  case 'tri':c.moveTo(cx-w/2,e.y);c.lineTo(cx,e.y-h);c.lineTo(cx+w/2,e.y);break;
-  case 'robe':c.moveTo(cx-w/2,e.y);c.lineTo(cx-w/4,e.y-h);c.lineTo(cx+w/4,e.y-h);c.lineTo(cx+w/2,e.y);break;
-  case 'wing':c.moveTo(cx-w/2,cy);c.lineTo(cx,cy-h/2);c.lineTo(cx+w/2,cy);c.lineTo(cx,cy+h/2);break;
-  case 'hex':for(let k=0;k<6;k++){const a=k*1.047;c.lineTo(cx+Math.cos(a)*w/2,cy+Math.sin(a)*h/2)}break;
-  case 'ghost':c.moveTo(cx-w/2,e.y);c.lineTo(cx-w/2,cy);c.arc(cx,cy,w/2,Math.PI,0);c.lineTo(cx+w/2,e.y);for(let k=3;k>=0;k--)c.lineTo(cx-w/2+k*w/3,e.y-(k%2?6:0));break;
-  case 'shield':c.rect(cx-w/2,e.y-h,w,h);c.fill();c.beginPath();c.fillStyle='#e0e8ff';c.rect(cx+f*w/2-(f>0?0:8),e.y-h-4,8,h+4);break;
-  default:c.rect(cx-w/2,e.y-h,w,h)}
- c.closePath();c.fill();
- c.shadowBlur=0;c.fillStyle='#000';const ey=e.d.shape==='diamond'||e.d.shape==='circle'||e.d.shape==='wing'||e.d.shape==='hex'?cy-2:e.y-h*.68;
- c.fillRect(cx+f*w*.08-4,ey,3,3);c.fillRect(cx+f*w*.22-1,ey,3,3)}
+/* ---------- dibujo (el arte de cada silueta está en art.js) ---------- */
 function drawEnemy(e){
  if(e.hidden)return e.def&&e.def.drawHidden&&e.def.drawHidden(e);
  const cx=e.x,cy=e.y-e.h/2,blink=e.tell>0&&Math.floor(S.t*16)%2,col=e.flash>0||blink?'#fff':(e.stun>0||e.stunT>0?'#888':e.d.color);
  c.globalAlpha=e.ghost>0?.25:1;glow(e.elite?e.aff[0].c:col,e.elite?22:12);c.fillStyle=col;
  if(e.boss){e.def.draw(e);c.shadowBlur=0;c.globalAlpha=1;return}
  if(e.elite){c.strokeStyle=e.aff[0].c;c.lineWidth=2;c.globalAlpha*=.6+.4*Math.sin(S.t*6);c.beginPath();c.arc(cx,cy,Math.max(e.w,e.h)*.75,0,6.283);c.stroke();c.globalAlpha=e.ghost>0?.25:1}
- drawShape(e,col);c.shadowBlur=0;c.globalAlpha=1;
+ drawEnemyArt(e,col);c.shadowBlur=0;c.globalAlpha=1;
  if(e.sh>0){c.strokeStyle='#d070ff';c.lineWidth=2;c.strokeRect(cx-e.w/2-4,e.y-e.h-4,e.w+8,e.h+8)}
  if(e.refT<0){c.strokeStyle='#e0e0ff';c.lineWidth=3;c.beginPath();for(let k=0;k<6;k++){const a=k*1.047+S.t;c.lineTo(cx+Math.cos(a)*e.w*.9,cy+Math.sin(a)*e.h*.9)}c.closePath();c.stroke()}
  if(e.lock!==undefined){c.strokeStyle='#ff3c6a';c.globalAlpha=.3+.5*(1-Math.max(0,e.cd-.25));c.lineWidth=e.cd<.25?3:1;c.beginPath();c.moveTo(cx,e.y-e.h+6);c.lineTo(cx+Math.cos(e.lock)*1000,e.y-e.h+6+Math.sin(e.lock)*1000);c.stroke();c.globalAlpha=1}

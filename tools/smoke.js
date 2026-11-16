@@ -5,12 +5,12 @@ const fs=require('fs'),path=require('path'),assert=require('assert');
 const root=path.join(__dirname,'..');
 const files=[...fs.readFileSync(path.join(root,'index.html'),'utf8').matchAll(/<script src="([^"]+)"/g)].map(m=>m[1]);
 
-const ctx=new Proxy({},{get:(t,k)=>k in t?t[k]:(k==='createLinearGradient'?()=>({addColorStop(){}}):k==='measureText'?s=>({width:String(s).length*7}):()=>{}),set:(t,k,v)=>(t[k]=v,true)});
+const ctx=new Proxy({},{get:(t,k)=>k in t?t[k]:(k==='createLinearGradient'||k==='createRadialGradient'?()=>({addColorStop(){}}):k==='measureText'?s=>({width:String(s).length*7}):()=>{}),set:(t,k,v)=>(t[k]=v,true)});
 const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
-Object.assign(global,{document:{getElementById:el},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
+Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,f),'utf8')).join('\n;\n')+
- '\n;global.T={start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);T.update(1/60);T.draw()}};
@@ -125,11 +125,27 @@ T.start('vanguard',4);assert.strictEqual(T.S.clock,45*60);for(let i=0;i<4;i++)el
 T.S.spawn=1e9;T.S.en.length=0;T.PR.n=0;T.S.zn.length=0;T.fxProj({x:500,y:400,vx:0,vy:900,dmg:5,r:5,life:2,hostile:1,col:'#f00'});step(30);assert(T.S.zn.some(q=>q.hostile&&q.dot),'Pesadilla no dejó zona de daño');
 T.start('vanguard',3);let dbl=0;for(let i=0;i<300;i++){const e=T.spawnEnemy('crawler',100);if(e.elite)dbl+=e.aff.length===2?1:-1000}assert(dbl>0,'Cataclismo sin doble afijo');
 // 24. Muerte permanente: en Pesadilla se borra la partida; en Estándar se puede reintentar la etapa con lo que tenías
-T.start('vanguard',4);for(let i=0;i<4;i++)els.nodes.onclick(pick0);assert(T.loadRun());T.S.p.items.ankh=0;T.S.p.revive=0;T.S.p.inv=0;T.hurtP(1e9);
+T.start('vanguard',4);for(let i=0;i<4;i++)els.nodes.onclick(pick0);assert(T.loadRun());T.S.p.items.ankh=0;T.S.p.revive=0;T.S.p.m.dodge=0;T.S.p.buf={};T.S.p.inv=0;T.hurtP(1e9);  // el lote aleatorio puede traer esquiva o intangibilidad
 assert.strictEqual(T.S.st,'over');assert.strictEqual(T.loadRun(),null,'Pesadilla no borró la partida');
 toStage(2);T.giveItem('sharp',1);T.saveRun();T.S.p.inv=0;T.hurtP(1e9);assert.strictEqual(T.S.st,'over');const rr=T.loadRun();assert(rr&&rr.stage===2,'no hay partida para reintentar');
 T.start(rr.cid,rr.did,rr);assert.strictEqual(T.S.stage,2);assert.strictEqual(T.S.p.items.sharp,1,'el reintento perdió los objetos');
 console.log('Etapas, jefes, enemigos, afijos, teletransportador, dificultades y guardado: OK');
+
+// 25. Fase 4: animación, postproceso, números de daño, menú y calidad
+T.start('vanguard',1);T.S.spawn=1e9;step(80);key('Space',false);assert(T.S.p.sy>1.1&&T.S.p.sx<.9,'el salto no estira');
+for(let i=0;i<80&&!T.S.p.ground;i++)step();step(1);assert(T.S.p.sy<1,'el aterrizaje no aplasta');
+T.S.p.cd.m=0;T.cast('m');step(3);assert(T.S.p.ghosts.length>0,'el dash no deja estela');
+const en=T.spawnEnemy('brute',T.S.p.x+60,500,true);en.hp=en.maxHp=1e6;en.elite=1;en.aff=[T.AFX[1]];T.hurtE(en,50,{crit:1});
+assert(T.TX.a.slice(0,T.TX.n).some(t=>t.size===20),'el crítico no usa número grande');assert(T.hitstop>0,'sin hit-stop en crítico a élite');
+const e2=T.spawnEnemy('crawler',T.S.p.x+60,500,true);const pn=T.PT.n;T.hurtE(e2,1e6,{raw:1});assert(T.PT.n>pn+3,'la muerte no desintegra');
+T.S.p.inv=0;T.hurtP(T.S.p.maxHp*.3);assert(T.chroma>0,'golpe fuerte sin aberración cromática');
+T.S.p.hp=1;T.heal(30);step(40);assert(T.TX.a.slice(0,T.TX.n).some(t=>String(t.s).startsWith('+')),'no se muestra la curación');
+
+for(const q of ['baja','media','alta']){T.setQuality(q);T.start('summoner',3);T.S.spawn=.1;for(let f=0;f<60*6;f++){T.mouse.l=f%30<20;step()}}
+T.setQuality('baja');assert(T.PT.max<=220&&!T.QL.glow,'la calidad baja no reduce');T.setQuality('alta');
+for(let i=0;i<60*13;i++)T.drawMenuBg(1/60);  // recorre la transición entre escenarios del menú
+console.log('Animación, efectos, calidad y menú: OK');
+
 
 
 

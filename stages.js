@@ -17,7 +17,7 @@ function loadStage(i){
  s.ints=[];const t=st.tp[Math.random()*st.tp.length|0];s.tp={x:t.x,y:t.y,state:'idle',charge:0};s.ints.push({k:'tp',x:t.x,y:t.y,open:0});
  for(let k=0;k<5;k++)spawnChest();spawnAltar();s.chestT=40;s.altarT=150;s.spawn=3;
  p.x=t.x<WORLD/2?WORLD-250:250;p.y=60;  // empiezas lejos del teletransportadorp.vy=0;p.dash=null;p.hp=p.maxHp;
- genBg(st,i*7919+13);
+ genBg(st,i*7919+13);s.fade=1;
  say(`Etapa ${i+1}/${STAGES.length}: ${st.name} · encuentra el teletransportador`);
 }
 function nextStage(){
@@ -45,18 +45,38 @@ function updStage(dt){
  const Wl=s.walls;if(Wl){Wl.l=Math.min(Wl.cx-420,Wl.l+45*dt);Wl.r=Math.max(Wl.cx+420,Wl.r-45*dt);
   if(p.x<Wl.l+12||p.x>Wl.r-12){p.x=clamp(p.x,Wl.l+12,Wl.r-12);hurtP(p.maxHp*.08)}}
  if(p.y>H+60)fallPit();
- const a=STAGE.amb;for(const q of BG.amb){q.x+=a.vx*q.v*dt;q.y+=a.vy*q.v*dt;if(q.y<-10)q.y=H+10;if(q.y>H+10)q.y=-10;if(q.x<-10)q.x=W+10;if(q.x>W+10)q.x=-10}
+ updAmb(dt);
 }
+function updAmb(dt){const a=STAGE.amb;for(const q of BG.amb){q.x+=a.vx*q.v*dt;q.y+=a.vy*q.v*dt;if(q.y<-10)q.y=H+10;if(q.y>H+10)q.y=-10;if(q.x<-10)q.x=W+10;if(q.x>W+10)q.x=-10}}
 
 /* ---------- dibujo ---------- */
-function drawBg(){
- const s=S,st=STAGE,bp=s.boss?s.boss.ph:0,g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,st.sky[bp]);g.addColorStop(1,st.ground);c.fillStyle=g;c.fillRect(0,0,W,H);
- c.fillStyle='#fff';for(const t of BG.stars){c.globalAlpha=.3+t.s/3;c.fillRect((t.x-s.cam*.05+W*4)%(W*2)-W*.5,t.y,t.s,t.s)}c.globalAlpha=1;
- for(const {ly,sh} of BG.layers){const off=(s.cam*ly.par)%BG.L;c.fillStyle=ly.col;
+/* 4 capas: cielo con estrellas, 3 siluetas con parallax y niebla en primer plano (drawFog).
+   Ciclo de color: el cielo cambia con la fase del jefe y el horizonte late con el color del escenario. */
+function drawBg(cam,bp,t){
+ const st=STAGE,g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,st.sky[bp]);g.addColorStop(1,st.ground);c.fillStyle=g;c.fillRect(0,0,W,H);
+ const hz=c.createLinearGradient(0,FLOOR-220,0,FLOOR+20);hz.addColorStop(0,'rgba(0,0,0,0)');hz.addColorStop(1,st.plat.glow);
+ c.globalAlpha=.12+.08*Math.sin(t*.6)+bp*.04;c.fillStyle=hz;c.fillRect(0,FLOOR-220,W,240);c.globalAlpha=1;
+ c.fillStyle='#fff';for(const s of BG.stars){c.globalAlpha=(.3+s.s/3)*(.7+.3*Math.sin(t*2+s.x));c.fillRect((s.x-cam*.05+W*4)%(W*2)-W*.5,s.y,s.s,s.s)}c.globalAlpha=1;
+ for(const {ly,sh} of BG.layers){const off=(cam*ly.par)%BG.L;c.fillStyle=ly.col;
   for(let rep=0;rep<2;rep++)for(const o of sh){const x=o.x-off+rep*BG.L;if(x>W+20||x+o.w<-20)continue;drawSil(ly,o,x)}}
- const a=st.amb;c.fillStyle=a.col;c.strokeStyle=a.col;c.lineWidth=1;c.globalAlpha=.55;
- for(const q of BG.amb){if(a.line){c.beginPath();c.moveTo(q.x,q.y);c.lineTo(q.x-a.vx*.04,q.y-a.vy*.04);c.stroke()}else c.fillRect(q.x,q.y,a.s*(a.sq?1.5:1),a.s*(a.sq?1.5:1))}
+ const a=st.amb,n=Math.ceil(BG.amb.length*QL.amb);c.fillStyle=a.col;c.strokeStyle=a.col;c.lineWidth=1;c.globalAlpha=.55;
+ for(let i=0;i<n;i++){const q=BG.amb[i];if(a.line){c.beginPath();c.moveTo(q.x,q.y);c.lineTo(q.x-a.vx*.04,q.y-a.vy*.04);c.stroke()}else c.fillRect(q.x,q.y,a.s*(a.sq?1.5:1),a.s*(a.sq?1.5:1))}
  c.globalAlpha=1;
+}
+// niebla en primer plano (coordenadas de pantalla): banda baja que ondula más rápido que la cámara
+function drawFog(cam,t){if(!QL.post)return;c.save();c.setTransform(K,0,0,K,0,0);const col=STAGE.plat.glow;
+ for(let k=0;k<2;k++){const off=(cam*1.25+t*20*(k?-1:1))%400;c.globalAlpha=.07;c.fillStyle=col;c.beginPath();c.moveTo(0,H);
+  for(let x=-400;x<=W+400;x+=40)c.lineTo(x-off,FLOOR+30-k*25+Math.sin((x+k*200)/90+t)*10);c.lineTo(W,H);c.closePath();c.fill()}
+ c.restore()}
+/* menú: el fondo recorre los escenarios con un fundido entre ellos */
+const MENU={t:0,i:-1};
+function drawMenuBg(dt){MENU.t+=dt;const i=Math.floor(MENU.t/12)%STAGES.length,ph=MENU.t%12;
+ if(i!==MENU.i){MENU.i=i;STAGE=STAGES[i];PLAT=STAGE.plats.map(q=>Object.assign({},q,{rx:q.x,ry:q.y,on:q.ph[0]===1}));genBg(STAGE,i*7919+13)}
+ updAmb(dt);screen();drawBg(MENU.t*45,0,MENU.t);
+ c.save();c.translate(-((MENU.t*45)%(WORLD-W)),0);for(const q of PLAT)if(q.on){c.fillStyle=q.solid?STAGE.plat.floor:STAGE.plat.fill;c.globalAlpha=.6;c.fillRect(q.rx,q.ry,q.w,q.h)}c.restore();c.globalAlpha=1;
+ drawFog(MENU.t*45,MENU.t);bloom();vignette(0);
+ const f=ph<1?1-ph:ph>11?ph-11:0;if(f>0){c.fillStyle=`rgba(5,3,13,${f})`;c.fillRect(0,0,W,H)}
+ drawPreview(MENU.t);
 }
 function drawSil(ly,o,x){const b=FLOOR+10;c.beginPath();
  switch(ly.type){

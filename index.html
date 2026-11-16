@@ -13,13 +13,17 @@
   <div id="menu" class="ov">
     <h1>NEÓN <span>TEMPESTAD</span></h1>
     <div id="sel">
-      <div id="fams"></div>
+      <div class="left">
+        <div id="fams"></div>
+        <small id="unl"></small>
+        <div class="row" id="diffs"></div>
+        <div id="dd"></div>
+        <div class="row"><button id="go">▶ NUEVA PARTIDA</button><button id="cont" style="display:none"></button></div>
+        <div class="row opts"><label>Calidad gráfica <select id="qual"><option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja (equipos lentos)</option></select></label>
+          <label>Temblor de pantalla <input id="shk" type="range" min="0" max="150" value="100"></label></div>
+      </div>
       <div id="info"></div>
     </div>
-    <small id="unl"></small>
-    <div class="row" id="diffs"></div>
-    <div id="dd"></div>
-    <div class="row"><button id="go">▶ NUEVA PARTIDA</button><button id="cont" style="display:none"></button></div>
     <p class="help">A/D mover · W/Espacio saltar (doble salto) · S bajar de plataforma · Ratón apuntar · Clic izq. disparo primario · Clic der. secundaria · Shift movimiento · Q definitiva · E abrir cofre, altar o teletransportador · Tab o I inventario</p>
   </div>
 
@@ -51,6 +55,7 @@
 <!-- Scripts clásicos (no módulos) para que funcione abriendo index.html con doble clic. El orden importa. -->
 <script src="engine.js"></script>
 <script src="fx.js"></script>
+<script src="art.js"></script>
 <script src="data_characters.js"></script>
 <script src="data_enemies.js"></script>
 <script src="data_items.js"></script>
