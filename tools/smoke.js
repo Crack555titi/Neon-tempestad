@@ -10,7 +10,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);T.update(1/60);T.draw()}};
@@ -191,12 +191,13 @@ console.log('Controles, pausa, récords, mando, táctil y audio: OK');
 
 
 // Supera una etapa a la fuerza: activa el teletransportador, juega el jefe por sus fases y viaja
-function clearStage(secs){const S=T.S;T.useTP();assert(S.boss,'no apareció el jefe');const b=S.boss,id=b.def.name;
+function clearStage(secs,choice){const S=T.S;T.useTP();assert(S.boss,'no apareció el jefe');const bs=S.bosses.slice(),id=bs.map(b=>b.def.name).join('+');
+ assert.strictEqual(bs.length,S.loop?2:1,'número de jefes incorrecto para el ciclo');
  for(let f=0;f<60*secs&&T.S.st!=='over'&&T.S.boss;f++){T.mouse.l=T.mouse.r=f%50<40;if(f%300===0)T.S.p.hp=T.S.p.maxHp;
-  if(f%40===0&&!b.dead){b.hidden=0;b.ghost=0;T.hurtE(b,b.maxHp*.035,{raw:1})}step()}
- if(T.S.st==='over')return;for(let i=0;i<3&&T.S.boss&&!b.dead;i++){b.hidden=0;b.ghost=0;T.hurtE(b,1e12,{raw:1})}
- assert(T.S.bossDone,id+' no murió');assert.strictEqual(b.ph,3,id+' se saltó una fase');
- T.S.tp.charge=1;step(2);assert.strictEqual(T.S.tp.state,'ready');T.useTP()}
+  if(f%40===0)for(const b of bs)if(!b.dead){b.hidden=0;b.ghost=0;T.hurtE(b,b.maxHp*.035,{raw:1})}step()}
+ if(T.S.st==='over')return;for(const b of bs)for(let i=0;i<3&&!b.dead;i++){b.hidden=0;b.ghost=0;T.hurtE(b,1e12,{raw:1})}
+ assert(T.S.bossDone,id+' no murió');for(const b of bs)assert.strictEqual(b.ph,3,b.def.name+' se saltó una fase');
+ T.S.tp.charge=1;step(2);assert.strictEqual(T.S.tp.state,'ready');T.useTP(choice)}
 // Matriz: cada personaje × dificultad recorre las 5 etapas (15 s explorando + jefe), vida rellenada → busca excepciones
 let fails=0;
 for(const ch of Object.keys(T.CHARS))for(let d=0;d<T.DIFFS.length;d++){
@@ -204,7 +205,10 @@ for(const ch of Object.keys(T.CHARS))for(let d=0;d<T.DIFFS.length;d++){
   for(let st=0;st<T.STAGES.length&&T.S.st!=='over';st++){assert.strictEqual(T.S.stage,st);
    for(let f=0;f<60*15;f++){T.keys.KeyD=(f/120|0)%2;T.keys.KeyA=!T.keys.KeyD;T.mouse.l=T.mouse.r=f%50<40;if(f%300===0)T.S.p.hp=T.S.p.maxHp;step()}
    clearStage(30)}
-  assert.strictEqual(T.S.st,'over','la partida no terminó tras la etapa 5');
+  if(T.S.st!=='over'){assert.strictEqual(T.S.loop,1,'no empezó el Loop 2 tras la etapa 5');assert.strictEqual(T.S.stage,0);
+   for(let f=0;f<60*8;f++){T.mouse.l=f%50<40;if(f%300===0)T.S.p.hp=T.S.p.maxHp;step()}
+   clearStage(20,'end')}
+  assert.strictEqual(T.S.st,'over','la partida no terminó al elegir «Terminar run»');
  }catch(e){fails++;console.log('FALLO',ch,d,e.stack.split('\n').slice(0,3).join(' | '))}}
 
 // Bot que apunta al enemigo más cercano y suelta los botones a ratos
@@ -225,6 +229,19 @@ console.log('DPS (1 objetivo · grupo de 5):\n'+dr.map(([n,a,b])=>`  ${n.padEnd(
 const surv=T.DIFFS.map((df,d)=>{let tot=0,it=0;for(const ch of Object.keys(T.CHARS)){const r=bot(ch,d,120);tot+=r.t;it+=r.items}const N=Object.keys(T.CHARS).length;return `${df.name}: ${(tot/N).toFixed(0)}s (${(it/N).toFixed(1)} obj.)`});
 console.log('Supervivencia media del bot (máx 120s):',surv.join(' · '));
 console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificultades: 0 excepciones');
+// 28. Modo Infinito
+{reset();T.start('vanguard',1);const pal=T.STAGE.sky[0],c1=T.coef();
+ T.S.loop=1;T.loadStage(0);assert.notStrictEqual(T.STAGE.sky[0],pal,'el ciclo no cambió la paleta');assert(/Eclipse/.test(T.STAGE.name));
+ assert(T.coef()>c1*1.4,'la dificultad no escala con el ciclo');assert(T.capL(.6)>.6&&T.capL(.6)<=.95,'los topes no se relajan');
+ // cada combinación jefe + acompañante aparece y combate sin errores; el acompañante nunca es el mismo jefe
+ for(let l=1;l<=4;l++)for(let st=0;st<T.STAGES.length;st++){T.start('vanguard',1);T.S.loop=l;T.loadStage(st);T.S.spawn=1e9;T.useTP();
+  const [a,b]=T.S.bosses;assert(a&&b&&a.def!==b.def,'jefes duales incorrectos en etapa '+st);step(60*6)}
+ // guardar y continuar conserva el ciclo
+ T.start('artillery',1);T.S.loop=2;T.loadStage(3);T.saveRun();const r=T.loadRun();assert.strictEqual(r.loop,2);T.start(r.cid,r.did,r);assert(T.S.loop===2&&T.S.stage===3,'continuar perdió el ciclo');
+ // terminar la run a mitad del primer ciclo: no es victoria, pero puntúa con la etapa superada
+ T.start('vanguard',1);T.useTP();for(let i=0;i<3;i++)T.hurtE(T.S.bosses[0],1e12,{raw:1});T.S.tp.charge=1;step(2);T.S.p.x=T.S.tp.x-30;
+ T.useTP('end');assert.strictEqual(T.S.st,'over');assert.strictEqual(T.loadRun(),null,'terminar la run no borró la partida guardada');
+ console.log('Modo Infinito: paletas, escalado, jefes duales, guardado y portal dual: OK')}
 // 27. Cuentas y clasificación (asíncrono: SHA-256 con crypto.subtle)
 async function authTests(){const A=T.Auth;
  assert(await A.register('ab','1234'),'aceptó un nombre de 2 letras');assert(await A.register('Piloto','12'),'aceptó una contraseña de 2');

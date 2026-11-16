@@ -40,7 +40,7 @@ function recordRunEnd(win){
  Save.add('runs');Save.add('playTime',S.t);Save.max('bestTime',S.t);
  if(win){Save.add('wins');if(DIFFS.indexOf(S.df)>=2)Save.add('hardWins');Save.addSet('winFams',S.ch.fam)}else Save.add('deaths');
  // récords por dificultad: etapa más lejana (y más rápida), victorias, mejor tiempo de victoria y más bajas
- const did=DIFFS.indexOf(S.df),r=Save.d.records[did]||(Save.d.records[did]={stage:0,time:0,wins:0,best:0,kills:0,ch:''}),st=S.stage+1;
+ const did=DIFFS.indexOf(S.df),r=Save.d.records[did]||(Save.d.records[did]={stage:0,time:0,wins:0,best:0,kills:0,ch:''}),st=S.loop*STAGES.length+S.stage+1;
  if(st>r.stage||(st===r.stage&&S.t<r.time)){r.stage=st;r.time=S.t;r.ch=S.ch.name}
  if(win){r.wins++;if(!r.best||S.t<r.best)r.best=S.t}r.kills=Math.max(r.kills,S.kills);
  Save.write();
@@ -49,7 +49,7 @@ function recordRunEnd(win){
 /* Partida en curso: instantánea al empezar cada etapa. Continuar / reintentar cargan desde aquí.
    Muerte permanente (Pesadilla Absoluta): al morir se borra y no hay reintento. */
 function saveRun(){const p=S.p;
- try{STORE.setItem(RUN_KEY,JSON.stringify({cid:S.cid,did:DIFFS.indexOf(S.df),stage:S.stage,clock:S.clock,t:S.t,kills:S.kills,
+ try{STORE.setItem(RUN_KEY,JSON.stringify({cid:S.cid,did:DIFFS.indexOf(S.df),stage:S.stage,loop:S.loop,clock:S.clock,t:S.t,kills:S.kills,
   lvl:p.lvl,xp:p.xp,gold:p.gold,revive:p.revive,items:Object.assign({},p.items),mastery:p.mastery.slice()}))}catch(e){}}
 function loadRun(){try{const r=JSON.parse(STORE.getItem(RUN_KEY));return r&&CHARS[r.cid]&&DIFFS[r.did]&&STAGES[r.stage]?r:null}catch(e){return null}}
 function clearRun(){try{STORE.removeItem(RUN_KEY)}catch(e){}}

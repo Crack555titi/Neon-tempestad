@@ -25,12 +25,14 @@ function hud(){
  c.textAlign='left';c.font='10px monospace';c.fillStyle='#9a93c8';c.fillText(s.df.name,W-196,24);
  gbar(W-196,34,176,8,((co-1)/1.2)%1,tier[1],'#fff');c.font='bold 10px monospace';c.fillStyle=tier[1];c.fillText(`${tier[0]} ×${co.toFixed(1)}`,W-196,54);
  if(p.revive>0){c.fillStyle='#4cff9a';c.fillText('♥ Resurrección ×'+p.revive,W-196,68)}
+ if(s.loop){c.textAlign='right';c.fillStyle='#ff3cf2';c.font='bold 11px monospace';c.fillText(`∞ LOOP ${s.loop+1}`,W-18,54)}
  // ---- arriba al centro: jefe o etapa + teletransportador ----
  let ty=20;
- if(s.boss){const b=s.boss;panel(W/2-262,6,524,50,b.def.color);c.textAlign='center';c.font='bold 13px monospace';c.fillStyle=b.def.color;c.fillText(b.def.name.toUpperCase(),W/2,22);
-  for(let k=1;k<=3;k++){c.fillStyle=k<=b.ph?b.def.color:'#333';c.beginPath();c.arc(W/2+130+k*14,18,4,0,6.283);c.fill()}
-  gbar(W/2-250,28,500,12,b.hp/b.maxHp,'#ff3c6a',b.def.color,b.stun>0);gbar(W/2-250,43,500,5,b.stun>0?b.stun/3.2:b.stag/b.stagMax,'#ffd23c','#fff',b.stun>0);ty=72}
- else{c.textAlign='center';c.font='bold 12px monospace';c.fillStyle=STAGE.plat.edge;c.fillText(`ETAPA ${s.stage+1}/${STAGES.length} · ${STAGE.name.toUpperCase()}`,W/2,ty);ty=38}
+ if(s.boss){const n=s.bosses.length,bw=n>1?258:524;s.bosses.forEach((b,i)=>{const x0=W/2-262+i*(bw+8),cx=x0+bw/2;panel(x0,6,bw,50,b.def.color);
+  c.textAlign='center';c.font='bold 13px monospace';c.fillStyle=b.def.color;c.fillText(b.def.name.toUpperCase(),n>1?cx-24:cx,22);
+  for(let k=1;k<=3;k++){c.fillStyle=k<=b.ph?b.def.color:'#333';c.beginPath();c.arc(x0+bw-62+k*14,18,4,0,6.283);c.fill()}
+  gbar(x0+12,28,bw-24,12,b.hp/b.maxHp,'#ff3c6a',b.def.color,b.stun>0);gbar(x0+12,43,bw-24,5,b.stun>0?b.stun/3.2:b.stag/b.stagMax,'#ffd23c','#fff',b.stun>0)});ty=72}
+ else{c.textAlign='center';c.font='bold 12px monospace';c.fillStyle=STAGE.plat.edge;c.fillText(`${s.loop?`LOOP ${s.loop+1} · `:''}ETAPA ${s.stage+1}/${STAGES.length} · ${STAGE.name.toUpperCase()}`,W/2,ty);ty=38}
  const T=s.tp;c.font='bold 12px monospace';
  const tl=T.state==='idle'?'Encuentra el teletransportador (E)':T.state==='ready'?'¡Teletransportador listo! (E)':`Teletransportador ${Math.floor(T.charge*100)}%${T.out?' · ¡vuelve a la zona!':''}${s.boss?' · derrota al jefe':''}`;
  c.fillStyle=T.state==='ready'?'#4cff7a':T.out?'#ff6a6a':'#ffd23c';c.fillText(tl,W/2,ty);
@@ -93,7 +95,7 @@ function itemCard(it,n){const rc=RARITY[it.r].col;
 function toggleInv(){
  if(S.st==='inv'){$('inv').style.display='none';S.st='play';mouse.l=mouse.r=0;return}
  const p=S.p,m=p.m,pct=v=>Math.round(v*100)+'%',ids=sortedItems();
- $('invStats').textContent=`Daño ×${(p.dmgMul*m.dmg*bm('dmg')).toFixed(2)} · Vel. ataque ×${(m.as*bm('as')).toFixed(2)} · Crítico ${pct(p.items.blacklens?1:m.crit)} · Robo de vida ${pct(m.ls)} · Armadura ${pct(Math.min(.6,m.arm))} · Enfriamientos −${pct(Math.min(.6,m.cdr))} · Suerte ${p.items.entropy?0:m.luck} · Oro ${p.gold}`;
+ $('invStats').textContent=`Daño ×${(p.dmgMul*m.dmg*bm('dmg')).toFixed(2)} · Vel. ataque ×${(m.as*bm('as')).toFixed(2)} · Crítico ${pct(p.items.blacklens?1:m.crit)} · Robo de vida ${pct(m.ls)} · Armadura ${pct(Math.min(capL(.6),m.arm))} · Enfriamientos −${pct(Math.min(capL(.6),m.cdr))} · Suerte ${p.items.entropy?0:m.luck} · Oro ${p.gold}`;
  $('invList').innerHTML=ids.length?ids.map(id=>itemCard(ITEM[id],p.items[id])).join(''):'<p>Aún no tienes objetos. Abre cofres con <b>E</b>.</p>';
  $('inv').style.display='flex';S.st='inv';
 }
@@ -116,14 +118,14 @@ function openMastery(){
  $('mastery').style.display='flex';
 }
 
-function endGame(win){
+function endGame(win,cashout){
  S.st='over';recordRunEnd(win);const sc=Auth.submit(win);
  $('endScore').textContent=sc?`Puntuación ${sc.score.toLocaleString('es')}${sc.rank?` · puesto #${sc.rank} en ${S.df.name}`:Auth.user?'':' · entra con una cuenta para aparecer en la clasificación'}`:'';
  // muerte permanente estricta: se borra la partida guardada y no hay reintento
- if(win||S.df.perma)clearRun();
- $('endT').textContent=win?'¡HAS SUPERADO LA TEMPESTAD!':(S.df.perma?'MUERTE PERMANENTE · PARTIDA BORRADA':'HAS CAÍDO');
- $('endS').textContent=`${S.ch.name} · Etapa ${S.stage+1}/${STAGES.length} · Nivel ${S.p.lvl} · ${S.kills} bajas · ${Math.floor(S.t/60)}:${String(Math.floor(S.t%60)).padStart(2,'0')} · ${S.df.name}`;
- $('retry').style.display=!win&&loadRun()?'inline-block':'none';
+ if(win||cashout||S.df.perma)clearRun();
+ $('endT').textContent=cashout?(win?`¡TEMPESTAD SUPERADA${S.loop?` · LOOP ${S.loop+1}`:''}!`:'RUN TERMINADA'):win?'¡HAS SUPERADO LA TEMPESTAD!':(S.df.perma?'MUERTE PERMANENTE · PARTIDA BORRADA':'HAS CAÍDO');
+ $('endS').textContent=`${S.ch.name} · ${S.loop?`Loop ${S.loop+1} · `:''}Etapa ${S.stage+1}/${STAGES.length} · Nivel ${S.p.lvl} · ${S.kills} bajas · ${Math.floor(S.t/60)}:${String(Math.floor(S.t%60)).padStart(2,'0')} · ${S.df.name}`;
+ $('retry').style.display=!win&&!cashout&&loadRun()?'inline-block':'none';
  setTimeout(()=>$('end').style.display='flex',win?1500:600);
 }
 
@@ -150,7 +152,7 @@ function buildMenu(){
  $('help').textContent=helpText();
  const n=Object.keys(CHARS).filter(isUnlocked).length;$('unl').textContent=`${n}/${Object.keys(CHARS).length} desbloqueados`;
  const run=loadRun();$('cont').style.display=run?'inline-block':'none';
- if(run)$('cont').textContent=`▶ CONTINUAR · ${CHARS[run.cid].name} · Etapa ${run.stage+1} · ${DIFFS[run.did].name}`;
+ if(run)$('cont').textContent=`▶ CONTINUAR · ${CHARS[run.cid].name} · ${run.loop?`Loop ${run.loop+1} · `:''}Etapa ${run.stage+1} · ${DIFFS[run.did].name}`;
 }
 function showLocked(k){
  const v=CHARS[k],a=ACHIEVEMENTS[v.unlock];

@@ -11,22 +11,44 @@ function genBg(st,seed){const rnd=rng(seed),L=W*2.4;
   amb:Array.from({length:st.amb.n},()=>({x:rnd()*W,y:rnd()*H,v:.6+rnd()*.8}))}}
 
 function loadStage(i){
- const s=S,p=s.p,st=STAGES[i];STAGE=st;s.stage=i;s.phase=1;s.lava=0;s.walls=null;s.boss=null;s.bossDone=0;
+ const s=S,p=s.p,st=s.loop?loopStage(STAGES[i],s.loop):STAGES[i];STAGE=st;s.stage=i;s.phase=1;s.lava=0;s.walls=null;s.boss=null;s.bosses=[];s.bossDone=0;
  PLAT=st.plats.map(q=>Object.assign({},q));
  s.en=[];s.zn=[];s.sch=[];s.portal={a:null,b:null};s.dr=s.dr.filter(m=>m.perm&&m.life===Infinity);PR.clear();
  s.ints=[];const t=st.tp[Math.random()*st.tp.length|0];s.tp={x:t.x,y:t.y,state:'idle',charge:0};s.ints.push({k:'tp',x:t.x,y:t.y,open:0});
- for(let k=0;k<5;k++)spawnChest();spawnAltar();s.chestT=40;s.altarT=150;s.spawn=3;
- p.x=t.x<WORLD/2?WORLD-250:250;p.y=60;  // empiezas lejos del teletransportadorp.vy=0;p.dash=null;p.hp=p.maxHp;
+ for(let k=0;k<5+2*s.loop;k++)spawnChest();spawnAltar();s.chestT=40;s.altarT=150;s.spawn=3;
+ p.x=t.x<WORLD/2?WORLD-250:250;p.y=60;p.vy=0;p.dash=null;p.hp=p.maxHp;  // empiezas lejos del teletransportador
  genBg(st,i*7919+13);s.fade=1;
- say(`Etapa ${i+1}/${STAGES.length}: ${st.name} · encuentra el teletransportador`);
+ say(`${s.loop?`Loop ${s.loop+1} · `:''}Etapa ${i+1}/${STAGES.length}: ${st.name} · encuentra el teletransportador`);
 }
+/* ===================== MODO INFINITO =====================
+   Con el teletransportador listo aparece un portal dual: a la izquierda «Terminar run» (puntuación al ranking) y a la
+   derecha «Siguiente etapa», o tras la última etapa «Continuar ciclo (Loop +1)»: vuelta a la etapa 1 con otra paleta,
+   enemigos exponencialmente más duros y numerosos, jefes duales y topes de estadísticas cada vez más altos. */
+const LOOP_ATMOS=[null,{name:'Eclipse',hue:150,sat:.9,lum:-.1},{name:'Ceniza Tóxica',hue:95,sat:1.1,lum:-.05},{name:'Aurora Sangrienta',hue:-60,sat:1.25,lum:0},{name:'Vacío Blanco',hue:200,sat:.55,lum:.08}];
+const loopAtmos=l=>LOOP_ATMOS[(l-1)%(LOOP_ATMOS.length-1)+1];
+// gira el tono de un color #rrggbb(aa) y ajusta saturación y luz
+function recolor(hex,a){const n=parseInt(hex.slice(1,7),16),al=hex.slice(7);let r=(n>>16)/255,g=(n>>8&255)/255,b=(n&255)/255;
+ const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2,d=mx-mn;let h=0,s=d?d/(1-Math.abs(2*l-1)):0;
+ if(d)h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h=(h*60+a.hue+720)%360;s=clamp(s*a.sat,0,1);const L=clamp(l+a.lum,0,1);
+ const C=(1-Math.abs(2*L-1))*s,X=C*(1-Math.abs(h/60%2-1)),m=L-C/2,[R,G,B]=h<60?[C,X,0]:h<120?[X,C,0]:h<180?[0,C,X]:h<240?[0,X,C]:h<300?[X,0,C]:[C,0,X];
+ return '#'+[R,G,B].map(v=>Math.round((v+m)*255).toString(16).padStart(2,'0')).join('')+al}
+// copia del escenario con todos sus colores recoloreados según la atmósfera del ciclo
+function loopStage(st,l){const a=loopAtmos(l),walk=v=>typeof v==='string'&&/^#[0-9a-f]{6}([0-9a-f]{2})?$/i.test(v)?recolor(v,a):
+ Array.isArray(v)?v.map(walk):v&&typeof v==='object'?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,walk(x)])):v;
+ return Object.assign(walk(st),{name:`${st.name} · ${a.name}`})}
 function nextStage(){
- if(S.stage+1>=STAGES.length){S.bossName='la Tempestad';return endGame(true)}
+ if(S.stage+1>=STAGES.length){S.loop++;Save.max('bestLoop',S.loop+1);hitStop(80);chromaHit(1.2);loadStage(0);saveRun();
+  say(`¡LOOP ${S.loop+1}! ${loopAtmos(S.loop).name}: enemigos ×${Math.pow(1.5,S.loop).toFixed(1)} y jefes duales`);return}
  hitStop(60);loadStage(S.stage+1);saveRun();
 }
-function useTP(){const T=S.tp;
- if(T.state==='idle'){T.state='charging';Snd.play('tp');spawnBoss();say(`¡Teletransportador activado! Quédate cerca para cargarlo`)}
- else if(T.state==='ready')nextStage();
+// terminar la run tras derrotar al jefe: cuenta como victoria si se completó al menos un ciclo entero
+function cashOut(){endGame(S.loop>0||S.stage>=STAGES.length-1,true)}
+// en ciclos posteriores al primero el jefe llega acompañado de otro (cada uno con un 75% de vida)
+const companionBoss=()=>STAGES[(S.stage+1+(S.loop-1)%(STAGES.length-1))%STAGES.length].boss;
+function useTP(choice){const T=S.tp;
+ if(T.state==='idle'){T.state='charging';Snd.play('tp');if(S.loop){spawnBoss(null,{hp:.75,dx:-260});spawnBoss(companionBoss(),{hp:.75,dx:260})}else spawnBoss();
+  say(S.loop?'¡JEFES DUALES! Quédate cerca del teletransportador para cargarlo':`¡Teletransportador activado! Quédate cerca para cargarlo`)}
+ else if(T.state==='ready')(choice==='end'?cashOut:nextStage)();
  else say(S.boss?'Derrota al jefe y termina la carga':'El teletransportador aún se está cargando')}
 
 function fallPit(){const p=S.p;
@@ -38,7 +60,7 @@ function fallPit(){const p=S.p;
 function updStage(dt){
  const s=S,p=s.p,T=s.tp;
  if(T.state==='charging'){const inR=hyp(p.x-T.x,p.y-T.y)<TP_R;if(inR)T.charge=Math.min(1,T.charge+dt/TP_CHARGE);T.out=!inR;
-  if(T.charge>=1&&s.bossDone){T.state='ready';Snd.play('tp');say(`¡Teletransportador listo! Pulsa ${keyName(BIND.interact[0])} sobre él para continuar`)}}
+  if(T.charge>=1&&s.bossDone){T.state='ready';Snd.play('tp');say(`¡Portal dual abierto! ${keyName(BIND.interact[0])} a la izquierda: terminar run · a la derecha: ${s.stage>=STAGES.length-1?'Loop +1':'seguir'}`)}}
  // lava (Hidra): el suelo sólido quema
  if(s.lava&&p.ground&&p.plat&&p.plat.solid){s.lavaT=(s.lavaT||0)-dt;if(s.lavaT<=0){s.lavaT=.5;hurtP(p.maxHp*.06)}}
  // paredes que se cierran (Arconte, fase 3)
@@ -103,4 +125,9 @@ function drawTP(){const T=S.tp,col=T.state==='ready'?'#4cff7a':T.state==='chargi
  c.fillStyle=col;c.globalAlpha=.25+.15*Math.sin(S.t*4);c.fillRect(T.x-30,T.y-70*(T.state==='idle'?.4:1),60,70*(T.state==='idle'?.4:1));c.globalAlpha=1;
  if(T.state==='charging'){c.globalAlpha=.25;c.setLineDash([10,8]);c.beginPath();c.arc(T.x,T.y,TP_R,0,6.283);c.stroke();c.setLineDash([]);c.globalAlpha=1;
   c.font='bold 13px monospace';c.textAlign='center';c.fillText(Math.floor(T.charge*100)+'%',T.x,T.y-80)}
+ if(T.state==='ready')for(const [s,cl,lb] of [[-1,'#ffd23c','TERMINAR'],[1,'#ff3cf2',S.stage>=STAGES.length-1?'LOOP +1':'SEGUIR']]){
+  const x=T.x+s*58,y=T.y-40,on=(S.p.x<T.x)===(s<0)&&hyp(S.p.x-T.x,S.p.y-T.y)<140,r=26+Math.sin(S.t*3+s)*2;glow(cl,on?26:12);c.strokeStyle=cl;c.lineWidth=on?4:2.5;
+  c.beginPath();c.ellipse(x,y,r*.6,r,0,0,6.283);c.stroke();c.globalAlpha=on?.35:.15;c.fillStyle=cl;c.fill();c.globalAlpha=1;
+  c.save();c.translate(x,y);c.rotate(S.t*2*s);c.setLineDash([4,6]);c.beginPath();c.ellipse(0,0,r*.38,r*.7,0,0,6.283);c.stroke();c.restore();c.setLineDash([]);
+  c.font='bold 11px monospace';c.textAlign='center';c.fillStyle=cl;c.fillText(lb,x,y-r-8)}
  c.shadowBlur=0}

@@ -41,7 +41,7 @@ const Auth={
  // registra la partida que acaba de terminar; devuelve {score, rank} o {score} si no hay cuenta
  submit(win){if(!S)return null;
   const r={user:this.user,ch:S.ch.name,lvl:S.p.lvl,loop:(S.loop||0)+1,time:Math.round(S.t),kills:S.kills,
-   stages:(S.loop||0)*STAGES.length+S.stage+(win?1:0),win:!!win,diff:DIFFS.indexOf(S.df),date:Date.now()};
+   stages:(S.loop||0)*STAGES.length+S.stage+(S.bossDone?1:0),win:!!win,diff:DIFFS.indexOf(S.df),date:Date.now()};
   r.score=scoreRun(r);if(!this.user)return {score:r.score};
   const all=readJSON(AUTH_BOARD,{}),list=(all[r.diff]=all[r.diff]||[]);list.push(r);list.sort((a,b)=>b.score-a.score);list.length=Math.min(list.length,50);
   writeJSON(AUTH_BOARD,all);const rank=this.board(r.diff).findIndex(e=>e.date===r.date&&e.user===r.user)+1;

@@ -48,6 +48,11 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  // inventario con objetos de todas las rarezas (sin los fragmentados, que cambian la vida máxima) y HUD con habilidades listas
  await js("Object.values(ITEM).filter(it=>it.r!=='f').filter((it,i)=>i%4===0).forEach(it=>giveItem(it.id,1));S.p.hp=S.p.maxHp;for(const k in S.p.cd)S.p.cd[k]=0");
  await sleep(300);await shot('05b-hud');await js("toggleInv()");await sleep(500);await shot('05-inventario');await js("toggleInv()");
+ // Modo Infinito: Loop 2 con paleta nueva y jefes duales; luego el portal dual con el teletransportador listo
+ await js("S.loop=1;loadStage(1);useTP();for(const b of S.bosses){b.hidden=0;b.t=1}S.p.hp=S.p.maxHp");await sleep(4500);await shot('11-loop-jefes-duales');
+ await js("for(const b of S.bosses.slice())for(let i=0;i<3;i++)hurtE(b,1e12,{raw:1});S.tp.charge=1");await sleep(400);
+ await js("S.p.x=S.tp.x-40;S.p.y=S.tp.y;S.p.vx=0;clearInterval(window.__bot);mouse.l=mouse.r=0;keys.ShiftLeft=keys.KeyQ=0");
+ for(let i=0;i<6;i++){await js("if(S.st==='mastery')document.querySelector('#nodes .card').click();S.p.x=S.tp.x-40;S.p.y=S.tp.y");await sleep(300)}await sleep(600);await shot('12-portal-dual');
  // audio real: el contexto debe arrancar y la música programar notas
  await cmd('Input.dispatchKeyEvent',{type:'keyDown',code:'KeyM',key:'m'});await cmd('Input.dispatchKeyEvent',{type:'keyUp',code:'KeyM',key:'m'});
  await js("Save.d.settings.mute=false;Snd.apply()");await sleep(400);

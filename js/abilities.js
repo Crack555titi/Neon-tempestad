@@ -135,7 +135,7 @@ function cast(slot,f){
 }
 // primario: velocidad de ataque; resto: reducción general + la propia de la ranura (definitiva/movimiento) × buffs (cdm)
 function maxCd(slot,d){const m=S.p.m;if(slot==='p')return d.cd/(m.as*bm('as'));
- const ex=slot==='u'?Math.min(.6,m.ucdr):slot==='m'?Math.min(.75,m.mcdr):0;return d.cd*(1-Math.min(.6,m.cdr))*(1-ex)*bm('cdm')}
+ const ex=slot==='u'?Math.min(capL(.6),m.ucdr):slot==='m'?Math.min(capL(.75),m.mcdr):0;return d.cd*(1-Math.min(capL(.6),m.cdr))*(1-ex)*bm('cdm')}
 
 /* ===================== PASIVAS ===================== */
 function enterVoid(t){const p=S.p;p.corr=100;buff('void',t,{dmg:1.8,taken:1.5,drain:.03,tick:b=>{p.corr=100*Math.max(0,b.t)/t},end:()=>{p.corr=0}});

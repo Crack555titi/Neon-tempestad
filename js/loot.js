@@ -27,7 +27,7 @@ function rollItem(r){const pool=ITEMS.filter(i=>i.r===r);return pool[Math.random
 
 /* ---------- economía ---------- */
 const scaleCost=()=>1+(coef()-1)*.5;  // precios y oro crecen con la dificultad al mismo ritmo
-const priceOf=o=>Math.round(CHESTS[o.tier].base*scaleCost()*S.df.chest*(1-Math.min(.5,S.p.m.chestm)));
+const priceOf=o=>Math.round(CHESTS[o.tier].base*scaleCost()*S.df.chest*(1-Math.min(capL(.5),S.p.m.chestm)));
 function goldFor(e){const p=S.p,it=p.items;
  return Math.round(e.d.xp*.6*scaleCost()*(1+p.m.goldm)*(it.greed?2+it.greed:1)*(it.invhour?2:1))}
 
@@ -46,14 +46,14 @@ function lootInit(kit){
 }
 function updLoot(dt){
  const s=S,p=s.p;
- s.chestT-=dt;if(s.chestT<=0){s.chestT=40;if(s.ints.filter(o=>o.k==='chest'&&!o.open).length<6)spawnChest()}
+ s.chestT-=dt;if(s.chestT<=0){s.chestT=40;if(s.ints.filter(o=>o.k==='chest'&&!o.open).length<6+3*s.loop)spawnChest()}
  s.altarT-=dt;if(s.altarT<=0){s.altarT=150;if(!s.ints.some(o=>o.k==='altar'&&!o.open))spawnAltar()}
  s.near=null;for(const o of s.ints)if(!o.open&&Math.abs(o.x-p.x)<45&&Math.abs(o.y-p.y)<60){s.near=o;break}
  if(s.note&&(s.note.t-=dt)<=0)s.note=null;
 }
 function interact(){
  const o=S.near,p=S.p;if(!o)return;
- if(o.k==='tp')return useTP();
+ if(o.k==='tp')return useTP(S.tp.state==='ready'&&p.x<o.x?'end':'next');
  if(o.k==='altar')return openAltar(o);
  const pr=priceOf(o);if(p.gold<pr){say(`Oro insuficiente (${pr})`);return}
  p.gold-=pr;o.open=1;
@@ -79,6 +79,6 @@ function drawLoot(){
  const o=S.near;if(o){const pr=o.k==='chest'?priceOf(o):0,ok=o.k!=='chest'||S.p.gold>=pr,T=S.tp;
   c.font='bold 12px monospace';c.textAlign='center';c.fillStyle=ok?'#fff':'#ff6a6a';
   const msg=o.k==='chest'?`[E] ${CHESTS[o.tier].name} · ${pr} oro`:o.k==='altar'?`[E] ${ALTAR.name} · −${ALTAR.cost*100}% de vida`:
-   T.state==='idle'?'[E] Activar teletransportador (despierta al jefe)':T.state==='ready'?'[E] Viajar a la siguiente etapa':'';
+   T.state==='idle'?'[E] Activar teletransportador (despierta al jefe)':T.state==='ready'?(S.p.x<T.x?'[E] ← Terminar run y guardar puntuación':S.stage>=STAGES.length-1?'[E] Continuar ciclo (Loop +1) →':'[E] Siguiente etapa →'):'';
   if(msg)c.fillText(msg,o.x,o.y-(o.k==='altar'?82:o.k==='tp'?96:40))}
 }

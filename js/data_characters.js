@@ -149,7 +149,7 @@ const MASTERY=[
  {name:'Sed de Sangre',desc:'+4% robo de vida',fx:p=>p.m.ls+=.04},
  {name:'Frenesí',desc:'+20% velocidad de ataque',fx:p=>p.m.as+=.2},
  {name:'Pies Ligeros',desc:'+12% velocidad de movimiento',fx:p=>p.m.spd+=.12},
- {name:'Cronómetro',desc:'-15% enfriamientos',fx:p=>p.m.cdr=Math.min(.6,p.m.cdr+.15)},
+ {name:'Cronómetro',desc:'-15% enfriamientos',fx:p=>p.m.cdr=Math.min(capL(.6),p.m.cdr+.15)},
  {name:'Poder Bruto',desc:'+15% daño',fx:p=>p.m.dmg+=.15},
  {name:'Bastión',desc:'-12% daño recibido',fx:p=>p.m.arm+=.12},
  {name:'Salto Extra',desc:'+1 salto en el aire',fx:p=>p.maxJ++},

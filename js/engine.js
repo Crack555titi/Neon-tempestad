@@ -26,14 +26,16 @@ const SLOTS='psmu',SLOT={p:'primary',s:'secondary',m:'move',u:'ult'};
 const BTN={p:()=>act('primary'),s:()=>act('secondary'),m:()=>act('move'),u:()=>act('ult')};  // entrada: input.js
 
 // dificultad: +0,5 por minuto de reloj y +0,3 por etapa superada
-const coef=()=>1+S.clock/60*.5+.3*S.stage, dmgScale=()=>1+.12*(coef()-1), hpScale=()=>1+.3*(coef()-1);
+const coef=()=>(1+S.clock/60*.5+.3*S.stage)*Math.pow(1.45,S.loop||0),
+ capL=c=>S&&S.loop?Math.min(.95,c+.12*S.loop):c,  // Modo Infinito: los topes (armadura, esquiva, enfriamientos…) se relajan en cada ciclo
+ dmgScale=()=>1+.12*(coef()-1), hpScale=()=>1+.3*(coef()-1);
 const say=m=>{S.msg=m;S.msgT=4};
 
 /* run: instantánea guardada al empezar una etapa (save.js) para continuar o reintentar */
 function start(cid,did,run){
  Ev.h={};fxReset();const ch=CHARS[cid],df=DIFFS[did];
  ['menu','end','mastery','inv','altar','pause','opts','ctrls'].forEach(i=>$(i).style.display='none');
- S={st:'play',cid,ch,df,t:0,clock:df.start||0,stage:0,phase:1,cam:0,shake:0,en:[],zn:[],dr:[],sch:[],freeze:0,spawn:2,boss:null,bossDone:0,bossName:'',msg:'',msgT:0,kills:0,mq:0,portal:{a:null,b:null},
+ S={st:'play',cid,ch,df,t:0,clock:df.start||0,stage:0,phase:1,cam:0,shake:0,en:[],zn:[],dr:[],sch:[],freeze:0,spawn:2,loop:0,bosses:[],boss:null,bossDone:0,bossName:'',msg:'',msgT:0,kills:0,mq:0,portal:{a:null,b:null},
   ints:[],near:null,note:null,chestT:40,altarT:150,tp:null,lava:0,walls:null,fade:1,lvlFx:null,
   p:{x:300,y:FLOOR,w:24,h:42,vx:0,vy:0,ground:0,wasG:1,plat:null,jumps:0,maxJ:2,face:1,aim:0,hp:ch.hp,maxHp:ch.hp,lvl:1,xp:0,need:40,dmgMul:1,inv:0,dash:null,drop:0,
    cd:{p:0,s:0,m:0,u:0},chg:{p:0,s:0,m:0,u:0},revive:df.revive||0,mastery:[],
@@ -50,7 +52,7 @@ function start(cid,did,run){
   for(const id in run.items)for(let k=0;k<run.items[id];k++)giveItem(id,1);
   p.lvl=run.lvl;p.xp=run.xp;p.need=Math.round(40*Math.pow(p.lvl,1.35));p.dmgMul=1+.05*(p.lvl-1);
   for(const n of run.mastery){const m=MASTERY.find(x=>x.name===n);if(m){m.fx(p);p.mastery.push(n)}}
-  recalcHp();loadStage(run.stage)}
+  recalcHp();S.loop=run.loop||0;loadStage(run.stage)}
  else{while(p.lvl<(df.startLvl||1))giveXp(p.need-p.xp);loadStage(0);saveRun()}
  p.hp=p.maxHp;
  trackRun(); // después de los niveles regalados de Pesadilla: no cuentan para logros
@@ -118,7 +120,7 @@ function hurtE(e,d,o){
  e.hp-=d;e.flash=.1;e.lastCrit=crit;txt(e.x+R(-10,10),e.y-e.h-6,Math.round(d)+(crit?'!':''),crit?'#ffd23c':o.dot?'#d9a0ff':o.proc?'#9ae6ff':'#fff',crit?20:o.dot?11:o.proc?12:14);
  if(crit&&!o.proc&&!o.dot&&hsCd<=0){hitStop(30);hsCd=e.elite||e.boss?.25:.5;kick(p.aim,2.5)}
  // Guillotina: ejecuta a los no-jefes por debajo del umbral
- if(p.m.exec&&!e.boss&&e.hp>0&&e.hp<e.maxHp*Math.min(.4,.06+p.m.exec)){e.hp=0;txt(e.x,e.y-e.h-20,'EJECUTADO','#ff2a6a')}
+ if(p.m.exec&&!e.boss&&e.hp>0&&e.hp<e.maxHp*Math.min(capL(.4),.06+p.m.exec)){e.hp=0;txt(e.x,e.y-e.h-20,'EJECUTADO','#ff2a6a')}
  Ev.emit('onHit',e,d,o,crit);
  const ls=p.m.ls+bsum('ls')+(o.ls||0);if(ls&&!o.dot&&!o.proc)heal(d*ls);  // el daño de objetos no roba vida: evita bucles curación↔daño (Núcleo Inverso)
  for(const id in p.buf){const b=p.buf[id];if(b.onDeal)b.onDeal(e,d,o)}
@@ -136,17 +138,18 @@ function kill(e){
  const p=S.p;giveXp(e.d.xp);p.gold+=goldFor(e);
  heal(p.maxHp*((p.items.bloodoath?0:.01)+bsum('killheal')));
  if(kdepth<4){kdepth++;Ev.emit('onKill',e);kdepth--}  // límite a las cadenas de explosiones al matar
- if(e.boss){S.boss=null;S.bossDone=1;S.bossName=e.def.name;S.phase=1;S.walls=null;S.lava=0;
-  const r=chance(.2)?'l':'r';giveItem(rollItem(r));say(`¡${e.def.name} derrotado! Termina de cargar el teletransportador`)}
+ if(e.boss){const r=chance(.2)?'l':'r';giveItem(rollItem(r));S.bosses=S.bosses.filter(b=>b!==e);S.boss=S.bosses[0]||null;S.bossName=e.def.name;
+  if(S.boss)say(`¡${e.def.name} derrotado! Queda ${S.boss.def.name}`);  // jefes duales: hasta que caigan los dos
+  else{S.bossDone=1;S.phase=1;S.walls=null;S.lava=0;say(`¡${e.def.name} derrotado! Termina de cargar el teletransportador`)}}
  else enemyDeath(e);
 }
 function hurtP(d,src){
  const p=S.p;if(p.inv>0||S.st!=='play'||bany('intang'))return;
  for(const id in p.buf){const b=p.buf[id];if(b.onHurt&&b.onHurt(b,d))return}
- if(p.m.dodge&&chance(Math.min(.5,p.m.dodge))){p.inv=.25;txt(p.x,p.y-56,'ESQUIVA','#9ae6ff');return}
+ if(p.m.dodge&&chance(Math.min(capL(.5),p.m.dodge))){p.inv=.25;txt(p.x,p.y-56,'ESQUIVA','#9ae6ff');return}
  // invulnerable ANTES de reflejar: si no, Fortaleza ↔ élite Reflectante se devuelven el daño sin fin
  p.inv=.45;S.shake=Math.max(S.shake,9);if(src&&src.x!==undefined)kick(Math.atan2(p.y-(src.y||p.y),p.x-src.x),Math.min(12,4+d/p.maxHp*40));
- d*=(1-Math.min(.6,p.m.arm))*bm('taken');
+ d*=(1-Math.min(capL(.6),p.m.arm))*bm('taken');
  p.shT=4;if(p.sh>0){const a=Math.min(p.sh,d);p.sh-=a;d-=a}
  const rf=bsum('reflect');if(rf)aoe(p.x,p.y-20,220,d*rf,RAW);
  for(const id in p.buf){const b=p.buf[id];if(b.absorb>0){const a=Math.min(b.absorb,d);b.absorb-=a;b.stored+=a;d-=a;if(b.absorb<=0)b.t=0}}
@@ -277,7 +280,7 @@ function update(dt){
  // director: más presión mientras se carga el teletransportador, casi nada cuando ya está listo
  const T=s.tp,evt=T.state==='charging'?1.5:T.state==='ready'?.3:1;
  s.spawn-=dt*evt;
- if(s.spawn<=0){const mx=Math.min(26,5+coef()*1.6)*(s.boss?.6:1);if(s.en.filter(e=>!e.boss).length<mx)spawnEnemy();s.spawn=Math.max(.5,2.6/(1+coef()*.12))}
+ if(s.spawn<=0){const L=Math.pow(1.5,s.loop),mx=Math.min(26*L,110,(5+coef()*1.6)*L)*(s.boss?.6:1);if(s.en.filter(e=>!e.boss).length<mx)spawnEnemy();s.spawn=Math.max(.5/L,2.6/(1+coef()*.12)/L)}
  // enemigos (Tiempo Detenido congela enemigos, sus proyectiles, zonas y ataques programados)
  if(fz)s.freeze-=dt;else for(const e of s.en)updEnemy(e,dt);
  s.en=s.en.filter(e=>!e.dead);

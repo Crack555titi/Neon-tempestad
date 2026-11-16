@@ -31,6 +31,15 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   | Núcleo de la Tempestad | Arconte de la Tempestad |
 
   Cada jefe tiene 3 fases (ningún golpe puede saltarse una), barra de ruptura de guardia, ataques telegrafiados que castigan el pánico y plataformas que cambian durante el combate.
+- **Modo Infinito.** Tras cada jefe, el teletransportador abre un portal dual:
+  - **izquierda — Terminar run:** guarda la puntuación en la clasificación;
+  - **derecha — Siguiente etapa**, o tras la etapa 5 **Continuar ciclo (Loop +1)**.
+
+  Cada loop vuelve a la etapa 1 con otra atmósfera (Eclipse, Ceniza Tóxica, Aurora Sangrienta, Vacío Blanco…). En cada uno:
+  - la dificultad se multiplica ×1,45;
+  - la densidad de enemigos, ×1,5;
+  - cada jefe llega acompañado de otro;
+  - los topes de armadura, esquiva y enfriamientos suben hasta el 95%, para que los objetos acumulados terminen rompiendo el juego.
 - **Enemigos.** 15 tipos (voladores, tiradores, kamikazes, tanques, etc.) y 11 afijos de élite.
 - **Dificultades.**
 
@@ -171,7 +180,8 @@ Las sinergias entre objetos van por un bus de eventos: `onHit`, `onKill`, `onJum
 - [x] Fase 4: mejora visual y *game feel*.
 - [x] Fase 5: audio, guardado, controles configurables, mando y controles táctiles.
 - [x] Fase 6: escritorio con Electron, Android con Capacitor y este README.
+- [x] Carpetas por extensión, cuentas con clasificación, héroes articulados y Modo Infinito.
 
 **Pendiente**
 - [ ] Probar en móviles y mandos reales: ajustar el tamaño de los botones táctiles y la sensibilidad.
-- [ ] Más escenarios y un modo infinito tras el Arconte.
+- [ ] Más escenarios.
