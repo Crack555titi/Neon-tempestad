@@ -20,7 +20,7 @@
   </div>
 
   <div id="mastery" class="ov" style="display:none">
-    <h2>NODO DE MAESTRÍA</h2>
+    <h2>NODO DE MAESTRÍA <small id="mq"></small></h2>
     <div class="row" id="nodes"></div>
   </div>
 
@@ -30,7 +30,13 @@
     <button id="again">VOLVER AL MENÚ</button>
   </div>
 </div>
-<!-- Fases siguientes: data_characters.js, data_items.js, bosses.js (se cargarán antes de engine.js) -->
+<!-- Scripts clásicos (no módulos) para que funcione abriendo index.html con doble clic. El orden importa. -->
 <script src="engine.js"></script>
+<script src="fx.js"></script>
+<script src="data_characters.js"></script>
+<script src="data_enemies.js"></script>
+<script src="bosses.js"></script>
+<script src="abilities.js"></script>
+<script src="ui.js"></script>
 </body>
 </html>
