@@ -34,7 +34,7 @@ const say=m=>{S.msg=m;S.msgT=4};
 /* run: instantánea guardada al empezar una etapa (save.js) para continuar o reintentar */
 function start(cid,did,run){
  Ev.h={};fxReset();const ch=CHARS[cid],df=DIFFS[did];
- ['title','menu','shop','rank','login','end','mastery','inv','altar','pause','opts','ctrls'].forEach(i=>$(i).style.display='none');
+ ['title','menu','shop','rank','login','end','mastery','storm','inv','altar','pause','opts','ctrls'].forEach(i=>$(i).style.display='none');
  S={st:'play',cid,ch,df,t:0,clock:df.start||0,stage:0,phase:1,cam:0,shake:0,en:[],zn:[],dr:[],sch:[],freeze:0,spawn:2,loop:0,bosses:[],boss:null,bossDone:0,bossName:'',msg:'',msgT:0,kills:0,mq:0,portal:{a:null,b:null},
   ints:[],near:null,note:null,chestT:40,altarT:150,tp:null,lava:0,walls:null,fade:1,lvlFx:null,
   p:{x:300,y:FLOOR,w:24,h:42,vx:0,vy:0,ground:0,wasG:1,plat:null,jumps:0,maxJ:2,face:1,aim:0,hp:ch.hp,maxHp:ch.hp,lvl:1,xp:0,need:40,dmgMul:1,inv:0,dash:null,drop:0,
@@ -55,7 +55,7 @@ function start(cid,did,run){
   recalcHp();S.loop=run.loop||0;loadStage(run.stage)}
  else{while(p.lvl<(df.startLvl||1))giveXp(p.need-p.xp);loadStage(0);saveRun()}
  p.hp=p.maxHp;
- trackRun(); // después de los niveles regalados de Pesadilla: no cuentan para logros
+ trackRun();stormInit(); // después de los niveles regalados de Pesadilla: no cuentan para logros
  Snd.hooks();
 }
 
@@ -74,7 +74,8 @@ function updBuffs(dt){const B=S.p.buf;
 
 /* ===================== FÍSICA ===================== */
 function phys(e,dt,drop){
- e.vy+=G*dt*(e.gm===undefined?1:e.gm);const oy=e.y;
+ e.vy+=G*dt*(e.gm===undefined?1:e.gm)*(S.gmul||1);  // gmul: anomalía de gravedad
+const oy=e.y;
  e.x=clamp(e.x+e.vx*dt,e.w/2,WORLD-e.w/2);e.y+=e.vy*dt;e.ground=0;e.plat=null;
  if(e.vy>=0)for(const p of PLAT){if(!p.on||(drop&&!p.solid))continue;
   if(e.x+e.w/2>p.rx&&e.x-e.w/2<p.rx+p.w&&oy<=p.ry+6&&e.y>=p.ry){e.y=p.ry;e.vy=0;e.ground=1;e.plat=p;break}}
@@ -135,7 +136,7 @@ function hurtE(e,d,o){
 function kill(e){
  e.dead=1;S.kills++;disintegrate(e.x,e.y,e.w,e.h,e.d.color);if(e.boss){burst(e.x,e.y-e.h/2,80,e.d.color,600,4);chromaHit(1.2)}S.shake=Math.max(S.shake,e.boss?30:3);
  if(e.boss||e.elite)hitStop(e.boss?60:40);
- const p=S.p;giveXp(e.d.xp);p.gold+=goldFor(e);
+ const p=S.p;giveXp(e.d.xp);p.gold+=Math.round(goldFor(e)*(S.storm?S.storm.goldMul:1));
  heal(p.maxHp*((p.items.bloodoath?0:.01)+bsum('killheal')));
  if(kdepth<4){kdepth++;Ev.emit('onKill',e);kdepth--}  // límite a las cadenas de explosiones al matar
  if(e.boss){const r=chance(.2)?'l':'r';giveItem(rollItem(r));S.bosses=S.bosses.filter(b=>b!==e);S.boss=S.bosses[0]||null;S.bossName=e.def.name;
@@ -198,9 +199,9 @@ function updProj(q,dt){
  if(q.homeP)steer(q,p.x,p.y-p.h/2,2.2,dt);  // proyectil hostil teledirigido (lento de girar: se puede esquivar)
  if(q.ret){if(!q.back&&q.life<q.t0*.5){q.back=1;q.hit.clear()}
   if(q.back){const a=Math.atan2(p.y-p.h/2-q.y,p.x-q.x),sp=hyp(q.vx,q.vy);q.vx=Math.cos(a)*sp;q.vy=Math.sin(a)*sp;q.life=Math.max(q.life,.05);if(hyp(p.x-q.x,p.y-p.h/2-q.y)<28)q.life=0}}
- if(q.gm)q.vy+=G*q.gm*dt;
+ if(q.gm)q.vy+=G*q.gm*dt*(s.gmul||1);
  if(q.pull)for(const e of s.en)if(hyp(e.x-q.x,e.y-e.h/2-q.y)<q.pull)pullE(e,q.x,q.y,240,dt);
- q.x+=q.vx*dt;q.y+=q.vy*dt;spark(q.x,q.y,0,0,.2,q.col,q.r);
+ const qs=q.hostile?s.pspd||1:1;q.x+=q.vx*dt*qs;q.y+=q.vy*dt*qs;spark(q.x,q.y,0,0,.2,q.col,q.r);  // pspd: proyectiles acelerados
  const P=s.portal;
  if(!q.hostile&&!q.ported&&P.a&&P.b){const A=hyp(q.x-P.a.x,q.y-P.a.y)<30?P.a:hyp(q.x-P.b.x,q.y-P.b.y)<30?P.b:null;
   if(A){const B=A===P.a?P.b:P.a;q.x=B.x;q.y=B.y;q.ported=1;q.dmg*=1.6;q.r*=1.3;ring(B.x,B.y,40,'#3cffd8',.25)}}
@@ -280,7 +281,7 @@ function update(dt){
  // director: más presión mientras se carga el teletransportador, casi nada cuando ya está listo
  const T=s.tp,evt=T.state==='charging'?1.5:T.state==='ready'?.3:1;
  s.spawn-=dt*evt;
- if(s.spawn<=0){const L=Math.pow(1.5,s.loop),mx=Math.min(26*L,110,(5+coef()*1.6)*L)*(s.boss?.6:1);if(s.en.filter(e=>!e.boss).length<mx)spawnEnemy();s.spawn=Math.max(.5/L,2.6/(1+coef()*.12)/L)}
+ if(s.spawn<=0){const L=Math.pow(1.5,s.loop),mx=Math.min(26*L,110,(5+coef()*1.6)*L)*(s.boss?.6:1)*(s.storm?s.storm.spawnMul:1);if(s.en.filter(e=>!e.boss).length<mx)spawnEnemy();s.spawn=Math.max(.5/L,2.6/(1+coef()*.12)/L)}
  // enemigos (Tiempo Detenido congela enemigos, sus proyectiles, zonas y ataques programados)
  if(fz)s.freeze-=dt;else for(const e of s.en)updEnemy(e,dt);
  s.en=s.en.filter(e=>!e.dead);
@@ -297,7 +298,7 @@ function update(dt){
  for(let i=0;i<PT.n;i++){const q=PT.a[i];q.l-=dt;if(q.ring){q.r+=(q.mr-q.r)*Math.min(1,dt*9)}else{q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.93;q.vy*=.93}}
  PT.sweep(deadL);for(let i=0;i<TX.n;i++){const t=TX.a[i];t.l-=dt;t.vy+=t.g*dt;t.x+=t.vx*dt;t.y+=t.vy*dt}TX.sweep(deadL);
  for(let i=0;i<BL.n;i++)BL.a[i].l-=dt;BL.sweep(deadL);
- s.shake*=.88;updKick(dt);s.msgT-=dt;hsCd-=dt;s.fade=Math.max(0,s.fade-dt*1.8);if(s.lvlFx&&(s.lvlFx.t-=dt)<=0)s.lvlFx=null;
+ s.shake*=.88;updKick(dt);updStorm(dt);s.msgT-=dt;hsCd-=dt;s.fade=Math.max(0,s.fade-dt*1.8);if(s.lvlFx&&(s.lvlFx.t-=dt)<=0)s.lvlFx=null;
 }
 
 /* ===================== RENDER ===================== */
@@ -321,6 +322,7 @@ function draw(){
  c.shadowBlur=0;
  drawLoot();
  for(const e of s.en)drawEnemy(e);
+ drawStormWorld();
  for(const m of s.dr)MIN[m.k].draw(m);c.shadowBlur=0;
  drawPlayer(s.p);
  for(const id in s.p.buf){const b=s.p.buf[id];if(b.draw)b.draw(b)}

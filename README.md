@@ -62,6 +62,10 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   - Mientras haya pocas partidas reales, la tabla se completa con jugadores ficticios, atenuados y marcados «IA», que no cuentan para tu puesto.
   - Las reglas del servidor solo permiten publicar con tu propio nombre y con valores razonables. Nadie puede editar ni borrar puntuaciones.
 - **Personajes articulados.** Cada héroe tiene esqueleto (cabeza, torso, piernas y brazos animados), una capa con física y un arma que apunta al cursor. Además lleva equipo propio: los aros del Cronista, los planos holográficos de la Mecánica, la cola de la Quimera, etc.
+- **La Tempestad.** Cada etapa tiene una **estabilidad dimensional** (100 → 0) que erosionan el tiempo, las bajas de élites, las definitivas y las fases de jefe.
+  - Al cruzar 75, 25 y 0 se desata una **anomalía**: gravedad baja, tormenta eléctrica, lluvia de meteoritos, proyectiles acelerados, enemigos tormentosos o niebla dimensional. Algunas etapas ya empiezan en plena tormenta.
+  - Dos anomalías concretas se **combinan** en un efecto nuevo (gravedad baja + tormenta eléctrica = orbes eléctricos flotantes).
+  - Al cruzar 50, la Tempestad ofrece un **trato**: estabilizar (menos enemigos, objeto poco común), alimentar (otra anomalía y más enemigos, objeto raro y +50% de oro) o absorber (60 s de poder con consecuencia).
 - **Tienda de cosméticos.**
   - Con los cristales 💎 que ganas al terminar cada partida (según la puntuación) compras cosméticos puramente visuales: 9 skins, 7 estelas y 6 auras.
   - La vista previa los muestra en movimiento antes de comprarlos.
@@ -200,6 +204,7 @@ Para borrar una puntuación (trampas, pruebas…) entra en la consola de Firebas
 | `js/update.js`, `version.json` | Comprobación de versión y actualización obligatoria |
 | `js/main.js`, `js/preload.js`, `js/updater.js` | Ventana de escritorio (Electron) y actualización automática verificada |
 | `js/cosmetics.js` | Tienda: skins, estelas y auras |
+| `js/storm.js` | La Tempestad: estabilidad, anomalías, combinaciones y tratos |
 | `tools/` | Pruebas (`smoke.js`, `browser.js`) y scripts de empaquetado |
 
 Las sinergias entre objetos van por un bus de eventos: `onHit`, `onKill`, `onJump`, `onTakeDamage`, `onLevelUp`, `onCast`, `onDash`, `onHeal`, `onChestOpen` y `onBossPhase`.

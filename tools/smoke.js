@@ -30,10 +30,10 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
-const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);T.update(1/60);T.draw()}};
+const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);if(T.S.st==='storm')el('stormOpts').onclick(pick0);T.update(1/60);T.draw()}};
 const key=(code,repeat)=>L.keydown({code,repeat,preventDefault(){}});
 const reset=()=>{for(const k in T.keys)T.keys[k]=0;T.mouse.l=T.mouse.r=0};
 
@@ -264,6 +264,28 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  T.start('vanguard',1);T.useTP();for(let i=0;i<3;i++)T.hurtE(T.S.bosses[0],1e12,{raw:1});T.S.tp.charge=1;step(2);T.S.p.x=T.S.tp.x-30;
  T.useTP('end');assert.strictEqual(T.S.st,'over');assert.strictEqual(T.loadRun(),null,'terminar la run no borró la partida guardada');
  console.log('Modo Infinito: paletas, escalado, jefes duales, guardado y portal dual: OK')}
+// 31. La Tempestad: estabilidad, anomalías, combinaciones y tratos
+{const fresh=()=>{reset();T.start('vanguard',1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;T.S.pspd=1};
+ fresh();const st=T.S.storm;assert.strictEqual(st.stab,100);step(60*5);assert(st.stab<100&&st.stab>97,'el tiempo no erosiona la estabilidad');
+ // umbrales: 75 → anomalía; 50 → trato; 25 → anomalía
+ st.stab=76;T.stormErode(2);assert.strictEqual(st.act.length,1,'cruzar 75 no desató una anomalía');
+ st.stab=51;T.stormErode(2);step(40);assert.strictEqual(T.S.st,'play','el trato no se resolvió');assert(st.marks[50],'cruzar 50 no ofreció el trato');
+ // cada trato hace lo que dice
+ fresh();let n0=Object.values(T.S.p.items).reduce((a,b)=>a+b,0);T.S.storm.stab=40;T.takeDeal('estabilizar');
+ assert(T.S.storm.stab===75&&T.S.storm.spawnMul<1&&Object.values(T.S.p.items).reduce((a,b)=>a+b,0)===n0+1,'estabilizar falló');
+ fresh();T.takeDeal('alimentar');assert(T.S.storm.act.length===1&&T.S.storm.goldMul>1&&T.S.storm.spawnMul>1,'alimentar falló');
+ fresh();T.S.storm.stab=60;T.takeDeal('absorber');assert(T.S.p.buf.tempestad,'absorber no dio el poder');T.S.p.buf.tempestad.t=0;step(2);assert(T.S.storm.stab<=35.1,'absorber no tuvo consecuencia');
+ // gravedad baja: se salta más alto
+ const peak=()=>{let top=1e9;for(let i=0;i<300&&!T.S.p.ground;i++)step();assert(T.S.p.ground,'no aterrizó');key('Space',false);T.keys.Space=0;for(let i=0;i<90;i++){step();top=Math.min(top,T.S.p.y)}return top};
+ fresh();const y0=peak();T.stormUnleash('grav');const y1=peak();assert(y1<y0-40,'la gravedad baja no cambió el salto');
+ // cada anomalía y combinación funciona sin errores; los enemigos tormentosos dan el doble de oro
+ for(const k in T.ANOMALIES){fresh();T.S.spawn=2;T.stormUnleash(k);step(60*6)}
+ for(const cb of T.STORM_COMBOS){fresh();T.S.spawn=2;T.stormUnleash(cb.a);T.stormUnleash(cb.b);step(60*8)}
+ fresh();T.stormUnleash('furia');const e=T.spawnEnemy(Object.keys(T.ENEMIES)[0]);assert(e.storm,'el enemigo no nació tormentoso');
+ // máximo 3 a la vez; cambiar de etapa limpia todo
+ fresh();for(const k of ['grav','veloz','rayos','niebla'])T.stormUnleash(k);assert.strictEqual(T.S.storm.act.length,3);assert.strictEqual(T.S.gmul,1,'la anomalía más antigua no se disipó');
+ T.stormUnleash('veloz');T.loadStage(1);assert(T.S.pspd===1&&T.S.gmul===1,'cambiar de etapa no limpió las anomalías');
+ console.log('Tempestad: estabilidad, umbrales, tratos, anomalías, combinaciones y limpieza: OK')}
 // 30. Tienda de cosméticos
 {const sd=T.Save.d.shop;sd.gems=0;sd.own={};sd.eq={};
  assert(!T.buyOrEquip('skin','oro'),'compró sin cristales');assert(!sd.own['skin:oro']&&!sd.eq.skin);

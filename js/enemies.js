@@ -59,7 +59,7 @@ function spawnEnemy(type,x,y,noElite){
  if(!noElite&&Math.random()<Math.min(.6,(.04+co*.012)*S.df.elite*(it.blacklens?2:1))){
   const n=S.df.dbl?2:1,pool=AFX.slice().sort(()=>Math.random()-.5);e.hp*=2;e.dmg*=1.3;e.elite=1;
   for(let i=0;i<n;i++){const a=pool[i];e.aff.push(a);if(a.spd)e.spdx*=a.spd;if(a.hp)e.hp*=a.hp}}
- e.maxHp=e.hp;S.en.push(e);return e;
+ stormSpawn(e);e.maxHp=e.hp;S.en.push(e);return e;
 }
 function updEnemy(e,dt){
  const p=S.p,d=e.d;e.flash-=dt;e.slowT-=dt;e.markT-=dt;

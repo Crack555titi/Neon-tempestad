@@ -176,3 +176,8 @@ h1.big span{animation:flick 6s steps(1) infinite}
 #shopDesc{margin:0}
 #shopBuy:disabled{opacity:.45;cursor:default;box-shadow:none}
 @media (max-width:700px){#shopGrid{grid-template-columns:repeat(2,1fr)}}
+
+/* ===== Tempestad ===== */
+#storm{background:radial-gradient(ellipse at center,rgba(20,60,90,.55),rgba(5,3,13,.93))}
+.stormT{color:#bff4ff;text-shadow:0 0 16px #3cf0ff;letter-spacing:3px}
+#stormOpts .card{max-width:260px}
