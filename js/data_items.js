@@ -71,7 +71,7 @@ const ITEMS=[
  /* ===================== POCO COMUNES (25) ===================== */
  {id:'coil',name:'Bobina Saltarina',r:'u',col:'#5ab4ff',desc:'25% de prob. al golpear de lanzar un rayo que salta a 2 enemigos (+2) con 60% del golpe.',tags:['rayo'],
   on:{onHit(n,e,d){if(!chance(.25))return;let f=e;const hit=new Set([e]);
-   for(let i=0;i<2*n;i++){const t=nearest(f.x,f.y-f.h/2,250,hit);if(!t)break;bolt(f.x,f.y-f.h/2,t.x,t.y-t.h/2,'#5ab4ff',2);hurtE(t,d*.6,PROCRAW);hit.add(t);f=t}}}},
+   for(let i=0;i<2*n;i++){const t=nearest(f.x,f.y-f.h/2,250,hit);if(!t)break;bolt(f.x,f.y-f.h/2,t.x,t.y-t.h/2,'#5ab4ff',2);hurtE(t,d*.6,EL_RAYO_RAW);hit.add(t);f=t}}}},
  {id:'missile',name:'Misil Buscador',r:'u',col:'#ff9a3c',desc:'8% de prob. al golpear de lanzar un misil teledirigido con 200% del golpe (+8%).',tags:['explosión'],
   on:{onHit(n,e,d){if(chance(.08*n)){const p=S.p;fxProj({x:p.x,y:p.y-40,vx:R(-80,80),vy:-500,dmg:d*2,r:5,life:2,home:1,col:'#ff9a3c',raw:1,proc:1})}}}},
  {id:'bloodbomb',name:'Granada de Sangre',r:'u',col:'#c0102c',desc:'Los enemigos que mueren sangrando explotan (r 120) con 300% de daño base y hacen sangrar a los cercanos (+300%).',tags:['sangrado','explosión'],
@@ -121,7 +121,7 @@ const ITEMS=[
  {id:'dagger',name:'Daga Ceremonial',r:'r',col:'#e0e0ff',desc:'Al matar lanzas 3 dagas teledirigidas con 150% de daño base (+3 dagas).',
   on:{onKill(n,e){for(let i=0;i<3*n;i++){const a=R(0,6.28);fxProj({x:e.x,y:e.y-e.h/2,vx:Math.cos(a)*500,vy:Math.sin(a)*500,dmg:ib()*1.5,r:4,life:1.5,home:1,col:'#e0e0ff',proc:1})}}}},
  {id:'tesla',name:'Bobina Tesla',r:'r',col:'#bfe4ff',desc:'Cada 0,5 s electrocutas a 3 enemigos cercanos con 100% de daño base (+100%).',tags:['rayo'],
-  on:{onTick(n,dt){if(!tick('tesla',.5,n,dt))return;const p=S.p;for(const e of inR(p.x,p.y-20,260).slice(0,3)){bolt(p.x,p.y-20,e.x,e.y-e.h/2,'#bfe4ff',2);hurtE(e,ib()*n,PROC)}}}},
+  on:{onTick(n,dt){if(!tick('tesla',.5,n,dt))return;const p=S.p;for(const e of inR(p.x,p.y-20,260).slice(0,3)){bolt(p.x,p.y-20,e.x,e.y-e.h/2,'#bfe4ff',2);hurtE(e,ib()*n,EL_RAYO)}}}},
  {id:'afterburner',name:'Postquemador',r:'r',col:'#ff9a3c',desc:'−30% de enfriamiento del movimiento (+30%; máx. 75%).',st:{mcdr:.3}},
  {id:'stormeye',name:'Ojo de la Tormenta',r:'r',col:'#5ab4ff',desc:'Los críticos invocan un rayo del cielo con 300% del golpe (+300%).',tags:['crítico','rayo'],
   on:{onHit(n,e,d,o,crit){if(crit){bolt(e.x,-10,e.x,e.y-e.h/2,'#bfe4ff',3,14,.2);hurtE(e,d*3*n,PROCRAW)}}}},

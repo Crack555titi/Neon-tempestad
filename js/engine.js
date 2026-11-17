@@ -106,13 +106,14 @@ function pullE(e,x,y,v,dt){if(e.boss)return;const dx=x-e.x,dy=y-(e.y-e.h/2),d=hy
 function applyDot(e,k,dps,dur,raw){const D=e.dots||(e.dots={}),o=D[k];
  if(k==='poison'&&o&&o.t>0){o.n=Math.min(10,o.n+1);o.t=dur;o.dps=dps;o.raw=raw}else D[k]={dps,t:dur,n:1,tk:.5,raw}}
 function tickDots(e,dt){for(const k in e.dots){const o=e.dots[k];if(o.t<=0)continue;o.t-=dt;o.tk-=dt;
- if(o.tk<=0){o.tk=.5;hurtE(e,o.dps*o.n*.5*(k==='poison'&&S.dr.some(m=>m.k==='queen')?2:1),o.raw?DOTRAW:DOT);if(e.dead)return}}}
+ if(o.tk<=0){o.tk=.5;hurtE(e,o.dps*o.n*.5*(k==='poison'&&S.dr.some(m=>m.k==='queen')?2:1),{dot:1,raw:o.raw,el:DOT_EL[k]});if(e.dead)return}}}
 
 function hurtE(e,d,o){
  if(e.dead||e.hidden||e.ghost>0)return;const p=S.p,bl=p.items.blacklens;o=o||NOOPT;let crit=false;
  if(!o.raw){crit=!o.dot&&(bl||o.crit||Math.random()<p.m.crit);
   d*=p.dmgMul*p.m.dmg*bm('dmg')*(crit?(bl?1.5:2)+p.m.critm:1)*(e.stun>0?1.5:1)*(e.markT>0?1.5:1);
-  for(const it of p.dmItems)d*=it.dm(p.items[it.id],e)}
+  for(const it of p.dmItems)d*=it.dm(p.items[it.id],e);d=applyElement(e,d,o)}
+ if(o.raw&&o.el)d=applyElement(e,d,o);
  if(e.d.front&&sgn(p.x-e.x)===e.face&&!e.chT)d*=e.d.front;  // escudo frontal del Acorazado
  for(const a of e.aff)if(a.taken)d=a.taken(e,d);
  if(e.sh>0){const a=Math.min(e.sh,d);e.sh-=a;d-=a}
@@ -323,7 +324,7 @@ function draw(){
  c.shadowBlur=0;
  drawLoot();
  for(const e of s.en)drawEnemy(e);
- drawStormWorld();
+ drawStormWorld();drawElements();
  for(const m of s.dr)MIN[m.k].draw(m);c.shadowBlur=0;
  drawPlayer(s.p);
  for(const id in s.p.buf){const b=s.p.buf[id];if(b.draw)b.draw(b)}

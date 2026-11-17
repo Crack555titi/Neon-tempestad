@@ -29,7 +29,7 @@ function hud(){
  // ---- arriba al centro: jefe o etapa + teletransportador ----
  let ty=20;
  if(s.boss){const n=s.bosses.length,bw=n>1?258:524;s.bosses.forEach((b,i)=>{const x0=W/2-262+i*(bw+8),cx=x0+bw/2;panel(x0,6,bw,50,b.def.color);
-  c.textAlign='center';c.font='bold 13px monospace';c.fillStyle=b.def.color;c.fillText(b.def.name.toUpperCase(),n>1?cx-24:cx,22);
+  c.textAlign='center';c.font='bold 13px monospace';c.fillStyle=b.def.color;c.fillText(b.def.name.toUpperCase()+(BOSS_EL[b.bid]?' · débil a '+ELEMENTS[BOSS_EL[b.bid].weak].sym:''),n>1?cx-24:cx,22);
   for(let k=1;k<=3;k++){c.fillStyle=k<=b.ph?b.def.color:'#333';c.beginPath();c.arc(x0+bw-62+k*14,18,4,0,6.283);c.fill()}
   gbar(x0+12,28,bw-24,12,b.hp/b.maxHp,'#ff3c6a',b.def.color,b.stun>0);gbar(x0+12,43,bw-24,5,b.stun>0?b.stun/3.2:b.stag/b.stagMax,'#ffd23c','#fff',b.stun>0)});ty=72}
  else{c.textAlign='center';c.font='bold 12px monospace';c.fillStyle=STAGE.plat.edge;c.fillText(`${s.loop?`LOOP ${s.loop+1} · `:''}ETAPA ${s.stage+1}/${STAGES.length} · ${STAGE.name.toUpperCase()}`,W/2,ty);ty=38}
@@ -95,7 +95,7 @@ function itemCard(it,n){const rc=RARITY[it.r].col;
 function toggleInv(){
  if(S.st==='inv'){$('inv').style.display='none';S.st='play';mouse.l=mouse.r=0;return}
  const p=S.p,m=p.m,pct=v=>Math.round(v*100)+'%',ids=sortedItems();
- $('invStats').textContent=`Daño ×${(p.dmgMul*m.dmg*bm('dmg')).toFixed(2)} · Vel. ataque ×${(m.as*bm('as')).toFixed(2)} · Crítico ${pct(p.items.blacklens?1:m.crit)} · Robo de vida ${pct(m.ls)} · Armadura ${pct(Math.min(capL(.6),m.arm))} · Enfriamientos −${pct(Math.min(capL(.6),m.cdr))} · Suerte ${p.items.entropy?0:m.luck} · Oro ${p.gold}`;
+ $('invStats').textContent=`${elemName(CHAR_EL[S.cid])} · Daño ×${(p.dmgMul*m.dmg*bm('dmg')).toFixed(2)} · Vel. ataque ×${(m.as*bm('as')).toFixed(2)} · Crítico ${pct(p.items.blacklens?1:m.crit)} · Robo de vida ${pct(m.ls)} · Armadura ${pct(Math.min(capL(.6),m.arm))} · Enfriamientos −${pct(Math.min(capL(.6),m.cdr))} · Suerte ${p.items.entropy?0:m.luck} · Oro ${p.gold}`;
  $('invList').innerHTML=ids.length?ids.map(id=>itemCard(ITEM[id],p.items[id])).join(''):'<p>Aún no tienes objetos. Abre cofres con <b>E</b>.</p>';
  $('inv').style.display='flex';S.st='inv';
 }
@@ -146,7 +146,7 @@ function buildMenu(){
  $('info').style.setProperty('--c',v.color);
  previewC=selC;
  $('info').innerHTML=`<canvas id="prev" width="220" height="130"></canvas><h2 style="color:${v.color}">${esc(v.name)}</h2><i>${esc(v.fam)} · ${esc(v.role)}</i>
-  <div class="stats">Vida ${v.hp} · Velocidad ${v.spd} · Salto ${v.jump}</div>
+  <div class="stats">Vida ${v.hp} · Velocidad ${v.spd} · Salto ${v.jump} · Elemento: ${elemName(CHAR_EL[selC])}</div>
   ${v.passive?`<p class="passive">◆ ${esc(v.passive.desc)}</p>`:''}
   <ul>${abHtml('LMB',v.primary)}${abHtml('RMB',v.secondary)}${abHtml('SHIFT',v.move)}${abHtml('Q',v.ult)}</ul>`;
  $('diffs').innerHTML=DIFFS.map((d,i)=>`<div class="diff ${i===selD?'sel':''}" data-i="${i}">${i+1}. ${d.name}</div>`).join('');

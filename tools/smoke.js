@@ -30,7 +30,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);if(T.S.st==='storm')el('stormOpts').onclick(pick0);T.update(1/60);T.draw()}};
@@ -264,6 +264,31 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  T.start('vanguard',1);T.useTP();for(let i=0;i<3;i++)T.hurtE(T.S.bosses[0],1e12,{raw:1});T.S.tp.charge=1;step(2);T.S.p.x=T.S.tp.x-30;
  T.useTP('end');assert.strictEqual(T.S.st,'over');assert.strictEqual(T.loadRun(),null,'terminar la run no borró la partida guardada');
  console.log('Modo Infinito: paletas, escalado, jefes duales, guardado y portal dual: OK')}
+// 33. Elementos: debilidades, resistencias, plasma, elemento de los DoT y reacciones
+{const fresh=(ch)=>{reset();T.start(ch,1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;const p=T.S.p;p.m.crit=0;return p};
+ const mk=(type,dx=80)=>{const e=T.spawnEnemy(type,T.S.p.x+dx,T.S.p.y);e.hp=e.maxHp=1e6;e.aff=[];e.elite=0;return e};
+ const hit=(e,d,o)=>{const h=e.hp;T.hurtE(e,d,o||{});return h-e.hp};
+ // todos los enemigos y jefes tienen debilidad y resistencia distintas; todos los héroes están en la tabla
+ for(const k in T.ENEMIES)assert(T.ENEMY_EL[k]&&T.ENEMY_EL[k].weak!==T.ENEMY_EL[k].res,k+' sin elementos');for(const k in T.BOSSES)assert(T.BOSS_EL[k],k+' sin elementos');for(const k in T.CHARS)assert(k in T.CHAR_EL,k+' sin elemento');
+ // Centinela (fuego) contra Reptador (débil a fuego) ×1,5 y contra Fuego Fatuo (resiste fuego) ×0,6
+ let p=fresh('vanguard');let e=mk('crawler');const base=hit(e,100);assert(base>140&&base<160,'debilidad: '+base);
+ e=mk('wisp');const r=hit(e,100);assert(r>55&&r<65,'resistencia: '+r);
+ // plasma (Cañonero) nunca es resistido; el Bastión es físico: ni débil ni resistido
+ p=fresh('artillery');e=mk('swarm');assert(Math.abs(hit(e,100)-100)<1,'el plasma fue resistido');
+ p=fresh('bastion');e=mk('crawler');assert(Math.abs(hit(e,100)-100)<1,'el físico tuvo debilidad');
+ // un elemento explícito manda sobre el del héroe; los DoT llevan el suyo (veneno = corrupción: el Reptador lo resiste)
+ p=fresh('bastion');e=mk('brute');assert(hit(e,100,{el:'rayo'})>140,'el elemento explícito no se aplicó');
+ e=mk('crawler');T.applyDot(e,'poison',100,1);const h0=e.hp;step(31);assert(h0-e.hp<40&&h0-e.hp>20,'el veneno no llevó corrupción: '+(h0-e.hp));
+ // reacciones: Resonancia (rayo sobre helado) salta a los vecinos; Choque Térmico quita el hielo; Combustión consume el veneno; Colapso aturde al electrizado
+ p=fresh('volt');e=mk('tank');const v=mk('tank',140);e.slowT=2;const d1=hit(e,100);assert(d1>200,'Resonancia no multiplicó: '+d1);assert(v.hp<v.maxHp,'Resonancia no saltó al vecino');
+ p=fresh('vanguard');e=mk('tank');e.slowT=2;hit(e,100);assert.strictEqual(e.slowT,0,'Choque Térmico no quitó el hielo');
+ p=fresh('vanguard');e=mk('tank');T.applyDot(e,'poison',50,4);hit(e,100);assert(!e.dots.poison.t,'Combustión no consumió el veneno');
+ p=fresh('chrono');e=mk('brute');e.shockT=3;hit(e,100);assert(e.stunT>0&&e.shockT===0,'Colapso no aturdió');
+ // un golpe de rayo electriza; la reacción tiene pausa de 0,8 s
+ p=fresh('volt');e=mk('tank');hit(e,10);assert(e.shockT>0,'el rayo no electrizó');e.slowT=2;hit(e,100);const rx=e.rxT;hit(e,100);assert(rx>0&&e.rxT===rx,'las reacciones se encadenaron sin pausa');
+ // cada héroe aguanta una partida con enemigos de los 5 escenarios sin excepciones (todas las tablas de elementos en uso)
+ for(const ch of Object.keys(T.CHARS)){fresh(ch);T.S.spawn=2;Object.assign(T.mouse,{x:700,y:300});for(let f=0;f<60*6;f++){T.mouse.l=f%40<30;if(f%120===0)T.S.p.hp=T.S.p.maxHp;step()}}
+ console.log('Elementos: debilidad, resistencia, plasma, físico, DoT con elemento y 4 reacciones: OK')}
 // 32. Los 10 objetos originales
 {const give=(ch,id,n=1)=>{reset();T.start(ch,1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;for(let i=0;i<n;i++)T.giveItem(id,1);return T.S.p};
  const ORIG=['stormheart','causality','voidpact','brokenclock','parasite','memory','unstableprism','lastking','destiny','dimparasite'];

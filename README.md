@@ -40,6 +40,7 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   - la densidad de enemigos, ×1,5;
   - cada jefe llega acompañado de otro;
   - los topes de armadura, esquiva y enfriamientos suben hasta el 95%, para que los objetos acumulados terminen rompiendo el juego.
+- **Elementos.** Cinco elementos de daño (fuego, rayo, vacío, plasma, corrupción) y el estado de hielo. Cada héroe golpea con el suyo; cada enemigo y jefe tiene una debilidad (×1,5) y una resistencia (×0,6), y el plasma nunca es resistido. Las **reacciones** premian combinar: rayo sobre un enemigo helado (Resonancia, salta a los vecinos), fuego sobre helado (Choque Térmico), fuego sobre envenenado (Combustión) y vacío sobre electrizado (Colapso, atrae y aturde).
 - **Enemigos.** 15 tipos (voladores, tiradores, kamikazes, tanques, etc.) y 11 afijos de élite.
 - **Dificultades.**
 
@@ -204,6 +205,7 @@ Para borrar una puntuación (trampas, pruebas…) entra en la consola de Firebas
 | `js/update.js`, `version.json` | Comprobación de versión y actualización obligatoria |
 | `js/main.js`, `js/preload.js`, `js/updater.js` | Ventana de escritorio (Electron) y actualización automática verificada |
 | `js/cosmetics.js` | Tienda: skins, estelas y auras |
+| `js/elements.js` | Elementos: debilidades, resistencias y reacciones |
 | `js/storm.js` | La Tempestad: estabilidad, anomalías, combinaciones y tratos |
 | `tools/` | Pruebas (`smoke.js`, `browser.js`) y scripts de empaquetado |
 

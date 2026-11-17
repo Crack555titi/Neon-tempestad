@@ -62,7 +62,7 @@ function spawnEnemy(type,x,y,noElite){
  stormSpawn(e);e.maxHp=e.hp;S.en.push(e);return e;
 }
 function updEnemy(e,dt){
- const p=S.p,d=e.d;e.flash-=dt;e.slowT-=dt;e.markT-=dt;
+ const p=S.p,d=e.d;e.flash-=dt;e.slowT-=dt;e.markT-=dt;updElements(e,dt);
  if(e.dots){tickDots(e,dt);if(e.dead)return}
  if(e.boss)return bossAI(e,dt);
  for(const a of e.aff)if(a.tick)a.tick(e,dt);
