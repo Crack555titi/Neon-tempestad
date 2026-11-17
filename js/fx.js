@@ -15,7 +15,7 @@ const TX=new Pool(()=>({}),200);              // números flotantes
 const BL=new Pool(()=>({}),120);              // rayos / haces (líneas)
 const deadL=o=>o.l<=0,deadLife=o=>o.life<=0;
 // Todos los campos que puede llevar un proyectil: el pool reutiliza objetos y hay que reiniciarlos
-const PR_DEF={x:0,y:0,vx:0,vy:0,dmg:0,r:5,life:1,t0:0,hostile:0,col:'#fff',pierce:0,home:0,boom:0,gm:0,bounce:0,wb:0,ret:0,back:0,
+const PR_DEF={x:0,y:0,vx:0,vy:0,cz:0,near:0,dmg:0,r:5,life:1,t0:0,hostile:0,col:'#fff',pierce:0,home:0,boom:0,gm:0,bounce:0,wb:0,ret:0,back:0,
  split:0,grow:0,dotK:0,dps:0,dur:0,mark:0,stun:0,hook:0,pull:0,ls:0,crit:0,zone:null,ported:0,raw:0,proc:0,homeP:0,harmless:0,src:null};
 
 /* ---------- calidad: baja desactiva el brillo y reduce partículas para equipos lentos ---------- */

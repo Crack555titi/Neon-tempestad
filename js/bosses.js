@@ -144,7 +144,7 @@ function bossAI(b,dt){
  D.move(b,dt);if(D.tick)D.tick(b,dt);
  if(D.contact&&!b.hidden){const p=S.p;if(Math.abs(b.x-p.x)<b.w/2&&Math.abs(b.y-b.h/2-(p.y-20))<b.h/2+20)hurtP(b.dmg*dmgScale()*.6,b)}
  b.t-=dt;if(b.t>0)return;
- const f=[0,1,.82,.65][b.ph],pool=D.moves.filter(m=>b.ph>=m.ph);
+ const f=[0,1,.82,.65][b.ph],pool=D.moves.filter(m=>b.ph+(S.p.items.voidpact?1:0)>=m.ph);  // Contrato del Vacío: ataques de la fase siguiente
  let r=Math.random()*pool.reduce((a,m)=>a+(m.w||1),0),m=pool[0];for(const x of pool){r-=x.w||1;if(r<=0){m=x;break}}
  m.f(b,f,dmgScale());b.t=m.cd*f+.4;
 }

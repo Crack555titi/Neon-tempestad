@@ -136,7 +136,8 @@ function hurtE(e,d,o){
 function kill(e){
  e.dead=1;S.kills++;disintegrate(e.x,e.y,e.w,e.h,e.d.color);if(e.boss){burst(e.x,e.y-e.h/2,80,e.d.color,600,4);chromaHit(1.2)}S.shake=Math.max(S.shake,e.boss?30:3);
  if(e.boss||e.elite)hitStop(e.boss?60:40);
- const p=S.p;giveXp(e.d.xp);p.gold+=Math.round(goldFor(e)*(S.storm?S.storm.goldMul:1));
+ const p=S.p;giveXp(e.d.xp*(e.elite&&p.items.voidpact?1+p.items.voidpact:1));  // Contrato del Vacío
+ p.gold+=Math.round(goldFor(e)*(S.storm?S.storm.goldMul:1));
  heal(p.maxHp*((p.items.bloodoath?0:.01)+bsum('killheal')));
  if(kdepth<4){kdepth++;Ev.emit('onKill',e);kdepth--}  // límite a las cadenas de explosiones al matar
  if(e.boss){const r=chance(.2)?'l':'r';giveItem(rollItem(r));S.bosses=S.bosses.filter(b=>b!==e);S.boss=S.bosses[0]||null;S.bossName=e.def.name;
@@ -242,7 +243,7 @@ function updZone(z,dt){
 
 /* ===================== UPDATE ===================== */
 function update(dt){
- const s=S,p=s.p,fz=s.freeze>0;s.t+=dt;s.clock+=dt*s.df.clock*(p.items.invhour?1.5+.5*p.items.invhour:1);s.cam=clamp(p.x-W/2,0,WORLD-W);
+ const s=S,p=s.p,fz=s.freeze>0;s.t+=dt;s.clock+=dt*s.df.clock*(p.items.invhour?1.5+.5*p.items.invhour:1)*(p.items.brokenclock?1.1+.1*p.items.brokenclock:1);s.cam=clamp(p.x-W/2,0,WORLD-W);
  for(const pl of PLAT){const a=pl.sp?Math.sin(s.t*pl.sp):0,nx=pl.x+(pl.ax||0)*a;pl.dx=pl.rx===undefined?0:nx-pl.rx;pl.rx=nx;pl.ry=pl.y+(pl.ay||0)*a;
   pl.on=s.phase>=pl.ph[0]&&s.phase<=pl.ph[1]&&!(pl.bl&&s.phase>=pl.bl&&Math.sin(s.t*1.6+pl.x*.01)<-.3)}  // bl: parpadea
  updBuffs(dt);drainP(p.maxHp*bsum('drain')*dt);if(s.st!=='play')return;

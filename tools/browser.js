@@ -49,6 +49,8 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  await sleep(6000);await shot('03-partida');
  // la Tempestad: tres anomalías activas (con combinación) y después el trato
  await js("for(const k of S.storm.act.slice())stormEnd(k);stormUnleash('grav');stormUnleash('rayos');stormUnleash('furia');S.storm.stab=38");await sleep(3200);await shot('03b-tempestad');
+ // objetos originales en acción: Parásito de Dimensión (copia morada), Prisma Inestable y Fragmento de Destino
+ await js("for(const id of ['dimparasite','unstableprism','destiny','stormheart'])giveItem(id,1);S.p.hp=S.p.maxHp");await sleep(2500);await shot('03d-objetos-originales');
  await js("openStormDeal()");await sleep(500);await shot('03c-trato');await js("takeDeal('estabilizar');$('storm').style.display='none';S.st='play'");
  for(const [i,b] of [[0,'prisma'],[1,'hydra'],[2,'queen'],[3,'leviathan'],[4,'archon']]){
   await js(`if(S.st!=='play')document.querySelector('#nodes .card')?.click();loadStage(${i});useTP();S.boss.hidden=0;hurtE(S.boss,S.boss.maxHp*.5,{raw:1});S.p.hp=S.p.maxHp`);

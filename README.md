@@ -18,7 +18,7 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   | Tiempo/Espacio | Cronista, Paradoja, Gravitón, Umbral |
   | Malditos/Híbridos | Hemomante, Berserker, Poseído, Quimera (riesgo/recompensa: gastan vida para potenciarse) |
 
-- **Objetos.** Hay 80 acumulables: 35 comunes, 25 poco comunes, 12 raros, 5 legendarios que cambian las reglas y 3 míticos. Además hay 12 objetos fragmentados, que dan bonificaciones absurdas a cambio de una penalización permanente y se consiguen en altares.
+- **Objetos.** Hay 90 acumulables: 35 comunes, 25 poco comunes, 18 raros, 9 legendarios y 3 míticos. Diez de ellos son **originales que cambian las reglas**: Corazón de la Tormenta, Espejo de Causalidad, Contrato del Vacío, Reloj Roto, Núcleo Parasitario, Memoria Artificial, Prisma Inestable, Corona del Último Rey, Fragmento de Destino y Parásito de Dimensión. Además hay 12 objetos fragmentados, que dan bonificaciones absurdas a cambio de una penalización permanente y se consiguen en altares.
 - **Economía.** Oro y cofres de varias rarezas. El precio sube con la dificultad, y en Cataclismo los cofres cuestan un 30% más.
 - **Escenarios y jefes.**
 

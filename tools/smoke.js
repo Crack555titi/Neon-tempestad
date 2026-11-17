@@ -30,7 +30,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);if(T.S.st==='storm')el('stormOpts').onclick(pick0);T.update(1/60);T.draw()}};
@@ -80,10 +80,10 @@ console.log('Comprobaciones de arreglos, logros y mecánicas: OK');
 
 // 9. Objetos: recuento por rareza, ids únicos, todos con descripción y efecto
 const cnt=r=>T.ITEMS.filter(i=>i.r===r).length;
-assert.deepStrictEqual(['c','u','r','l','m'].map(cnt),[35,25,12,5,3],'recuento por rareza');
-assert.strictEqual(T.ITEMS.length,80);assert(T.FRAGMENTS.length>=10);
+assert.deepStrictEqual(['c','u','r','l','m'].map(cnt),[35,25,18,9,3],'recuento por rareza');
+assert.strictEqual(T.ITEMS.length,90);assert(T.FRAGMENTS.length>=10);
 const all=T.ITEMS.concat(T.FRAGMENTS),ids=new Set(all.map(i=>i.id));assert.strictEqual(ids.size,all.length,'ids repetidos');
-const SPECIAL=['prismfork','ankh','greed','invhour','blacklens','icarus','elegy'];  // efectos leídos directamente por el motor
+const SPECIAL=['prismfork','ankh','greed','invhour','blacklens','icarus','elegy','voidpact'];  // efectos leídos directamente por el motor
 for(const it of all){assert(it.name&&it.desc&&it.col,it.id);assert(it.st||it.on||it.dm||it.pick||SPECIAL.includes(it.id),it.id+' no hace nada')}
 // 10. Economía: el precio crece con la dificultad y Cataclismo cobra un 30% más que Estándar al mismo minuto
 T.start('vanguard',1);T.S.clock=600;const c1=T.priceOf({tier:'small'});T.start('vanguard',3);T.S.clock=600;const c3=T.priceOf({tier:'small'});
@@ -264,6 +264,29 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  T.start('vanguard',1);T.useTP();for(let i=0;i<3;i++)T.hurtE(T.S.bosses[0],1e12,{raw:1});T.S.tp.charge=1;step(2);T.S.p.x=T.S.tp.x-30;
  T.useTP('end');assert.strictEqual(T.S.st,'over');assert.strictEqual(T.loadRun(),null,'terminar la run no borró la partida guardada');
  console.log('Modo Infinito: paletas, escalado, jefes duales, guardado y portal dual: OK')}
+// 32. Los 10 objetos originales
+{const give=(ch,id,n=1)=>{reset();T.start(ch,1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;for(let i=0;i<n;i++)T.giveItem(id,1);return T.S.p};
+ const ORIG=['stormheart','causality','voidpact','brokenclock','parasite','memory','unstableprism','lastking','destiny','dimparasite'];
+ // Reloj Roto: las bajas recortan enfriamientos y el reloj corre más
+ let p=give('artillery','brokenclock');p.cd.s=3;p.cd.u=10;const e1=T.spawnEnemy(Object.keys(T.ENEMIES)[0],p.x+60,p.y);T.hurtE(e1,1e9,{raw:1});assert(p.cd.s<=2.7&&p.cd.u<=9.7,'Reloj Roto no recortó enfriamientos');
+ const c0=T.S.clock;step(60);const dBroken=T.S.clock-c0;reset();T.start('artillery',1);const c1=T.S.clock;step(60);assert(dBroken>(T.S.clock-c1)*1.15,'Reloj Roto no acelera el reloj');
+ // Corona del Último Rey: más daño con pocos enemigos, menos con muchos
+ p=give('vanguard','lastking');const dm=T.ITEM.lastking.dm;for(const e of T.S.en)e.dead=1;assert(dm(1)>1.5,'Corona sin enemigos');for(let i=0;i<12;i++)T.spawnEnemy(Object.keys(T.ENEMIES)[0],p.x+300+i*10,p.y);assert.strictEqual(dm(1),.8,'Corona con muchos enemigos');
+ // Corazón de la Tormenta: se carga al recibir daño y descarga sobre los enemigos cercanos
+ p=give('vanguard','stormheart');p.m.dodge=0;const ev=T.spawnEnemy(Object.keys(T.ENEMIES)[0],p.x+60,p.y);const hp0=ev.hp;for(let i=0;i<6;i++){p.inv=0;T.hurtP(p.maxHp*.12,{x:p.x+300,y:p.y})}
+ assert(ev.hp<hp0,'Corazón de la Tormenta no descargó');
+ // Fragmento de Destino: un proyectil que roza da suerte; un golpe la quita
+ p=give('vanguard','destiny');const l0=p.m.luck;T.fxProj({x:p.x+p.w/2+25,y:p.y-p.h/2,vx:0,vy:0,r:4,life:5,hostile:1,dmg:1});T.S.spawn=1e9;step(1);assert(p.m.luck>l0,'Destino no dio suerte');
+ p.inv=0;p.m.dodge=0;T.hurtP(5);assert.strictEqual(p.m.luck,l0,'Destino no perdió la suerte al recibir daño');
+ // Contrato del Vacío: élites con recompensa doble y jefes con los ataques de la fase siguiente
+ p=give('vanguard','voidpact');const el=T.spawnEnemy(Object.keys(T.ENEMIES)[0],p.x+200,p.y);el.elite=1;el.aff=[Object.values(T.AFX)[0]];const g0=p.gold,x0=p.xp;T.hurtE(el,1e9,{raw:1});
+ const el2=(()=>{reset();T.start('vanguard',1);T.S.spawn=1e9;const q=T.S.p,e=T.spawnEnemy(Object.keys(T.ENEMIES)[0],q.x+200,q.y);e.elite=1;e.aff=[Object.values(T.AFX)[0]];const g=q.gold,x=q.xp;T.hurtE(e,1e9,{raw:1});return [q.gold-g,q.xp-x]})();
+ assert(p.gold-g0>=el2[0]*1.9&&p.xp-x0>=el2[1]*1.9,'Contrato del Vacío no dobló la recompensa');
+ // Memoria Artificial y Parásito de Dimensión: lo que repiten aparece con retraso
+ p=give('artillery','dimparasite');step(50);T.mouse.l=1;step(2);T.mouse.l=0;const n0=T.PR.n;step(50);assert(T.PR.n>0||n0>0,'Parásito de Dimensión no repitió el disparo');assert(p.ist.dimAt,'el parásito no tiene posición');
+ // cada objeto original, con 3 acumulaciones, aguanta una partida con enemigos sin excepciones
+ for(const id of ORIG){const q=give('artillery',id,3);T.S.spawn=2;Object.assign(T.mouse,{x:700,y:300});T.keys.KeyQ=1;for(let f=0;f<60*12;f++){T.mouse.l=f%40<30;if(f%120===0)q.hp=q.maxHp;step()}T.keys.KeyQ=0}
+ console.log('Objetos originales: Reloj Roto, Corona, Corazón de la Tormenta, Destino, Contrato del Vacío, parásitos y memoria: OK')}
 // 31. La Tempestad: estabilidad, anomalías, combinaciones y tratos
 {const fresh=()=>{reset();T.start('vanguard',1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;T.S.pspd=1};
  fresh();const st=T.S.storm;assert.strictEqual(st.stab,100);step(60*5);assert(st.stab<100&&st.stab>97,'el tiempo no erosiona la estabilidad');

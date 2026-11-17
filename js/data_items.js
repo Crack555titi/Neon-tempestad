@@ -14,6 +14,8 @@ const RARITY={
  c:{n:'Común',col:'#d8e0ff'},u:{n:'Poco común',col:'#4cff7a'},r:{n:'Raro',col:'#ff4d6d'},
  l:{n:'Legendario',col:'#ffd23c'},m:{n:'Mítico',col:'#ff3cf2'},f:{n:'Fragmentado',col:'#5ab4ff'}
 };
+// definitivas que Memoria Artificial puede repetir con el daño reducido (el resto se sustituye por una explosión)
+const MEM_OK=new Set(['nova','zone','well','blackhole','static','quake','rift','barrage','napalm','storm','orbital','beam','rocket','proj','ringshot','chain','siege','slam','hemorrhage']);
 const tick=(id,every,n,dt)=>{const s=S.p.ist;s[id]=(s[id]||0)+dt;if(s[id]<every)return false;s[id]=0;return true};
 
 const ITEMS=[
@@ -151,7 +153,45 @@ const ITEMS=[
    Z({x:e.x,y:e.y-e.h/2,r:220,life:2.5,dot:1,fdmg:ib()*1.5,pullZ:380,col:'#3a1a8a',end:z=>boom(z.x,z.y,180,ib()*6,'#ff3cf2')})}}},
  {id:'eclipse',name:'Eclipse Hambriento',r:'m',col:'#ff2a00',desc:'+100% de velocidad de ataque y −50% de enfriamientos (+25% vel.). COSTE: pierdes un 3% de vida por segundo si no has matado en los últimos 2 s.',
   pick(n){buff('i_eclipse',Infinity,{as:2+.25*(n-1),cdm:.5})},
-  on:{onKill(){S.p.ist.lastKill=S.t},onTick(n,dt){if(S.t-(S.p.ist.lastKill||0)>2)drainP(S.p.maxHp*.03*dt)}}}
+  on:{onKill(){S.p.ist.lastKill=S.t},onTick(n,dt){if(S.t-(S.p.ist.lastKill||0)>2)drainP(S.p.maxHp*.03*dt)}}},
+
+ /* ===================== ORIGINALES (10): cambian las reglas en vez de sumar porcentajes ===================== */
+ {id:'stormheart',name:'Corazón de la Tormenta',r:'r',col:'#3cf0ff',tags:['rayo'],desc:'Cada golpe recibido te carga de electricidad. Al acumular daño igual a la mitad de tu vida máxima, descargas un rayo en 180 px con 400% de daño base (+200%).',
+  on:{onTakeDamage(n,d){const p=S.p,s=p.ist;s.charge=(s.charge||0)+d;if(s.charge<p.maxHp*.5)return;s.charge=0;
+   for(const e of inR(p.x,p.y-20,180))bolt(p.x,p.y-20,e.x,e.y-e.h/2,'#3cf0ff',3);boom(p.x,p.y-20,180,ib()*(2+2*n),'#3cf0ff');say('¡Corazón de la Tormenta!')}}},
+ {id:'causality',name:'Espejo de Causalidad',r:'r',col:'#c8a0ff',desc:'El 20% de tus proyectiles (+10%) vuelve a ti 1,5 s después de extinguirse y sale de nuevo buscando enemigos con un 150% de su daño.',
+  on:{onTick(n){for(let i=0;i<PR.n;i++){const q=PR.a[i];if(q.hostile||q.harmless||q.cz)continue;q.cz=1;if(!chance(.1+.1*n))continue;
+   const dmg=q.dmg*1.5,r=q.r;S.sch.push({t:(q.life||1)+1.5,f:()=>{if(!S||S.st!=='play')return;const p=S.p,a=R(-2.6,-.5);
+    ring(p.x,p.y-20,24,'#c8a0ff',.2);fxProj({x:p.x,y:p.y-20,vx:Math.cos(a)*420,vy:Math.sin(a)*420,dmg,r,life:3,t0:3,home:1,col:'#c8a0ff',proc:1})}})}}}},
+ {id:'voidpact',name:'Contrato del Vacío',r:'l',col:'#9b30ff',desc:'Los élites dan el doble de oro y experiencia (+100%). A cambio, cada jefe dispone desde el principio de los ataques de su siguiente fase.'},
+ {id:'brokenclock',name:'Reloj Roto',r:'r',col:'#ffb070',tags:['enfriamiento'],desc:'Cada baja reduce 0,3 s (+0,3 s) todos tus enfriamientos. A cambio, el reloj del mundo avanza un 20% más rápido (+10%).',
+  on:{onKill(n){const cd=S.p.cd;for(const k of 'smu')if(cd[k]>0)cd[k]=Math.max(0,cd[k]-.3*n)}}},
+ {id:'parasite',name:'Núcleo Parasitario',r:'l',col:'#7dff3c',desc:'Un organismo que aprende de ti: cada 40 s evoluciona según la habilidad que más uses. Primaria: +10% vel. de ataque · Secundaria: −6% enfriamientos · Movimiento: +8% velocidad · Definitiva: −8% enfriamiento de la definitiva (×acumulaciones).',
+  on:{onCast(n,slot){const u=S.p.ist.parUse||(S.p.ist.parUse={});u[slot]=(u[slot]||0)+1},
+   onTick(n,dt){if(!tick('par',40,n,dt))return;const p=S.p,u=p.ist.parUse||{},slot=Object.keys(u).sort((a,b)=>u[b]-u[a])[0]||'p';p.ist.parUse={};
+    const ev={p:['velocidad de ataque',()=>p.m.as+=.1*n],s:['enfriamientos',()=>p.m.cdr+=.06*n],m:['velocidad',()=>p.m.spd+=.08*n],u:['definitiva',()=>p.m.ucdr+=.08*n]}[slot];
+    ev[1]();p.ist.parLv=(p.ist.parLv||0)+1;say(`🧬 Núcleo Parasitario evoluciona (nivel ${p.ist.parLv}): ${ev[0]}`);burst(p.x,p.y-20,20,'#7dff3c',300,3)}}},
+ {id:'memory',name:'Memoria Artificial',r:'l',col:'#f0f0ff',desc:'2,5 s después de cada definitiva, la reproduce otra vez al 40% de daño (+15%). Las definitivas que no son de daño se sustituyen por una explosión.',
+  on:{onCast(n,slot){if(slot!=='u')return;const p=S.p,d=ab('u'),aim=p.aim,k=.25+.15*n;
+   S.sch.push({t:2.5,f:()=>{if(!S||S.st!=='play')return;ring(p.x,p.y-20,40,'#f0f0ff',.3);
+    if(MEM_OK.has(d.t)){const c2=Object.assign({},d);for(const key of ['dmg','dps','fdmg'])if(c2[key])c2[key]*=k;AB[d.t](p,c2,aim,0)}else boom(p.x,p.y-20,200,ib()*8*k,'#f0f0ff')}})}}},
+ {id:'unstableprism',name:'Prisma Inestable',r:'r',col:'#ff3cf2',desc:'Cada 30 s cambia al azar el atributo que potencia: +30% de daño, +30% de vel. de ataque, −25% de daño recibido o +20% de crítico (+10% cada uno).',
+  on:{onTick(n,dt){const p=S.p;if(!tick('uprism',30,n,dt)&&p.buf.i_uprism)return;const k=['dmg','as','def','crit'][Math.random()*4|0],v=.2+.1*n;
+   if(p.buf.i_uprism&&p.buf.i_uprism.end)p.buf.i_uprism.end();
+   const o={};if(k==='dmg')o.dmg=1.1+v;if(k==='as')o.as=1.1+v;if(k==='def')o.taken=1-Math.min(.6,v+.05);if(k==='crit'){p.m.crit+=v;o.end=()=>{p.m.crit-=v}}
+   buff('i_uprism',Infinity,o);txt(p.x,p.y-60,'PRISMA: '+{dmg:'DAÑO',as:'VELOCIDAD',def:'DEFENSA',crit:'CRÍTICO'}[k],'#ff3cf2',14)}}},
+ {id:'lastking',name:'Corona del Último Rey',r:'r',col:'#ffd23c',desc:'Con 3 enemigos o menos en pantalla, +15% de daño por cada enemigo que falte hasta 4 (máx. +60%, ×acumulaciones). Con 10 o más, −20%.',
+  dm(n){const c=S.en.filter(x=>!x.dead&&!x.boss).length;return c<=3?1+.15*n*(4-c):c>=10?.8:1}},
+ {id:'destiny',name:'Fragmento de Destino',r:'r',col:'#bff4ff',tags:['suerte'],desc:'Cada proyectil enemigo que te roza sin tocarte te da +0,5 de suerte (+0,5; máx. 5 por acumulación). Si te golpean, pierdes toda la acumulada.',
+  on:{onTick(n){const p=S.p,s=p.ist;for(let i=0;i<PR.n;i++){const q=PR.a[i];if(!q.hostile||q.near)continue;const d=hyp(q.x-p.x,q.y-(p.y-p.h/2));
+    if(d<p.w/2+q.r+34&&d>p.w/2+q.r+6){q.near=1;const g=Math.min(.5*n,5*n-(s.dLuck||0));if(g<=0)continue;s.dLuck=(s.dLuck||0)+g;p.m.luck+=g;txt(p.x,p.y-60,'+'+g+' SUERTE','#bff4ff',11)}}},
+   onTakeDamage(){const p=S.p,s=p.ist;if(!s.dLuck)return;p.m.luck-=s.dLuck;s.dLuck=0;txt(p.x,p.y-66,'DESTINO ROTO','#ff3c6a',13)}}},
+ {id:'dimparasite',name:'Parásito de Dimensión',r:'l',col:'#9b30ff',desc:'Una copia de ti imita tus movimientos con 0,7 s de retraso y repite cada disparo primario con un 35% de su daño (+15%).',
+  pick(n){if(n>1)return;buff('i_dimpar',Infinity,{draw(){const g=S.p.ist.dimAt;if(!g)return;c.globalAlpha=.5;drawHero(c,g.x,g.y,{cid:S.cid,col:'#9b30ff',face:g.face,aim:g.aim,run:g.run,moving:g.mv,t:S.t,ghost:1});c.globalAlpha=1}})},
+  on:{onTick(){const p=S.p,s=p.ist,h=s.dimH||(s.dimH=[]);h.push({t:S.t,x:p.x,y:p.y,face:p.face,aim:p.aim,run:p.run,mv:Math.abs(p.vx)>30});while(h.length>1&&S.t-h[0].t>.7)h.shift();s.dimAt=h[0]},
+   onCast(n,slot){if(slot!=='p')return;const d=ab('p'),k=.2+.15*n;S.sch.push({t:.7,f:()=>{if(!S||S.st!=='play')return;const g=S.p.ist.dimAt;if(!g)return;
+    if(d.t==='proj'||d.t==='snipe'||d.t==='ringshot')fxProj({x:g.x,y:g.y-20,vx:Math.cos(g.aim)*(d.spd||600),vy:Math.sin(g.aim)*(d.spd||600),dmg:(d.dmg||ib())*k,r:d.r||5,life:d.life||1,t0:d.life||1,pierce:d.pierce||0,col:'#9b30ff',proc:1});
+    else aoe(g.x+Math.cos(g.aim)*40,g.y-20,60,(d.dmg||ib())*k,PROC)}})}}}
 ];
 
 /* ===================== FRAGMENTADOS (altares): bonificación absurda, penalización permanente ===================== */
