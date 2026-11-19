@@ -30,7 +30,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);if(T.S.st==='storm')el('stormOpts').onclick(pick0);T.update(1/60);T.draw()}};
@@ -264,6 +264,35 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  T.start('vanguard',1);T.useTP();for(let i=0;i<3;i++)T.hurtE(T.S.bosses[0],1e12,{raw:1});T.S.tp.charge=1;step(2);T.S.p.x=T.S.tp.x-30;
  T.useTP('end');assert.strictEqual(T.S.st,'over');assert.strictEqual(T.loadRun(),null,'terminar la run no borró la partida guardada');
  console.log('Modo Infinito: paletas, escalado, jefes duales, guardado y portal dual: OK')}
+// 36. Ecología de enemigos: armaduras, evolución, devoradores y el Cazador del Vacío
+{const fresh=()=>{reset();T.start('vanguard',1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;
+  T.S.hunter=null;const p=T.S.p;p.inv=1e9;p.m.dodge=0;p.m.crit=0;p.ground=1;return p};
+ // armadura: el Bruto nace con placas que absorben el 60%; al romperse va más rápido, recibe más y el Acorazado pierde el escudo
+ let p=fresh();const br=T.spawnEnemy('brute',p.x+300,p.y);assert(br.armor>0,'el Bruto no nació con armadura');
+ assert(Math.abs(T.armorAbsorb(br,100)-40)<.01,'la armadura no absorbió el 60%');const sp0=br.spdx;br.armor=1;T.armorAbsorb(br,100);
+ assert(br.armorBroke&&br.spdx>sp0&&br.brittle>1,'romper la armadura no cambió al enemigo');
+ const tk=T.spawnEnemy('tank',p.x+300,p.y);tk.armor=0;tk.armorBroke=1;tk.face=-1;tk.aff=[];tk.hp=tk.maxHp=1e6;const h0=tk.hp;T.hurtE(tk,100,{raw:1});assert(h0-tk.hp>=100,'el Acorazado sin armadura conservó el escudo frontal');
+ // evolución: a los 20 s más vida, un rasgo y más recompensa (y otra vez a los 40 s)
+ p=fresh();const ev=T.spawnEnemy('crawler',p.x+600,p.y);ev.armor=0;const m0=ev.maxHp;ev.age=19.99;step(2);assert.strictEqual(ev.evo,1,'no evolucionó a los 20 s');
+ assert(ev.maxHp>m0*1.25&&ev.traits.length===1&&T.ecoReward(ev)===1.5,'la evolución no mejoró al enemigo');ev.age=39.99;step(2);assert.strictEqual(ev.evo,2);ev.age=80;step(2);assert.strictEqual(ev.evo,2,'evolucionó más de dos veces');
+ // devoradores: un Gólem cercano se alimenta del caído y se cura
+ p=fresh();const gol=T.spawnEnemy('golem',p.x+500,p.y);gol.hp=gol.maxHp*.5;const vic=T.spawnEnemy('crawler',p.x+540,p.y);T.hurtE(vic,1e9,{raw:1});
+ assert(gol.fed===1&&gol.hp>gol.maxHp*.5,'el Gólem no se alimentó');
+ // el Cazador: huye herido sin dar recompensa y vuelve con la vida que le quedaba
+ p=fresh();let hu=T.spawnHunter();const H=T.hunterState();assert(hu&&hu.hunter&&H.met,'el Cazador no apareció');const items0=Object.values(p.items).reduce((a,b)=>a+b,0);
+ hu.hp=hu.fleeAt-1;step(2);assert(hu.dead&&hu.fled&&H.escapes===1,'el Cazador no huyó');assert.strictEqual(Object.values(p.items).reduce((a,b)=>a+b,0),items0,'la huida dio recompensa');
+ hu=T.spawnHunter();assert(hu.hp<hu.maxHp,'volvió con la vida llena');assert(hu.fleeAt>0&&hu.fleeAt<hu.maxHp*.4,'la segunda vez debería huir más tarde');
+ hu.hp=hu.fleeAt-1;step(2);assert.strictEqual(H.escapes,2);hu=T.spawnHunter();assert.strictEqual(hu.fleeAt,-1,'a la tercera tendría que pelear hasta el final');
+ // se guarda con la partida
+ T.saveRun();const run=T.loadRun();assert(run.hunter&&run.hunter.escapes===2,'el Cazador no se guardó con la partida');
+ // derrotarlo da un objeto legendario y no vuelve más
+ const leg0=Object.keys(p.items).filter(k=>T.ITEM[k].r==='l').reduce((a,k)=>a+p.items[k],0);T.hurtE(hu,1e9,{raw:1});
+ assert(H.dead&&Object.keys(p.items).filter(k=>T.ITEM[k].r==='l').reduce((a,k)=>a+p.items[k],0)===leg0+1,'derrotar al Cazador no dio un legendario');
+ T.hunterStage();assert(!(H.t>0),'un Cazador muerto volvió a programarse');
+ // partida con el Cazador y enemigos acorazados para cada familia, sin excepciones
+ for(const ch of ['vanguard','artillery','summoner','chrono','hemo']){reset();T.start(ch,2);T.S.hunter=null;T.loadStage(2);T.S.spawn=1.5;T.spawnHunter();const q=T.S.p;Object.assign(T.mouse,{x:700,y:300});
+  for(let f=0;f<60*10;f++){T.mouse.l=f%40<30;if(f%45===0)key('KeyF',false);if(f%120===0)q.hp=q.maxHp;step()}}
+ console.log('Ecología: armaduras, evolución, devoradores y el Cazador del Vacío (huida, regreso, guardado y recompensa): OK')}
 // 35. Combate: parry, ejecuciones, combos aéreos, sobrecarga, contexto y heridas
 {const fresh=ch=>{reset();T.start(ch,1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;
   const p=T.S.p;p.m.dodge=0;p.items.ankh=0;p.inv=0;for(let i=0;i<120&&!p.ground;i++)step();return p};
@@ -322,7 +351,7 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  console.log('Rendimiento: resolución por calidad, calidad automática y migración de guardados: OK')}
 // 33. Elementos: debilidades, resistencias, plasma, elemento de los DoT y reacciones
 {const fresh=(ch)=>{reset();T.start(ch,1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;const p=T.S.p;p.m.crit=0;return p};
- const mk=(type,dx=80)=>{const e=T.spawnEnemy(type,T.S.p.x+dx,T.S.p.y);e.hp=e.maxHp=1e6;e.aff=[];e.elite=0;return e};
+ const mk=(type,dx=80)=>{const e=T.spawnEnemy(type,T.S.p.x+dx,T.S.p.y);e.hp=e.maxHp=1e6;e.aff=[];e.elite=0;e.armor=0;return e};  // sin armadura: se mide solo el elemento
  const hit=(e,d,o)=>{const p=T.S.p;p.ground=1;if(p.cmb){p.cmb.combo=0;p.cmb.dashT=0}e.stunT=0;const h=e.hp;T.hurtE(e,d,o||{});return h-e.hp};  // aislado del combo y del contexto
  // todos los enemigos y jefes tienen debilidad y resistencia distintas; todos los héroes están en la tabla
  for(const k in T.ENEMIES)assert(T.ENEMY_EL[k]&&T.ENEMY_EL[k].weak!==T.ENEMY_EL[k].res,k+' sin elementos');for(const k in T.BOSSES)assert(T.BOSS_EL[k],k+' sin elementos');for(const k in T.CHARS)assert(k in T.CHAR_EL,k+' sin elemento');

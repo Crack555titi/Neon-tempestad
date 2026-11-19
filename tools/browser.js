@@ -56,6 +56,9 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  // combate: combo, energía, herida, ventana de parry y un enemigo ejecutable con su aviso
  await js("const C=cmb();C.combo=17;C.comboT=1.4;C.energy=70;buff('w_fractura',5,{spd:.75});const e=spawnEnemy('brute',S.p.x+50,S.p.y);e.hp=e.maxHp*.1;e.aff=[];C.parryT=.2");
  await sleep(250);await shot('03f-combate');
+ // ecología: Cazador del Vacío, Bruto acorazado y un enemigo evolucionado dos veces
+ await js("S.hunter=null;const h=spawnHunter();h.x=S.p.x+170;const b=spawnEnemy('brute',S.p.x+330,S.p.y);b.armor=b.armorMax*.4;const v=spawnEnemy('crawler',S.p.x-160,S.p.y);evolve(v);evolve(v);S.p.inv=99");
+ await sleep(900);await shot('03g-ecologia');
  await js("openStormDeal()");await sleep(500);await shot('03c-trato');await js("takeDeal('estabilizar');$('storm').style.display='none';S.st='play'");
  for(const [i,b] of [[0,'prisma'],[1,'hydra'],[2,'queen'],[3,'leviathan'],[4,'archon']]){
   await js(`if(S.st!=='play')document.querySelector('#nodes .card')?.click();loadStage(${i});useTP();S.boss.hidden=0;hurtE(S.boss,S.boss.maxHp*.5,{raw:1});S.p.hp=S.p.maxHp`);

@@ -52,10 +52,10 @@ function start(cid,did,run){
   for(const id in run.items)for(let k=0;k<run.items[id];k++)giveItem(id,1);
   p.lvl=run.lvl;p.xp=run.xp;p.need=Math.round(40*Math.pow(p.lvl,1.35));p.dmgMul=1+.05*(p.lvl-1);
   for(const n of run.mastery){const m=MASTERY.find(x=>x.name===n);if(m){m.fx(p);p.mastery.push(n)}}
-  recalcHp();S.loop=run.loop||0;loadStage(run.stage)}
+  recalcHp();S.loop=run.loop||0;if(run.hunter)S.hunter=run.hunter;loadStage(run.stage)}
  else{while(p.lvl<(df.startLvl||1))giveXp(p.need-p.xp);loadStage(0);saveRun()}
  p.hp=p.maxHp;
- trackRun();stormInit();combatInit(); // después de los niveles regalados de Pesadilla: no cuentan para logros
+ trackRun();stormInit();combatInit();ecoInit(); // después de los niveles regalados de Pesadilla: no cuentan para logros
  Snd.hooks();
 }
 
@@ -114,7 +114,8 @@ function hurtE(e,d,o){
   d*=p.dmgMul*p.m.dmg*bm('dmg')*(crit?(bl?1.5:2)+p.m.critm:1)*(e.stun>0?1.5:1)*(e.markT>0?1.5:1);
   for(const it of p.dmItems)d*=it.dm(p.items[it.id],e);d*=combatMul(e,o);d=applyElement(e,d,o)}
  if(o.raw&&o.el)d=applyElement(e,d,o);
- if(e.d.front&&sgn(p.x-e.x)===e.face&&!e.chT)d*=e.d.front;  // escudo frontal del Acorazado
+ if(e.d.front&&!e.armorBroke&&sgn(p.x-e.x)===e.face&&!e.chT)d*=e.d.front;
+ d=armorAbsorb(e,d);  // escudo frontal del Acorazado
  for(const a of e.aff)if(a.taken)d=a.taken(e,d);
  if(e.sh>0){const a=Math.min(e.sh,d);e.sh-=a;d-=a}
  if(d<=0)return;
@@ -137,7 +138,7 @@ function hurtE(e,d,o){
 function kill(e){
  e.dead=1;S.kills++;disintegrate(e.x,e.y,e.w,e.h,e.d.color);if(e.boss){burst(e.x,e.y-e.h/2,80,e.d.color,600,4);chromaHit(1.2)}S.shake=Math.max(S.shake,e.boss?30:3);
  if(e.boss||e.elite)hitStop(e.boss?60:40);
- const p=S.p;giveXp(e.d.xp*(e.elite&&p.items.voidpact?1+p.items.voidpact:1));  // Contrato del Vacío
+ const p=S.p;giveXp(e.d.xp*(e.elite&&p.items.voidpact?1+p.items.voidpact:1)*ecoReward(e));  // Contrato del Vacío
  p.gold+=Math.round(goldFor(e)*(S.storm?S.storm.goldMul:1));
  heal(p.maxHp*((p.items.bloodoath?0:.01)+bsum('killheal')));
  if(kdepth<4){kdepth++;Ev.emit('onKill',e);kdepth--}  // límite a las cadenas de explosiones al matar
@@ -301,7 +302,7 @@ function update(dt){
  for(let i=0;i<PT.n;i++){const q=PT.a[i];q.l-=dt;if(q.ring){q.r+=(q.mr-q.r)*Math.min(1,dt*9)}else{q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.93;q.vy*=.93}}
  PT.sweep(deadL);for(let i=0;i<TX.n;i++){const t=TX.a[i];t.l-=dt;t.vy+=t.g*dt;t.x+=t.vx*dt;t.y+=t.vy*dt}TX.sweep(deadL);
  for(let i=0;i<BL.n;i++)BL.a[i].l-=dt;BL.sweep(deadL);
- s.shake*=.88;updKick(dt);updStorm(dt);updCombat(dt);s.msgT-=dt;hsCd-=dt;s.fade=Math.max(0,s.fade-dt*1.8);if(s.lvlFx&&(s.lvlFx.t-=dt)<=0)s.lvlFx=null;
+ s.shake*=.88;updKick(dt);updStorm(dt);updCombat(dt);updEcoStage(dt);s.msgT-=dt;hsCd-=dt;s.fade=Math.max(0,s.fade-dt*1.8);if(s.lvlFx&&(s.lvlFx.t-=dt)<=0)s.lvlFx=null;
 }
 
 /* ===================== RENDER ===================== */
@@ -325,7 +326,7 @@ function draw(){
  c.shadowBlur=0;
  drawLoot();
  for(const e of s.en)drawEnemy(e);
- drawStormWorld();drawElements();drawCombatWorld();
+ drawStormWorld();drawElements();drawCombatWorld();drawEco();
  for(const m of s.dr)MIN[m.k].draw(m);c.shadowBlur=0;
  drawPlayer(s.p);
  for(const id in s.p.buf){const b=s.p.buf[id];if(b.draw)b.draw(b)}

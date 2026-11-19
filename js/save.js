@@ -52,7 +52,7 @@ function recordRunEnd(win){
 /* Partida en curso: instantánea al empezar cada etapa. Continuar / reintentar cargan desde aquí.
    Muerte permanente (Pesadilla Absoluta): al morir se borra y no hay reintento. */
 function saveRun(){const p=S.p;
- try{STORE.setItem(RUN_KEY,JSON.stringify({cid:S.cid,did:DIFFS.indexOf(S.df),stage:S.stage,loop:S.loop,clock:S.clock,t:S.t,kills:S.kills,
+ try{STORE.setItem(RUN_KEY,JSON.stringify({cid:S.cid,did:DIFFS.indexOf(S.df),stage:S.stage,loop:S.loop,hunter:S.hunter||null,clock:S.clock,t:S.t,kills:S.kills,
   lvl:p.lvl,xp:p.xp,gold:p.gold,revive:p.revive,items:Object.assign({},p.items),mastery:p.mastery.slice()}))}catch(e){}}
 function loadRun(){try{const r=JSON.parse(STORE.getItem(RUN_KEY));return r&&CHARS[r.cid]&&DIFFS[r.did]&&STAGES[r.stage]?r:null}catch(e){return null}}
 function clearRun(){try{STORE.removeItem(RUN_KEY)}catch(e){}}

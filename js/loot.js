@@ -29,7 +29,7 @@ function rollItem(r){const pool=ITEMS.filter(i=>i.r===r);return pool[Math.random
 const scaleCost=()=>1+(coef()-1)*.5;  // precios y oro crecen con la dificultad al mismo ritmo
 const priceOf=o=>Math.round(CHESTS[o.tier].base*scaleCost()*S.df.chest*(1-Math.min(capL(.5),S.p.m.chestm)));
 function goldFor(e){const p=S.p,it=p.items;
- return Math.round(e.d.xp*.6*scaleCost()*(1+p.m.goldm)*(it.greed?2+it.greed:1)*(it.invhour?2:1)*(it.voidpact&&e.elite?1+it.voidpact:1))}
+ return Math.round(e.d.xp*.6*scaleCost()*(1+p.m.goldm)*(it.greed?2+it.greed:1)*(it.invhour?2:1)*(it.voidpact&&e.elite?1+it.voidpact:1)*ecoReward(e))}
 
 /* ---------- interactuables (cofres y altares) ---------- */
 function spot(){const ps=PLAT.filter(q=>q.ph[0]===1&&q.ph[1]===3&&!q.sp);

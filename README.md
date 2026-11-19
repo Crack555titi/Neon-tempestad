@@ -47,6 +47,11 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   - **Sobrecarga**: habilidades, parries, ejecuciones y combos cargan energía; al 100% hay 6 s de habilidades potenciadas y después agotamiento.
   - **Ataques contextuales**: más daño en el aire, desde arriba, justo después de un movimiento y contra enemigos aturdidos.
   - **Heridas**: algunos enemigos y jefes dejan fractura, infección, interferencia o desgarro durante 5 s.
+- **Enemigos que cambian.**
+  - **Armaduras**: Brutos, Gólems y Acorazados llevan placas que absorben el 60% del daño; rotas, el enemigo es más rápido y frágil y el Acorazado pierde su escudo.
+  - **Evolución**: un enemigo que sobrevive 20 s (y otra vez a los 40 s) evoluciona con más vida, daño, velocidad y un rasgo (regenera, coraza, veloz o feroz). Vale más.
+  - **Devoradores**: Gólems, Gelatinas y Chamanes absorben a los caídos cercanos: se curan, crecen y evolucionan antes.
+  - **Cazador del Vacío**: desde la etapa 2 puede aparecer un cazador único que huye herido y vuelve en otra etapa más fuerte; a la tercera pelea hasta el final y deja un objeto legendario.
 - **Elementos.** Cinco elementos de daño (fuego, rayo, vacío, plasma, corrupción) y el estado de hielo. Cada héroe golpea con el suyo; cada enemigo y jefe tiene una debilidad (×1,5) y una resistencia (×0,6), y el plasma nunca es resistido. Las **reacciones** premian combinar: rayo sobre un enemigo helado (Resonancia, salta a los vecinos), fuego sobre helado (Choque Térmico), fuego sobre envenenado (Combustión) y vacío sobre electrizado (Colapso, atrae y aturde).
 - **Enemigos.** 15 tipos (voladores, tiradores, kamikazes, tanques, etc.) y 11 afijos de élite.
 - **Dificultades.**
@@ -214,6 +219,7 @@ Para borrar una puntuación (trampas, pruebas…) entra en la consola de Firebas
 | `js/cosmetics.js` | Tienda: skins, estelas y auras |
 | `js/elements.js` | Elementos: debilidades, resistencias y reacciones |
 | `js/combat.js` | Parry, ejecuciones, combos, sobrecarga, contexto y heridas |
+| `js/ecology.js` | Armaduras, evolución, devoradores y el Cazador del Vacío |
 | `js/storm.js` | La Tempestad: estabilidad, anomalías, combinaciones y tratos |
 | `tools/` | Pruebas (`smoke.js`, `browser.js`) y scripts de empaquetado |
 
