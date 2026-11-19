@@ -19,6 +19,7 @@ const ENEMIES={
  splitlet:{name:'Gelatina Menor',hp:30,dmg:7,spd:110,w:18,h:15,xp:4,color:'#4cff9a',ai:'walk',shape:'dome',contact:1,wt:0},
  shaman:{name:'Chamán',hp:70,dmg:8,spd:70,w:26,h:38,xp:20,color:'#d070ff',ai:'shaman',shape:'robe',range:360,wt:1,min:1.5},
  phantom:{name:'Espectro',hp:55,dmg:14,spd:110,w:26,h:30,xp:15,color:'#c8d2ff',ai:'phantom',shape:'ghost',wt:2},
+ mimic:{name:'Eco Imitador',hp:80,dmg:16,spd:90,w:26,h:38,xp:24,color:'#f0f0ff',ai:'mimic',shape:'robe',range:260,wt:1,min:1.6},
  hunter:{name:'Cazador del Vacío',hp:700,dmg:26,spd:150,w:28,h:46,xp:90,color:'#9b30ff',ai:'hunter',shape:'robe',contact:1,wt:0},
  golem:{name:'Gólem de Escoria',hp:260,dmg:32,spd:50,w:56,h:58,xp:36,color:'#ff6a3c',ai:'golem',shape:'box',contact:1,wt:1,min:2}
 };

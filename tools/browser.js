@@ -59,6 +59,9 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  // ecología: Cazador del Vacío, Bruto acorazado y un enemigo evolucionado dos veces
  await js("S.hunter=null;const h=spawnHunter();h.x=S.p.x+170;const b=spawnEnemy('brute',S.p.x+330,S.p.y);b.armor=b.armorMax*.4;const v=spawnEnemy('crawler',S.p.x-160,S.p.y);evolve(v);evolve(v);S.p.inv=99");
  await sleep(900);await shot('03g-ecologia');
+ // neutrales e IA adaptativa: mercader con mercancía, ermitaño, misión en curso e imitador copiando
+ await js("S.en.forEach(e=>e.dead=1);S.ints.push({k:'merchant',x:S.p.x-150,y:S.p.y,stock:[{id:rollItem('u'),r:'u'},{id:rollItem('r'),r:'r'}]},{k:'hermit',x:S.p.x+230,y:S.p.y,q:QUESTS[0]});S.quest={q:QUESTS[3],prog:12,t:0,done:0};const m=spawnEnemy('mimic',S.p.x+120,S.p.y);m.copy={name:'Riel',t:'proj'};m.copyT=4;S.p.x-=110");
+ await sleep(500);await shot('03h-neutrales');
  await js("openStormDeal()");await sleep(500);await shot('03c-trato');await js("takeDeal('estabilizar');$('storm').style.display='none';S.st='play'");
  for(const [i,b] of [[0,'prisma'],[1,'hydra'],[2,'queen'],[3,'leviathan'],[4,'archon']]){
   await js(`if(S.st!=='play')document.querySelector('#nodes .card')?.click();loadStage(${i});useTP();S.boss.hidden=0;hurtE(S.boss,S.boss.maxHp*.5,{raw:1});S.p.hp=S.p.maxHp`);

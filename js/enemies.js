@@ -47,7 +47,7 @@ const EAI={
   hover(e,dt,p,sp,140,200);e.gT=(e.gT===undefined?R(2,4):e.gT)-dt;if(e.gT<=0){e.gT=R(3,4.5);e.ghost=1;burst(e.x,e.y-e.h/2,14,'#c8d2ff',200,3)}},
  hunter(e,dt,p,sp){if(e.lunge>0){e.lunge-=dt;e.vx=e.ldir*620;phys(e,dt);return}
   if(e.tell>0){e.tell-=dt;e.vx*=.8;phys(e,dt);if(e.tell<=0){e.lunge=.35;e.ldir=sgn(p.x-e.x);Snd.play('dash')}return}
-  EAI.walk(e,dt,p,sp);e.cd=(e.cd||2)-dt;if(e.cd<=0&&Math.abs(p.x-e.x)<330){e.cd=R(1.8,2.6);e.tell=.5}},
+  EAI.walk(e,dt,p,sp);e.cd-=dt;if(e.cd<=0&&Math.abs(p.x-e.x)<330){e.cd=R(1.8,2.6);e.tell=.5}},
  golem(e,dt,p,sp){if(e.tell>0){e.tell-=dt;e.vx*=.8;phys(e,dt);return}EAI.walk(e,dt,p,sp);e.cd-=dt;
   if(e.cd<=0&&hyp(p.x-e.x,p.y-e.y)<170){e.cd=3.2;e.tell=.9;Z({x:e.x,y:e.y-10,r:150,warn:.9,dmg:e.dmg,hostile:1,col:'#ff6a3c'})}}
 };

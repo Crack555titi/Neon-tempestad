@@ -30,7 +30,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);if(T.S.st==='storm')el('stormOpts').onclick(pick0);T.update(1/60);T.draw()}};
@@ -264,6 +264,39 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  T.start('vanguard',1);T.useTP();for(let i=0;i<3;i++)T.hurtE(T.S.bosses[0],1e12,{raw:1});T.S.tp.charge=1;step(2);T.S.p.x=T.S.tp.x-30;
  T.useTP('end');assert.strictEqual(T.S.st,'over');assert.strictEqual(T.loadRun(),null,'terminar la run no borró la partida guardada');
  console.log('Modo Infinito: paletas, escalado, jefes duales, guardado y portal dual: OK')}
+// 37. Neutrales (mercader, ermitaño y misiones) e IA adaptativa (imitador y jefes que recuerdan)
+{const fresh=(ch='vanguard')=>{reset();T.start(ch,1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;T.S.hunter={dead:1};
+  const p=T.S.p;p.inv=1e9;p.m.dodge=0;return p};
+ const near=o=>{const p=T.S.p;p.x=o.x;p.y=o.y;p.vx=p.vy=0;step(1);assert.strictEqual(T.S.near,o,'no quedó junto al '+o.k)};
+ const rnd=Math.random;
+ // mercader: con oro compra el primer objeto; sin oro no
+ let p=fresh();T.S.ints=T.S.ints.filter(o=>o.k!=='merchant'&&o.k!=='hermit');Math.random=()=>.1;T.npcStage();Math.random=rnd;
+ const m=T.S.ints.find(o=>o.k==='merchant'),h=T.S.ints.find(o=>o.k==='hermit');assert(m&&h,'no aparecieron el mercader y el ermitaño');
+ for(let i=0;i<120&&!p.ground;i++)step();m.x=p.x;m.y=p.y;h.x=-9999;  // sobre suelo firme (el azar fijado podía dejarlos sobre un pozo)
+ near(m);const first=m.stock[0].id,price=T.merchantPrice(m.stock[0]);p.gold=price-1;key('KeyE',false);assert.strictEqual(m.stock.length,2,'vendió sin oro suficiente');
+ p.gold=price;const n0=p.items[first]||0;key('KeyE',false);assert(m.stock.length===1&&p.items[first]===n0+1&&p.gold===0,'la compra no dio el objeto o no cobró');
+ // ermitaño: la misión «Reflejos» avanza con parries y al cumplirse da un objeto raro y oro
+ h.q=T.QUESTS.find(q=>q.id==='reflejos');h.x=m.x;h.y=m.y;m.x=-9999;near(h);key('KeyE',false);assert(T.S.quest&&h.open,'no se aceptó la misión');
+ const items=()=>Object.values(p.items).reduce((a,b)=>a+b,0),i0=items(),g0=p.gold;p.inv=0;
+ for(let i=0;i<3;i++){T.cmb().parryT=.2;T.cmb().parryCd=0;T.hurtP(5,null);p.inv=0}
+ assert(T.S.quest.done&&items()===i0+1&&p.gold>g0,'la misión cumplida no dio la recompensa');
+ // «Intocable» se reinicia al recibir daño; «Cacería» falla al acabarse el tiempo
+ p=fresh();T.S.quest={q:T.QUESTS.find(q=>q.id==='intocable'),prog:10,t:0,done:0};p.inv=0;T.hurtP(5,null);assert.strictEqual(T.S.quest.prog,0,'recibir daño no reinició «Intocable»');
+ T.S.quest={q:T.QUESTS.find(q=>q.id==='cazador'),prog:0,t:1,done:0};step(70);assert.strictEqual(T.S.quest,null,'la misión con tiempo no falló');
+ // Eco Imitador: copia la habilidad usada y cada tipo de copia funciona
+ p=fresh('artillery');const mim=T.spawnEnemy('mimic',p.x+250,p.y);mim.aff=[];p.cd.s=0;T.mouse.r=1;step(3);T.mouse.r=0;
+ assert(T.S.lastCast&&T.S.lastCast.name===T.CHARS.artillery.secondary.name,'no se registró la habilidad usada');mim.cd=0;mim.tell=0;step(2);assert.strictEqual(mim.copy.name,T.S.lastCast.name,'el imitador no copió la habilidad');
+ for(const k of ['proj','melee','dash','nova']){mim.copy={name:k,t:k};T.mimicAct(mim,p);step(20)}
+ // jefe que recuerda: si peleas lejos aprende la lanza de largo alcance y la añade a su repertorio
+ p=fresh();T.useTP();const b=T.S.boss;b.obs={t:20,dist:20*600,air:0,dash:0,use:{}};T.adaptBoss(b,2);
+ assert(b.adapt&&b.adapt[0].k==='lejos','no aprendió la respuesta a la distancia');assert(T.bossPool(b,2).some(mv=>mv.k==='lejos'),'la respuesta no entró en su repertorio');
+ b.obs={t:20,dist:20*100,air:0,dash:0,use:{}};T.adaptBoss(b,3);assert.strictEqual(b.adapt[1].k,'cerca','no se adaptó a pelear de cerca');
+ const zn=T.S.zn.length;for(const k in T.ADAPT)T.ADAPT[k].f(b,1,1);step(10);assert(T.S.zn.length>zn,'las respuestas no crearon avisos de peligro');
+ // un combate real contra cada jefe con el jugador pegado: termina aprendiendo y sin excepciones
+ for(let st=0;st<5;st++){p=fresh();T.loadStage(st);T.useTP();const bb=T.S.boss;bb.hidden=0;
+  for(let f=0;f<60*12;f++){p.x=bb.x+40;if(f===60*6){bb.hidden=0;bb.ghost=0;T.hurtE(bb,bb.maxHp*.36,{raw:1})}if(f%120===0)p.hp=p.maxHp;step()}
+  assert(bb.adapt&&bb.adapt.length>=1,bb.def.name+' no se adaptó tras cambiar de fase')}
+ console.log('Neutrales e IA adaptativa: mercader, misiones, imitador y jefes que recuerdan: OK')}
 // 36. Ecología de enemigos: armaduras, evolución, devoradores y el Cazador del Vacío
 {const fresh=()=>{reset();T.start('vanguard',1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;
   T.S.hunter=null;const p=T.S.p;p.inv=1e9;p.m.dodge=0;p.m.crit=0;p.ground=1;return p};

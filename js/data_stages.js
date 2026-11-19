@@ -28,7 +28,7 @@ const STAGES=[
   sky:['#031410','#04201a','#082a22','#0a1a2a'],ground:'#020806',plat:{fill:'#0e2a24',floor:'#071612',edge:'#4cffc8',glow:'#2affb0'},
   layers:[{type:'domes',col:'#06150f',par:.15,h:[60,140],w:[200,380]},{type:'spires',col:'#0a2018',par:.35,h:[60,160],w:[20,50]},{type:'domes',col:'#0f2a20',par:.6,h:[20,50],w:[30,60],cross:'#4cffc8'}],
   amb:{n:45,col:'#9affd8',vx:-8,vy:6,s:3},
-  enemies:['wisp','phantom','shaman','leaper','splitter','sniper'],
+  enemies:['wisp','phantom','shaman','leaper','splitter','sniper','mimic'],
   plats:[fl(0,WORLD),pl(200,390,200),pl(520,300,160),pl(850,380,200),pl(1150,280,180),pl(1450,380,200),pl(1750,300,160),pl(2050,390,200),
    pl(680,210,120,[2,3]),pl(1600,210,120,[2,3])],
   tp:[{x:1240,y:280},{x:300,y:390},{x:2100,y:FLOOR}]},
@@ -36,7 +36,7 @@ const STAGES=[
   sky:['#020818','#04102a','#06183a','#0a0a3a'],ground:'#01040c',plat:{fill:'#0a1e3a',floor:'#061226',edge:'#3cf0ff',glow:'#1ab4ff'},
   layers:[{type:'towers',col:'#06102a',par:.15,h:[150,300],w:[40,90],lights:'#3cf0ff'},{type:'blocks',col:'#0a1838',par:.35,h:[60,160],w:[80,160],lights:'#3cf0ff'},{type:'spires',col:'#0e2248',par:.6,h:[30,80],w:[10,24]}],
   amb:{n:50,col:'#3cf0ff',vx:0,vy:60,s:3,sq:1},
-  enemies:['swarm','bomber','sniper','turret','wisp','kamikaze'],
+  enemies:['swarm','bomber','sniper','turret','wisp','kamikaze','mimic'],
   // el suelo entero solo existe antes de la fase 2; luego se rompe en segmentos con abismos
   plats:[fl(0,WORLD,[1,1]),fl(0,500,[2,3]),fl(700,400,[2,3]),fl(1300,400,[2,3]),fl(1900,500,[2,3]),
    pl(350,390,180),pl(800,320,160),pl(1150,260,160),pl(1500,330,160),pl(1900,380,180),
@@ -46,7 +46,7 @@ const STAGES=[
   sky:['#14041a','#1e0624','#2a0830','#3a0a10'],ground:'#06020a',plat:{fill:'#2a0e30',floor:'#16061a',edge:'#ffd23c',glow:'#ff3cf2'},
   layers:[{type:'peaks',col:'#12041a',par:.15,h:[160,280],w:[200,400]},{type:'towers',col:'#1e0828',par:.35,h:[100,220],w:[40,80],lights:'#ffd23c'},{type:'spires',col:'#2a0c34',par:.6,h:[40,110],w:[14,30]}],
   amb:{n:60,col:'#ffd23c',vx:-120,vy:260,s:1,line:1},
-  enemies:['tank','golem','phantom','shaman','bomber','leaper','sniper'],
+  enemies:['tank','golem','phantom','shaman','bomber','leaper','sniper','mimic'],
   plats:[fl(0,WORLD),pl(250,380,200),pl(650,300,180),pl(1100,360,200),pl(1550,300,180),pl(1950,380,200),
    pl(900,230,140,[1,1]),pl(1400,230,140,[1,1]),pl(820,220,120,[2,3],{sp:.9,ax:120}),pl(1460,220,120,[2,3],{sp:.9,ax:-120}),pl(1140,160,120,[3,3])],
   tp:[{x:1200,y:FLOOR},{x:350,y:380},{x:2050,y:380}]}

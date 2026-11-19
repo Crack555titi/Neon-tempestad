@@ -38,7 +38,7 @@ function combatParry(d,src,proj){const C=cmb(),p=S.p;if(!(C.parryT>0))return fal
 function execute(e){const p=S.p,C=cmb();p.x=clamp(e.x-p.face*28,p.w/2,WORLD-p.w/2);p.inv=Math.max(p.inv,.6);
  hitStop(80);chromaHit(.6);S.shake=Math.max(S.shake,10);burst(e.x,e.y-e.h/2,26,'#ff2a6a',460,4);txt(e.x,e.y-e.h-24,'EJECUCIÓN','#ff2a6a',18);
  p.gold+=goldFor(e);heal(p.maxHp*.05);addEnergy(20);C.combo+=3;C.comboT=COMBO_WIN;e.sh=0;
- hurtE(e,e.hp*10+1e3,{raw:1,proc:1,exec:1});Save.add('execs');Snd.play('elite')}
+ hurtE(e,e.hp*10+1e3,{raw:1,proc:1,exec:1});Ev.emit('onExecute',e);Save.add('execs');Snd.play('elite')}
 
 /* ---------- combos y contexto ---------- */
 // multiplicador de daño del golpe: combo + circunstancias (solo golpes directos, no daño de objetos ni en el tiempo)

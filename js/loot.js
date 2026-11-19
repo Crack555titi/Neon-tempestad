@@ -55,6 +55,7 @@ function interact(){
  const o=S.near,p=S.p;if(!o)return;
  if(o.k==='tp')return useTP(S.tp.state==='ready'&&p.x<o.x?'end':'next');
  if(o.k==='altar')return openAltar(o);
+ if(npcInteract(o))return;
  const pr=priceOf(o);if(p.gold<pr){say(`Oro insuficiente (${pr})`);return}
  p.gold-=pr;o.open=1;
  if(p.items.elegy&&Math.random()<1/3){ring(o.x,o.y-15,120,'#5ab4ff',.4);burst(o.x,o.y-15,30,'#5ab4ff',400,4);hurtP(p.maxHp*.15);say('¡El cofre se hace añicos! (Elegía)')}
@@ -66,6 +67,7 @@ function chooseFragment(o,id){const p=S.p;p.hp=Math.max(1,p.hp*(1-ALTAR.cost));o
 function drawLoot(){
  for(const o of S.ints){
   if(o.k==='tp'){drawTP();continue}
+  if(o.k==='merchant'||o.k==='hermit'){drawNpc(o);continue}
   if(o.k==='chest'){const C=CHESTS[o.tier],w=o.tier==='small'?32:40,h=o.tier==='small'?20:26;
    c.globalAlpha=o.open?.35:1;glow(C.col,o.open?0:14);c.fillStyle='#1a1030';c.strokeStyle=C.col;c.lineWidth=2;
    c.fillRect(o.x-w/2,o.y-h,w,h);c.strokeRect(o.x-w/2,o.y-h,w,h);
@@ -76,7 +78,8 @@ function drawLoot(){
    if(!o.open){const fy=o.y-64+Math.sin(S.t*2.5)*5;c.fillStyle=ALTAR.col;c.beginPath();c.moveTo(o.x,fy-9);c.lineTo(o.x+7,fy);c.lineTo(o.x,fy+9);c.lineTo(o.x-7,fy);c.fill()}}
  }
  c.globalAlpha=1;c.shadowBlur=0;
- const o=S.near;if(o){const pr=o.k==='chest'?priceOf(o):0,ok=o.k!=='chest'||S.p.gold>=pr,T=S.tp;
+ const o=S.near,nm=o&&npcMsg(o);if(nm){c.font='bold 12px monospace';c.textAlign='center';c.fillStyle=nm[1]?'#fff':'#ff6a6a';c.fillText(nm[0],o.x,o.y-(o.k==='merchant'?100:74))}
+ else if(o){const pr=o.k==='chest'?priceOf(o):0,ok=o.k!=='chest'||S.p.gold>=pr,T=S.tp;
   c.font='bold 12px monospace';c.textAlign='center';c.fillStyle=ok?'#fff':'#ff6a6a';
   const msg=o.k==='chest'?`[E] ${CHESTS[o.tier].name} · ${pr} oro`:o.k==='altar'?`[E] ${ALTAR.name} · −${ALTAR.cost*100}% de vida`:
    T.state==='idle'?'[E] Activar teletransportador (despierta al jefe)':T.state==='ready'?(S.p.x<T.x?'[E] ← Terminar run y guardar puntuación':S.stage>=STAGES.length-1?'[E] Continuar ciclo (Loop +1) →':'[E] Siguiente etapa →'):'';

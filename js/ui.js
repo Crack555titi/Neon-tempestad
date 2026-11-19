@@ -12,7 +12,7 @@ const DIFF_TIERS=[['FÁCIL','#4cff7a'],['MEDIO','#c8ff3c'],['DIFÍCIL','#ffd23c'
 const KEYS={p:'LMB',s:'RMB',m:'SHIFT',u:'Q'};
 
 function hud(){
- const s=S,p=s.p,t=s.t;screen();drawStormHud();drawCombatHud();c.shadowBlur=0;c.textBaseline='alphabetic';
+ const s=S,p=s.p,t=s.t;screen();drawStormHud();drawCombatHud();drawQuestHud();c.shadowBlur=0;c.textBaseline='alphabetic';
  // ---- arriba a la izquierda: oro y objetos ----
  const ids=sortedItems(),cols=Math.max(6,(W/2-262-36)/22|0),rows=Math.ceil(ids.length/cols);  // columnas que caben antes de la barra del jefe
  panel(10,8,Math.max(150,Math.min(cols,ids.length)*22+14),26+rows*22,'#ffd23c55');
