@@ -14,8 +14,8 @@ const D=['mdpi',1,'hdpi',1.5,'xhdpi',2,'xxhdpi',3,'xxxhdpi',4],T=[['build/icon.p
 for(let i=0;i<D.length;i+=2){const d=D[i],k=D[i+1],r=`build/android/res/mipmap-${d}/`;
  T.push([r+'ic_launcher.png',48*k,48*k,'full'],[r+'ic_launcher_round.png',48*k,48*k,'round'],[r+'ic_launcher_foreground.png',108*k,108*k,'fg'])}
 const SPL={mdpi:[480,320],hdpi:[800,480],xhdpi:[1280,720],xxhdpi:[1600,960],xxxhdpi:[1920,1280]};
-T.push(['build/android/res/drawable/splash.png',480,320,'splash']);
-for(const d in SPL){const [w,h]=SPL[d];T.push([`build/android/res/drawable-land-${d}/splash.png`,w,h,'splash'],[`build/android/res/drawable-port-${d}/splash.png`,h,w,'splash'])}
+T.push(['build/android/res/drawable/splash.jpg',480,320,'splash']);  // JPEG: el degradado en PNG pesaba ~10 MB entre todas
+for(const d in SPL){const [w,h]=SPL[d];T.push([`build/android/res/drawable-land-${d}/splash.jpg`,w,h,'splash'],[`build/android/res/drawable-port-${d}/splash.jpg`,h,w,'splash'])}
 
 // se ejecuta dentro del navegador
 function render(w,h,mode){
@@ -39,7 +39,7 @@ function render(w,h,mode){
  if(mode==='splash'){const s=S*.5;emblem(w/2,h/2-S*.08,s);g.textAlign='center';g.font=`bold ${S*.075}px monospace`;g.shadowBlur=S*.02;
   g.shadowColor='#ff3cf2';g.fillStyle='#ff3cf2';g.fillText('NEÓN',w/2-S*.2,h/2+S*.3);g.shadowColor='#3cf0ff';g.fillStyle='#3cf0ff';g.fillText('TEMPESTAD',w/2+S*.1,h/2+S*.3)}
  else emblem(w/2,h/2,mode==='fg'?S*.6:S*.9);  // la capa frontal adaptativa solo garantiza visible el 66% central
- return cv.toDataURL('image/png').split(',')[1];
+ return (mode==='splash'?cv.toDataURL('image/jpeg',.88):cv.toDataURL('image/png')).split(',')[1];
 }
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));

@@ -20,11 +20,20 @@ const PR_DEF={x:0,y:0,vx:0,vy:0,cz:0,near:0,dmg:0,r:5,life:1,t0:0,hostile:0,col:
 
 /* ---------- calidad: baja desactiva el brillo y reduce partículas para equipos lentos ---------- */
 const QUALITY={
- baja:{glow:0,bloom:0,post:0,add:0,pmax:220,amb:.35},
- media:{glow:1,bloom:0,post:1,add:1,pmax:500,amb:.7},
- alta:{glow:1,bloom:1,post:1,add:1,pmax:800,amb:1}};
+ baja:{glow:0,bloom:0,post:0,add:0,pmax:220,amb:.35,dpr:1},
+ media:{glow:1,bloom:0,post:1,add:1,pmax:500,amb:.7,dpr:1.5},
+ alta:{glow:1,bloom:1,post:1,add:1,pmax:800,amb:1,dpr:2}};
 let QL=QUALITY.alta,SHAKE=1;
-function setQuality(k){QL=QUALITY[k]||QUALITY.alta;PT.max=QL.pmax;if(PT.n>PT.max)PT.n=PT.max}
+function setQuality(k){QL=QUALITY[k]||QUALITY.alta;PT.max=QL.pmax;if(PT.n>PT.max)PT.n=PT.max;if(typeof fitCanvas==='function')fitCanvas()}
+/* calidad automática (por defecto): los teléfonos empiezan en media; si en partida el juego baja de ~48 FPS durante 3 s,
+   baja un escalón y lo recuerda para la próxima vez. Nunca sube sola (evita que oscile). Elegir una calidad en Opciones la desactiva. */
+const AUTOQ={win:0,frames:0,cool:0};
+const autoLevel=()=>Save.d.settings.autoLevel||(typeof isTouchDevice==='function'&&isTouchDevice()?'media':'alta');
+function autoQuality(raw){if(Save.d.settings.quality!=='auto'||!S||S.st!=='play'||raw>.5)return;  // >0,5 s: pestaña en segundo plano, no cuenta
+ if(AUTOQ.cool>0){AUTOQ.cool-=raw;return}AUTOQ.win+=raw;AUTOQ.frames++;if(AUTOQ.win<3)return;
+ const fps=AUTOQ.frames/AUTOQ.win;AUTOQ.win=AUTOQ.frames=0;const lv=autoLevel();
+ if(fps<48&&lv!=='baja'){const nx=lv==='alta'?'media':'baja';Save.d.settings.autoLevel=nx;Save.write();setQuality(nx);AUTOQ.cool=4;
+  say(`Calidad ajustada a ${nx} para que vaya más fluido`)}}
 
 let hitstop=0,chroma=0,hsCd=0;
 const hitStop=ms=>{hitstop=Math.max(hitstop,ms/1000)};
@@ -50,7 +59,7 @@ function fxProj(o){const q=PR.get();if(!q)return null;q.hit.clear();Object.assig
    todo se dibuja en coordenadas lógicas W×H gracias a la escala K. */
 let K=1;
 function fitCanvas(){
- const r=cv.getBoundingClientRect(),d=globalThis.devicePixelRatio||1,w=Math.max(W,Math.round((r.width||W)*d));
+ const r=cv.getBoundingClientRect(),d=Math.min(globalThis.devicePixelRatio||1,QL.dpr||2),w=Math.max(W,Math.round((r.width||W)*d));
  if(cv.width!==w){cv.width=w;cv.height=Math.round(w*H/W)}K=cv.width/W;
 }
 const screen=()=>c.setTransform(K,0,0,K,0,0);

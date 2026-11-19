@@ -30,7 +30,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);if(T.S.st==='storm')el('stormOpts').onclick(pick0);T.update(1/60);T.draw()}};
@@ -264,6 +264,21 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  T.start('vanguard',1);T.useTP();for(let i=0;i<3;i++)T.hurtE(T.S.bosses[0],1e12,{raw:1});T.S.tp.charge=1;step(2);T.S.p.x=T.S.tp.x-30;
  T.useTP('end');assert.strictEqual(T.S.st,'over');assert.strictEqual(T.loadRun(),null,'terminar la run no borró la partida guardada');
  console.log('Modo Infinito: paletas, escalado, jefes duales, guardado y portal dual: OK')}
+// 34. Rendimiento en teléfonos: tope de resolución por calidad y calidad automática
+{const st=T.Save.d.settings,prevQ=st.quality;global.devicePixelRatio=3;
+ T.setQuality('baja');assert.strictEqual(T.cv.width,960,'la calidad baja no limitó la resolución a 1x');
+ T.setQuality('media');assert.strictEqual(T.cv.width,1440,'la media no quedó en 1,5x');T.setQuality('alta');assert.strictEqual(T.cv.width,1920,'la alta no quedó en 2x');
+ // automática: con el juego a ~30 FPS durante 3 s baja un escalón y lo recuerda
+ st.quality='auto';st.autoLevel='alta';T.AUTOQ.win=T.AUTOQ.frames=T.AUTOQ.cool=0;T.setQuality('alta');reset();T.start('vanguard',1);
+ for(let i=0;i<100;i++)T.autoQuality(1/30);assert.strictEqual(st.autoLevel,'media','la automática no bajó de alta a media');assert.strictEqual(T.QL,T.QUALITY.media);
+ T.AUTOQ.cool=0;for(let i=0;i<100;i++)T.autoQuality(1/60);assert.strictEqual(st.autoLevel,'media','bajó yendo a 60 FPS');
+ // una calidad elegida a mano no se toca
+ st.quality='alta';st.autoLevel='alta';T.setQuality('alta');for(let i=0;i<200;i++)T.autoQuality(1/20);assert.strictEqual(T.QL,T.QUALITY.alta,'la automática pisó la calidad elegida a mano');
+ // guardados anteriores a esta versión: su «alta» era el valor por defecto → pasan a automática una sola vez
+ T.STORE.setItem(T.SAVE_KEY,JSON.stringify({settings:{quality:'alta'}}));T.Save.load();assert.strictEqual(T.Save.d.settings.quality,'auto','el guardado viejo no pasó a automática');
+ T.Save.d.settings.quality='baja';T.Save.write();T.Save.load();assert.strictEqual(T.Save.d.settings.quality,'baja','la migración se repitió sobre una elección del jugador');
+ T.Save.d.settings.quality=prevQ;delete T.Save.d.settings.autoLevel;global.devicePixelRatio=1;T.setQuality('alta');
+ console.log('Rendimiento: resolución por calidad, calidad automática y migración de guardados: OK')}
 // 33. Elementos: debilidades, resistencias, plasma, elemento de los DoT y reacciones
 {const fresh=(ch)=>{reset();T.start(ch,1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;const p=T.S.p;p.m.crit=0;return p};
  const mk=(type,dx=80)=>{const e=T.spawnEnemy(type,T.S.p.x+dx,T.S.p.y);e.hp=e.maxHp=1e6;e.aff=[];e.elite=0;return e};

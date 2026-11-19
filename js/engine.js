@@ -372,7 +372,7 @@ function drawPlayer(p){
 
 /* ===================== LOOP ===================== */
 let last=performance.now();
-function loop(now){const dt=clamp((now-last)/1000,0,.033);last=now;  // el primer fotograma puede llegar con una marca anterior a last: dt negativo rompía el fondo del menú
+function loop(now){const dt=clamp((now-last)/1000,0,.033);if(last)autoQuality((now-last)/1000);last=now;  // el primer fotograma puede llegar con una marca anterior a last: dt negativo rompía el fondo del menú
  chroma=Math.max(0,chroma-dt*3);pollInput();
  if(S){if(S.st==='play'){if(hitstop>0)hitstop-=dt;else update(dt)}draw()}else drawMenuBg(dt);
  requestAnimationFrame(loop)}

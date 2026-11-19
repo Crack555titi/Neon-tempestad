@@ -14,6 +14,8 @@ const ver=require('../package.json').version,code=ver.split('.').reduce((a,n)=>a
 let gs=fs.readFileSync(gf,'utf8');if(!/versionCode \d+/.test(gs))throw new Error('No encontré versionCode en android/app/build.gradle');
 fs.writeFileSync(gf,gs.replace(/versionCode \d+/,'versionCode '+code).replace(/versionName "[^"]*"/,`versionName "${ver}"`));console.log(`Versión ${ver} (código ${code})`);
 // iconos y splash: copia build/android/res encima de android/app/src/main/res
+// la pantalla de carga ahora es JPEG: se quita el splash.png de Capacitor para que Android no vea dos recursos «splash»
+for(const d of fs.readdirSync(path.join(main,'res')))fs.rmSync(path.join(main,'res',d,'splash.png'),{force:true});
 fs.cpSync(path.join(root,'build','android','res'),path.join(main,'res'),{recursive:true});
 const bg=path.join(main,'res','values','ic_launcher_background.xml');  // fondo de la capa trasera del icono adaptativo
 fs.writeFileSync(bg,'<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#05030D</color>\n</resources>\n');

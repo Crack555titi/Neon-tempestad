@@ -196,7 +196,7 @@ $('cReset').onclick=()=>{BIND=JSON.parse(JSON.stringify(BIND_DEF));saveBinds();b
 function syncOptions(){const st=Save.d.settings;if(!$('qual'))return;
  $('qual').value=st.quality;$('shk').value=Math.round(st.shake*100);$('vMaster').value=Math.round(st.vol.master*100);$('vSfx').value=Math.round(st.vol.sfx*100);
  $('vMusic').value=Math.round(st.vol.music*100);$('mute').checked=!!st.mute;$('tMode').value=st.touch;$('aMode').value=st.aim}
-function applySettings(){const st=Save.d.settings;setQuality(st.quality);SHAKE=st.shake;Snd.apply();loadBinds();syncOptions()}
+function applySettings(){const st=Save.d.settings;setQuality(st.quality==='auto'?autoLevel():st.quality);SHAKE=st.shake;Snd.apply();loadBinds();syncOptions()}
 const setOpt=(id,f)=>{$(id).oninput=$(id).onchange=e=>{f(e.target);Save.write();applySettings();Snd.play('ui')}};
 setOpt('qual',t=>Save.d.settings.quality=t.value);setOpt('shk',t=>Save.d.settings.shake=+t.value/100);
 setOpt('vMaster',t=>Save.d.settings.vol.master=+t.value/100);setOpt('vSfx',t=>Save.d.settings.vol.sfx=+t.value/100);setOpt('vMusic',t=>Save.d.settings.vol.music=+t.value/100);
