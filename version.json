@@ -1,9 +1,9 @@
 {
-  "latest": "1.3.0",
-  "min": "1.3.0",
-  "notes": "Tienda de cosméticos (skins, estelas y auras) con cristales que ganas jugando. Nueva pantalla de inicio. Ahora el juego se instala y se actualiza solo.",
+  "latest": "1.4.0",
+  "min": "1.4.0",
+  "notes": "Neón Tempestad 2.0 (parte 1): la Tempestad con estabilidad, anomalías y tratos; elementos y reacciones; parry, ejecuciones, combos y sobrecarga; 10 objetos originales; enemigos que evolucionan, el Cazador del Vacío, imitadores, mercader y misiones; jefes que aprenden, jefe secreto y fusiones; exploración con salas secretas, terminales, rescates y mazmorras; evolución de habilidades, mutaciones y reliquias. Además: mejor rendimiento en teléfonos y APK más liviano.",
   "url": "https://github.com/Crack555titi/Neon-tempestad/releases/latest",
-  "exe": "NeonTempestad-Setup-1.3.0.exe",
-  "apk": "NeonTempestad-1.3.0.apk",
-  "sha256": "db4da40fc5e741d2da80f090d078431f94bf4b6d6d9c15f31a199202b7b584ab"
+  "exe": "NeonTempestad-Setup-1.4.0.exe",
+  "apk": "NeonTempestad-1.4.0.apk",
+  "sha256": "e2abe93732bec1f1138974a8428dbfdba71d6d89f2575f569d98e7cee67f11da"
 }
