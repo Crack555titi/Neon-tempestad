@@ -181,3 +181,11 @@ h1.big span{animation:flick 6s steps(1) infinite}
 #storm{background:radial-gradient(ellipse at center,rgba(20,60,90,.55),rgba(5,3,13,.93))}
 .stormT{color:#bff4ff;text-shadow:0 0 16px #3cf0ff;letter-spacing:3px}
 #stormOpts .card{max-width:260px}
+
+/* ===== Códice ===== */
+#codex{justify-content:safe center;overflow-y:auto}
+#codexList{display:grid;grid-template-columns:repeat(3,minmax(200px,1fr));gap:8px;max-width:900px;width:100%}
+.cx{border:2px solid var(--c,#3a2f6a);border-radius:8px;padding:8px 10px;background:#120a26cc;text-align:left;display:flex;flex-direction:column;gap:3px}
+.cx b{color:var(--c,#fff);font-size:14px}.cx small{color:#cfc9f5;font-size:11px;font-style:italic}.cx span{color:#9a93c8;font-size:11px}
+.cx.unk{border-style:dashed;opacity:.55}.cx.unk b{color:#666}
+@media (max-width:700px){#codexList{grid-template-columns:repeat(2,1fr)}}

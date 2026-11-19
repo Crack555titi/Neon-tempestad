@@ -62,7 +62,7 @@ function updStorm(dt){const st=S.storm;if(!st)return;st.flash=Math.max(0,st.flas
 // bajas y definitivas erosionan; lo registra start() (el bus de eventos se reinicia en cada partida)
 function stormInit(){Ev.on('onKill',e=>{stormErode(e.boss?0:e.elite?3:.25);for(const k of (S.storm?S.storm.act:[]))if(ANOMALIES[k].kill)ANOMALIES[k].kill(e);if(e.storm)S.p.gold+=goldFor(e)});
  Ev.on('onCast',slot=>{if(slot==='u')stormErode(4)});Ev.on('onBossPhase',()=>stormErode(10))}
-function stormSpawn(e){if(!S.storm)return;for(const k of S.storm.act)if(ANOMALIES[k].spawn)ANOMALIES[k].spawn(e)}
+function stormSpawn(e){if(!S.storm||e.d.structure)return;for(const k of S.storm.act)if(ANOMALIES[k].spawn)ANOMALIES[k].spawn(e)}
 
 /* ---------- el trato (umbral 50) ---------- */
 function openStormDeal(){S.st='storm';mouse.l=mouse.r=0;

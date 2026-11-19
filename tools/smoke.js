@@ -30,7 +30,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);if(T.S.st==='storm')el('stormOpts').onclick(pick0);T.update(1/60);T.draw()}};
@@ -264,6 +264,42 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  T.start('vanguard',1);T.useTP();for(let i=0;i<3;i++)T.hurtE(T.S.bosses[0],1e12,{raw:1});T.S.tp.charge=1;step(2);T.S.p.x=T.S.tp.x-30;
  T.useTP('end');assert.strictEqual(T.S.st,'over');assert.strictEqual(T.loadRun(),null,'terminar la run no borró la partida guardada');
  console.log('Modo Infinito: paletas, escalado, jefes duales, guardado y portal dual: OK')}
+// 39. Exploración: gravedad por zonas, salas secretas, terminales y Códice, mecanismos, rescates y mazmorras
+{const fresh=()=>{reset();T.start('vanguard',1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;
+  T.S.hunter={dead:1};T.S.gzones=[];T.S.en=[];const p=T.S.p;p.inv=1e9;p.m.dodge=0;p.m.crit=0;for(let i=0;i<120&&!p.ground;i++)step();return p};
+ const items=()=>Object.values(T.S.p.items).reduce((a,b)=>a+b,0);
+ // gravedad: dentro de una columna antigravedad se salta más alto
+ let p=fresh();const peak=()=>{for(let i=0;i<120&&!p.ground;i++)step();let top=1e9;key('Space',false);T.keys.Space=0;for(let i=0;i<90;i++){step();top=Math.min(top,p.y)}return top};
+ const y0=peak();T.S.gzones=[{x:p.x-200,w:400,g:.4,anti:1,col:'#3cf0ff'}];assert(Math.abs(T.gravAt(p.x)-.4)<1e-9);const y1=peak();assert(y1<y0-60,'la antigravedad no cambió el salto');
+ // muro agrietado: estructura que no se ejecuta ni evoluciona; romperlo revela un Cofre Dorado
+ p=fresh();const wall=T.spawnEnemy('crackwall',p.x+300,p.y,1);wall.y=p.y;wall.hp=wall.maxHp*.1;assert(!T.execTarget(),'el muro quedó ejecutable');
+ wall.age=30;step(2);assert(!wall.evo,'el muro evolucionó');const golds=T.S.ints.filter(o=>o.k==='chest'&&o.tier==='gold').length;T.hurtE(wall,1e9,{raw:1});
+ assert(T.S.ints.filter(o=>o.k==='chest'&&o.tier==='gold').length===golds+1,'romper el muro no reveló el cofre');
+ // terminales: investigan a un enemigo desconocido, lo guardan para siempre y dan +10% de daño contra él
+ p=fresh();T.Save.d.codex={};const k=T.researchTarget();assert(k,'no hay nada que investigar');const dummy=T.spawnEnemy(k,p.x+500,p.y,1);dummy.armor=0;
+ const m0=T.combatMul(dummy,{});T.exploreInteract({k:'terminal',x:p.x,y:p.y});assert(T.Save.d.codex[k],'no se guardó la investigación');
+ assert(Math.abs(T.combatMul(dummy,{})/m0-1.1)<.01,'investigar no dio +10% de daño');T.Save.write();T.Save.load();assert(T.Save.d.codex[k],'el Códice no sobrevivió a guardar y cargar');
+ for(const e of T.STAGE.enemies)T.Save.d.codex[e]=1;const g0=p.gold;T.exploreInteract({k:'terminal',x:p.x,y:p.y});assert(p.gold>g0,'con todo investigado la terminal no pagó');
+ // mecanismo antiguo: la trampa daña a los enemigos cercanos y abre un compartimento con un objeto
+ p=fresh();const foe=T.spawnEnemy('tank',p.x+60,p.y,1);foe.hp=foe.maxHp=1e6;foe.armor=0;const i0=items();T.exploreInteract({k:'lever',x:p.x,y:p.y});step(100);
+ assert(foe.hp<foe.maxHp,'la trampa no dañó al enemigo');assert.strictEqual(items(),i0+1,'el compartimento no dio un objeto');
+ // rescate: alejarse hace retroceder el progreso; quedarse 8 s cerca libera al explorador (dron aliado y objeto)
+ p=fresh();const cage={k:'rescue',x:p.x,y:p.y,prog:0};T.S.ints.push(cage);T.exploreInteract(cage);step(60*3);const t3=T.S.rescue.t;p.x+=900;step(60);assert(T.S.rescue.t<t3,'alejarse no hizo retroceder el rescate');
+ p.x=cage.x;const dr0=T.S.dr.length,i1=items();for(let f=0;f<60*12&&T.S.rescue;f++){p.x=cage.x;p.hp=p.maxHp;step()}
+ assert(cage.open&&T.S.dr.length>dr0&&items()===i1+1,'el rescate no se completó con su recompensa');
+ // mazmorra: no se abre con un jefe activo; encierra, pasa 3 oleadas y da un legendario
+ p=fresh();T.useTP();T.exploreInteract({k:'rift',x:p.x,y:p.y});assert(!T.S.dungeon,'la mazmorra se abrió con un jefe');
+ p=fresh();const leg=()=>Object.keys(p.items).filter(k=>T.ITEM[k].r==='l').reduce((a,k)=>a+p.items[k],0),l0=leg();T.exploreInteract({k:'rift',x:p.x,y:p.y});
+ assert(T.S.dungeon&&T.S.walls,'la mazmorra no encerró al jugador');
+ for(let w=0;w<3;w++){assert.strictEqual(T.S.dungeon.wave,w+1);for(const e of T.S.dungeon.foes.slice())T.hurtE(e,1e9,{raw:1});step(2)}
+ assert(!T.S.dungeon&&!T.S.walls&&leg()>=l0+1,'superar la mazmorra no liberó ni dio el legendario');
+ // Códice en la pantalla de inicio
+ T.openCodex();assert(/Investigados \d+\/\d+/.test(el('codexStats').textContent)&&el('codexList').innerHTML.includes('cx'),'el Códice no se mostró');
+ // una etapa entera con todo lo de exploración generado, sin excepciones
+ for(let st=0;st<5;st++){reset();T.start('artillery',1);const rr=Math.random;Math.random=()=>.05;T.loadStage(st);Math.random=rr;T.S.spawn=2;const q=T.S.p;Object.assign(T.mouse,{x:700,y:300});
+  for(let f=0;f<60*8;f++){T.mouse.l=f%40<30;if(f%90===0)key('KeyE',false);if(f%120===0)q.hp=q.maxHp;step()}}
+ T.Save.d.codex={};
+ console.log('Exploración: gravedad, salas secretas, terminales y Códice, mecanismos, rescates y mazmorras: OK')}
 // 38. Jefes: consecuencias, jefe secreto (Heraldo del Vacío) y jefes fusionados
 {const fresh=(ch='vanguard')=>{reset();T.start(ch,1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;
   T.S.hunter={dead:1};const p=T.S.p;p.inv=1e9;p.m.dodge=0;return p};

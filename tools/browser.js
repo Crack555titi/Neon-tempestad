@@ -66,6 +66,10 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  await js("S.en.forEach(e=>e.dead=1);S.sealExec=3;S.storm.stab=90;const o={k:'seal',x:S.p.x+120,y:S.p.y};S.ints.push(o);openSeal(o);S.boss.hidden=0;S.p.inv=99;S.p.hp=S.p.maxHp");
  await sleep(2500);await shot('03i-heraldo');
  await js("S.loop=1;loadStage(4);useTP();S.boss.hidden=0;S.p.inv=99;S.p.hp=S.p.maxHp");await sleep(3000);await shot('03j-fusion');
+ // exploración: columna antigravedad, muro agrietado, terminal, mecanismo, explorador atrapado y grieta dimensional
+ await js("S.en.forEach(e=>e.dead=1);S.bosses=[];S.boss=null;S.walls=null;S.loop=0;loadStage(0);S.spawn=1e9;S.p.inv=99");await sleep(1800);
+ await js("S.en.forEach(e=>e.dead=1);const x=S.p.x,y=S.p.y;S.gzones=[{x:x-330,w:170,g:.4,anti:1,col:'#3cf0ff'}];const w=spawnEnemy('crackwall',x+330,y,1);w.y=y;S.ints.push({k:'terminal',x:x-110,y},{k:'lever',x:x+110,y},{k:'rescue',x:x+210,y,prog:0},{k:'rift',x:x-230,y});S.p.inv=99");
+ await sleep(800);await shot('03k-exploracion');await js("openCodex()");await sleep(300);await shot('03l-codice');await js("hide('codex')");
  await js("openStormDeal()");await sleep(500);await shot('03c-trato');await js("takeDeal('estabilizar');$('storm').style.display='none';S.st='play'");
  for(const [i,b] of [[0,'prisma'],[1,'hydra'],[2,'queen'],[3,'leviathan'],[4,'archon']]){
   await js(`if(S.st!=='play')document.querySelector('#nodes .card')?.click();loadStage(${i});useTP();S.boss.hidden=0;hurtE(S.boss,S.boss.maxHp*.5,{raw:1});S.p.hp=S.p.maxHp`);

@@ -11,7 +11,7 @@
    - HERIDAS: algunos enemigos y jefes dejan heridas temporales (fractura, infección, interferencia, desgarro). */
 const PARRY_WIN=.2,PARRY_CD=1.1,COMBO_WIN=1.4,EXEC_R=85;
 const cmb=()=>S.p.cmb||(S.p.cmb={parryT:0,parryCd:0,energy:0,combo:0,comboT:0,best:0,dashT:0,flash:0});
-const executable=e=>!e.dead&&!e.boss&&!e.hidden&&e.hp>0&&e.hp<e.maxHp*(e.elite?.15:.22);
+const executable=e=>!e.dead&&!e.boss&&!e.hidden&&!e.d.structure&&e.hp>0&&e.hp<e.maxHp*(e.elite?.15:.22);
 function execTarget(){const p=S.p;let b=null,bd=EXEC_R;for(const e of S.en)if(executable(e)){const d=hyp(e.x-p.x,(e.y-e.h/2)-(p.y-p.h/2));if(d<bd){bd=d;b=e}}return b}
 
 /* ---------- parry ---------- */
@@ -46,6 +46,7 @@ function combatMul(e,o){if(o.proc||o.dot)return 1;const p=S.p,C=cmb();let k=1+Ma
  if(!p.ground){k*=1.15;if(p.y<e.y-e.h-30){k*=1.15;flagE(e,'DESDE ARRIBA','#ffd23c')}}
  if(C.dashT>0){k*=1.3;flagE(e,'CONTRAGOLPE','#ff8a3c')}
  if(e.stunT>0&&!e.boss){k*=1.25;flagE(e,'VULNERABLE','#ff3c6a')}
+ if(Save.d.codex&&Save.d.codex[e.type])k*=1.1;  // investigado en una terminal
  return k}
 function comboHit(e,o){if(o.proc||o.dot)return;const p=S.p,C=cmb(),air=!p.ground;C.combo+=air?2:1;C.comboT=COMBO_WIN;
  if(C.combo>C.best){C.best=C.combo;Save.max('bestCombo',C.combo)}

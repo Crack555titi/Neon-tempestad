@@ -17,7 +17,7 @@ const FEEDERS=new Set(['golem','splitter','shaman']);
 const HUNTER_FLEE=.4,HUNTER_MAX_ESCAPES=2;
 
 /* ---------- armaduras ---------- */
-function ecoSpawn(e){if(e.boss||e.hunter)return;const a=ARMORED[e.type]||(coef()>2.5&&e.hp>50&&Math.random()<.15?.35:0);
+function ecoSpawn(e){if(e.boss||e.hunter||e.d.structure)return;const a=ARMORED[e.type]||(coef()>2.5&&e.hp>50&&Math.random()<.15?.35:0);
  if(a){e.armor=e.armorMax=e.maxHp*a||e.hp*a}}
 // absorbe parte del daño en la armadura; al romperse, el enemigo cambia
 function armorAbsorb(e,d){if(!(e.armor>0))return d;const take=Math.min(e.armor,d*.6);e.armor-=take;
@@ -33,7 +33,7 @@ function evolve(e,why){const lv=(e.evo||0)+1;if(lv>2||e.dead)return;e.evo=lv;con
 function feed(f,dead){f.fed=(f.fed||0)+1;f.hp=Math.min(f.maxHp,f.hp+f.maxHp*.25);f.age=(f.age||0)+6;
  if(f.fed<=5){f.w*=1.06;f.h*=1.06;f.dmg*=1.08}
  bolt(dead.x,dead.y-dead.h/2,f.x,f.y-f.h/2,f.d.color,2);txt(f.x,f.y-f.h-14,'SE ALIMENTA','#d0ff7a',11)}
-function updEco(e,dt){if(e.boss||e.dead)return;e.age=(e.age||0)+dt;
+function updEco(e,dt){if(e.boss||e.dead||e.d.structure)return;e.age=(e.age||0)+dt;
  if(!e.hunter&&e.age>=EVO_TIME[e.evo||0])evolve(e);
  if(e.evoRegen)e.hp=Math.min(e.maxHp,e.hp+e.maxHp*e.evoRegen*dt);
  if(e.hunter)updHunter(e,dt)}
@@ -54,7 +54,7 @@ function updEcoStage(dt){const H=hunterState();if(H.dead||!(H.t>0)||S.boss)retur
 function ecoInit(){Ev.on('onKill',e=>{
  if(e.hunter&&!e.fled){const H=hunterState();H.dead=1;giveItem(rollItem('l'));Save.add('hunterKills');say('☠ ¡CAZADOR DEL VACÍO DERROTADO! Te deja un objeto legendario')}
  // los devoradores cercanos absorben al caído
- for(const f of S.en)if(f!==e&&!f.dead&&!f.boss&&FEEDERS.has(f.type)&&hyp(f.x-e.x,f.y-e.y)<170){feed(f,e);break}})}
+ if(!isStructure(e))for(const f of S.en)if(f!==e&&!f.dead&&!f.boss&&FEEDERS.has(f.type)&&hyp(f.x-e.x,f.y-e.y)<170){feed(f,e);break}})}
 // recompensa extra por enemigos evolucionados
 const ecoReward=e=>1+.5*(e.evo||0);
 

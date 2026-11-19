@@ -34,7 +34,7 @@ const say=m=>{S.msg=m;S.msgT=4};
 /* run: instantánea guardada al empezar una etapa (save.js) para continuar o reintentar */
 function start(cid,did,run){
  Ev.h={};fxReset();const ch=CHARS[cid],df=DIFFS[did];
- ['title','menu','shop','rank','login','end','mastery','storm','inv','altar','pause','opts','ctrls'].forEach(i=>$(i).style.display='none');
+ ['title','menu','shop','codex','rank','login','end','mastery','storm','inv','altar','pause','opts','ctrls'].forEach(i=>$(i).style.display='none');
  S={st:'play',cid,ch,df,t:0,clock:df.start||0,stage:0,phase:1,cam:0,shake:0,en:[],zn:[],dr:[],sch:[],freeze:0,spawn:2,loop:0,bosses:[],boss:null,bossDone:0,bossName:'',msg:'',msgT:0,kills:0,mq:0,portal:{a:null,b:null},
   ints:[],near:null,note:null,chestT:40,altarT:150,tp:null,lava:0,walls:null,fade:1,lvlFx:null,
   p:{x:300,y:FLOOR,w:24,h:42,vx:0,vy:0,ground:0,wasG:1,plat:null,jumps:0,maxJ:2,face:1,aim:0,hp:ch.hp,maxHp:ch.hp,lvl:1,xp:0,need:40,dmgMul:1,inv:0,dash:null,drop:0,
@@ -55,7 +55,7 @@ function start(cid,did,run){
   recalcHp();S.loop=run.loop||0;if(run.hunter)S.hunter=run.hunter;S.legacy=run.legacy||[];loadStage(run.stage)}
  else{while(p.lvl<(df.startLvl||1))giveXp(p.need-p.xp);loadStage(0);saveRun()}
  p.hp=p.maxHp;
- trackRun();stormInit();combatInit();ecoInit();adaptiveInit();npcInit();bossplusInit(); // después de los niveles regalados de Pesadilla: no cuentan para logros
+ trackRun();stormInit();combatInit();ecoInit();adaptiveInit();npcInit();bossplusInit();exploreInit(); // después de los niveles regalados de Pesadilla: no cuentan para logros
  Snd.hooks();
 }
 
@@ -74,7 +74,7 @@ function updBuffs(dt){const B=S.p.buf;
 
 /* ===================== FÍSICA ===================== */
 function phys(e,dt,drop){
- e.vy+=G*dt*(e.gm===undefined?1:e.gm)*(S.gmul||1);  // gmul: anomalía de gravedad
+ e.vy+=G*dt*(e.gm===undefined?1:e.gm)*(S.gmul||1)*gravAt(e.x);  // gmul: anomalía de gravedad · gravAt: sectores de gravedad
 const oy=e.y;
  e.x=clamp(e.x+e.vx*dt,e.w/2,WORLD-e.w/2);e.y+=e.vy*dt;e.ground=0;e.plat=null;
  if(e.vy>=0)for(const p of PLAT){if(!p.on||(drop&&!p.solid))continue;
@@ -203,7 +203,7 @@ function updProj(q,dt){
  if(q.homeP)steer(q,p.x,p.y-p.h/2,2.2,dt);  // proyectil hostil teledirigido (lento de girar: se puede esquivar)
  if(q.ret){if(!q.back&&q.life<q.t0*.5){q.back=1;q.hit.clear()}
   if(q.back){const a=Math.atan2(p.y-p.h/2-q.y,p.x-q.x),sp=hyp(q.vx,q.vy);q.vx=Math.cos(a)*sp;q.vy=Math.sin(a)*sp;q.life=Math.max(q.life,.05);if(hyp(p.x-q.x,p.y-p.h/2-q.y)<28)q.life=0}}
- if(q.gm)q.vy+=G*q.gm*dt*(s.gmul||1);
+ if(q.gm)q.vy+=G*q.gm*dt*(s.gmul||1)*gravAt(q.x);
  if(q.pull)for(const e of s.en)if(hyp(e.x-q.x,e.y-e.h/2-q.y)<q.pull)pullE(e,q.x,q.y,240,dt);
  const qs=q.hostile?s.pspd||1:1;q.x+=q.vx*dt*qs;q.y+=q.vy*dt*qs;spark(q.x,q.y,0,0,.2,q.col,q.r);  // pspd: proyectiles acelerados
  const P=s.portal;
@@ -302,7 +302,7 @@ function update(dt){
  for(let i=0;i<PT.n;i++){const q=PT.a[i];q.l-=dt;if(q.ring){q.r+=(q.mr-q.r)*Math.min(1,dt*9)}else{q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.93;q.vy*=.93}}
  PT.sweep(deadL);for(let i=0;i<TX.n;i++){const t=TX.a[i];t.l-=dt;t.vy+=t.g*dt;t.x+=t.vx*dt;t.y+=t.vy*dt}TX.sweep(deadL);
  for(let i=0;i<BL.n;i++)BL.a[i].l-=dt;BL.sweep(deadL);
- s.shake*=.88;updKick(dt);updStorm(dt);updCombat(dt);updEcoStage(dt);updAdaptive(dt);updNpcs(dt);s.msgT-=dt;hsCd-=dt;s.fade=Math.max(0,s.fade-dt*1.8);if(s.lvlFx&&(s.lvlFx.t-=dt)<=0)s.lvlFx=null;
+ s.shake*=.88;updKick(dt);updStorm(dt);updCombat(dt);updEcoStage(dt);updAdaptive(dt);updNpcs(dt);updExplore(dt);s.msgT-=dt;hsCd-=dt;s.fade=Math.max(0,s.fade-dt*1.8);if(s.lvlFx&&(s.lvlFx.t-=dt)<=0)s.lvlFx=null;
 }
 
 /* ===================== RENDER ===================== */
@@ -319,7 +319,7 @@ function drawZone(z){
 function draw(){
  const s=S;screen();drawBg(s.cam,s.boss?s.boss.ph:0,s.t);
  const sh=s.shake*SHAKE,sx=R(-1,1)*sh+KICK.x*SHAKE,sy=R(-1,1)*sh+KICK.y*SHAKE;c.translate(-s.cam+sx,sy);
- drawPlats();
+ drawPlats();drawGravZones();
  for(const z of s.zn)drawZone(z);
  // portales
  for(const P of [s.portal.a,s.portal.b])if(P){glow('#3cffd8',16);c.strokeStyle=P===s.portal.a?'#3cffd8':'#ff8a3c';c.lineWidth=4;c.beginPath();c.ellipse(P.x,P.y,14,30+Math.sin(s.t*5)*3,0,0,6.283);c.stroke()}

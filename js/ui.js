@@ -210,7 +210,7 @@ const helpText=()=>`${keyName(BIND.left[0])}/${keyName(BIND.right[0])} mover · 
 /* ===================== ARRANQUE ===================== */
 /* ===================== PANTALLA DE INICIO ===================== */
 // vuelta a la pantalla de inicio desde cualquier sitio (fin de partida, pausa, ranking, tienda); la partida guardada se conserva
-function goHome(){for(const id of ['menu','end','rank','shop','opts','ctrls','pause','inv','altar','mastery','storm'])hide(id);S=null;show('title');updateTitle()}
+function goHome(){for(const id of ['menu','end','rank','shop','codex','opts','ctrls','pause','inv','altar','mastery','storm'])hide(id);S=null;show('title');updateTitle()}
 function updateTitle(){$('tGems').textContent=`💎 ${Save.d.shop.gems.toLocaleString('es')}`;buildMenu()}
 $('tPlay').onclick=()=>{hide('title');show('menu');buildMenu();Snd.play('ui')};
 $('mBack').onclick=()=>{hide('menu');show('title');updateTitle();Snd.play('ui')};
