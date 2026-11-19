@@ -30,10 +30,10 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={RELICS,MUTATIONS,EVO_MODS,relicUnlocked,takeEvo,takeMutation,openPick,buildRelics,REL,ab,maxCd,bm,gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
-const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);if(T.S.st==='storm')el('stormOpts').onclick(pick0);T.update(1/60);T.draw()}};
+const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);if(T.S.st==='storm')el('stormOpts').onclick(pick0);if(T.S.st==='choice')el('choiceOpts').onclick(pick0);T.update(1/60);T.draw()}};
 const key=(code,repeat)=>L.keydown({code,repeat,preventDefault(){}});
 const reset=()=>{for(const k in T.keys)T.keys[k]=0;T.mouse.l=T.mouse.r=0};
 
@@ -97,8 +97,8 @@ T.start('vanguard',1);const al=T.S.ints.find(o=>o.k==='altar');T.S.p.x=al.x;T.S.
 assert.strictEqual(T.S.st,'altar');els.altarOpts.onclick(pick0);assert(T.FRAGMENTS.some(f=>T.S.p.items[f.id]),'el altar no dio objeto');
 assert(al.open&&T.S.st==='play');
 // 13. Sinergia sangrado + Granada de Sangre: un enemigo que muere sangrando daña a su vecino
-T.start('vanguard',1);T.S.spawn=1e9;T.giveItem('bloodbomb',1);T.spawnEnemy('crawler',900,500,true);T.spawnEnemy('crawler',940,500,true);
-const [ea,eb]=T.S.en;eb.hp=eb.maxHp=1e5;T.applyDot(ea,'bleed',1,3);T.hurtE(ea,1e4);assert(eb.hp<eb.maxHp,'la Granada de Sangre no explotó');
+T.start('vanguard',1);T.S.spawn=1e9;T.giveItem('bloodbomb',1);T.S.en=[];  // sin los muros agrietados que pueda generar la etapa
+const ea=T.spawnEnemy('crawler',900,500,true),eb=T.spawnEnemy('crawler',940,500,true);eb.hp=eb.maxHp=1e5;T.applyDot(ea,'bleed',1,3);T.hurtE(ea,1e4);assert(eb.hp<eb.maxHp,'la Granada de Sangre no explotó');
 // 14. Fragmentados con efecto duro: Vidrio fija la vida en 1; Ankh resucita y se consume
 T.start('vanguard',1);T.giveItem('glass',1);assert.strictEqual(T.S.p.maxHp,1);step(60);assert.strictEqual(T.S.p.maxHp,1);
 T.start('vanguard',1);T.giveItem('ankh',1);T.S.p.inv=0;T.hurtP(1e6);assert(T.S.st==='play'&&T.S.p.hp===T.S.p.maxHp&&!T.S.p.items.ankh,'el Ankh no funcionó');
@@ -264,6 +264,41 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  T.start('vanguard',1);T.useTP();for(let i=0;i<3;i++)T.hurtE(T.S.bosses[0],1e12,{raw:1});T.S.tp.charge=1;step(2);T.S.p.x=T.S.tp.x-30;
  T.useTP('end');assert.strictEqual(T.S.st,'over');assert.strictEqual(T.loadRun(),null,'terminar la run no borró la partida guardada');
  console.log('Modo Infinito: paletas, escalado, jefes duales, guardado y portal dual: OK')}
+// 40. Progresión: evolución de habilidades, mutaciones, reliquias (desbloqueo por descubrimiento) y continuar la partida
+{const st=T.Save.d.stats,set=T.Save.d.settings,prev={...st},prevRel=set.relic;
+ const fresh=(ch='artillery',d=1)=>{reset();T.start(ch,d);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;
+  T.S.hunter={dead:1};const p=T.S.p;p.inv=1e9;p.m.dodge=0;return p};
+ // evolución: al llegar a nivel 4 se ofrece; la mejora cambia de verdad los datos de la habilidad
+ set.relic=null;let p=fresh();const d0=T.ab('p');T.S.pick=[];T.Ev.emit('onLevelUp',4);step(1);assert.strictEqual(T.S.st,'choice','no se ofreció la evolución');
+ assert(el('choiceOpts').innerHTML.includes('card'),'la elección no tiene opciones');el('choiceOpts').onclick({target:{closest:()=>({dataset:{i:0}})}});assert.strictEqual(T.S.st,'play');
+ p=fresh();T.takeEvo('p','dmg');assert(Math.abs(T.ab('p').dmg/d0.dmg-1.25)<1e-9,'Potencia no subió el daño');T.takeEvo('p','n');assert.strictEqual(T.ab('p').n,(d0.n||1)+1,'Multiplicidad no añadió proyectil');
+ const cd0=T.maxCd('s',T.ab('s'));T.takeEvo('s','cd');assert(T.maxCd('s',T.ab('s'))<cd0*.85,'Celeridad no bajó el enfriamiento');
+ // mutaciones: ventaja y coste a la vez
+ p=fresh();T.takeMutation('vidrio');assert(T.bm('dmg')>=1.25&&T.bm('taken')>=1.2,'Piel de Vidrio no aplicó ventaja y coste');
+ p=fresh();const hm=p.maxHp;T.takeMutation('volatil');assert(p.maxHp<hm,'Sangre Volátil no restó vida');const foe=T.spawnEnemy('tank',p.x+60,p.y,1);foe.hp=foe.maxHp=1e6;foe.armor=0;p.inv=0;T.hurtP(5,null);assert(foe.hp<1e6,'Sangre Volátil no explotó');
+ p=fresh();T.S.legacy=[];const e0=T.spawnEnemy('crawler',p.x+400,p.y,1);T.takeMutation('iman');const e1=T.spawnEnemy('crawler',p.x+400,p.y,1);assert(e1.maxHp>e0.maxHp*1.1,'Imán Dimensional no fortaleció a los enemigos');
+ // reliquias: bloqueadas hasta descubrir; desbloqueadas cambian lo que dicen
+ for(const k in T.RELICS)st[T.RELICS[k].stat]=0;for(const k in T.RELICS)assert(!T.relicUnlocked(k),k+' desbloqueada sin descubrir nada');
+ set.relic='brujula';p=fresh();assert.strictEqual(T.S.relic,null,'se usó una reliquia bloqueada');
+ for(const k in T.RELICS)st[T.RELICS[k].stat]=T.RELICS[k].n;for(const k in T.RELICS)assert(T.relicUnlocked(k),k+' no se desbloqueó al descubrir');
+ set.relic=null;p=fresh();const price0=T.priceOf({tier:'small'}),c0=T.S.clock;step(60);const clk0=T.S.clock-c0;
+ set.relic='brujula';p=fresh();assert.strictEqual(T.S.relic,'brujula');assert(Object.keys(p.items).some(k=>T.ITEM[k].r==='r'),'la Brújula no dio el objeto raro');assert(T.priceOf({tier:'small'})>price0,'la Brújula no encareció los cofres');
+ set.relic='arena';p=fresh();const c1=T.S.clock;step(60);assert(T.S.clock-c1<clk0*.85,'el Reloj de Arena no frenó el reloj');
+ set.relic='cristal';p=fresh();assert(p.maxHp>T.CHARS.artillery.hp*1.4,'el Corazón de Cristal no subió la vida');
+ set.relic='ojo';p=fresh();const rq=Math.random;Math.random=()=>.99;T.loadStage(1);Math.random=rq;  // .99: sin anomalía inicial al azar
+ assert(T.S.storm.act.length>=1,'el Ojo de la Tempestad no trajo una anomalía');
+ set.relic='semilla';p=fresh();T.cmb().energy=0;T.addEnergy(10);assert.strictEqual(T.cmb().energy,15,'la Semilla no aceleró la sobrecarga');
+ set.relic='corona';p=fresh();assert(T.REL().elite===1.5&&T.REL().eliteGold===3);
+ // continuar la partida: reliquia, mutaciones y evoluciones se reaplican (una sola vez)
+ set.relic='cristal';p=fresh('artillery');T.takeMutation('quitina');T.takeEvo('p','dmg');const arm=p.m.arm,dmgP=T.ab('p').dmg,mh=p.maxHp;T.saveRun();
+ const run=T.loadRun();assert(run.relic==='cristal'&&run.muts.includes('quitina')&&run.abm.p.lv===1,'no se guardó la progresión');
+ T.start(run.cid,run.did,run);p=T.S.p;assert(T.S.relic==='cristal'&&p.muts.length===1&&Math.abs(p.m.arm-arm)<1e-9,'la mutación no se reaplicó una sola vez');
+ assert(Math.abs(T.ab('p').dmg-dmgP)<1e-9,'la evolución no se reaplicó');assert(Math.abs(p.maxHp-mh)<1,'la vida máxima cambió al continuar');
+ // selector de reliquias: una bloqueada muestra cómo conseguirla
+ for(const k in T.RELICS)st[T.RELICS[k].stat]=0;set.relic=null;T.buildRelics();assert(el('relics').innerHTML.includes('🔒'),'el selector no mostró reliquias bloqueadas');
+ el('relics').onclick({target:{closest:()=>({dataset:{r:'ojo'}})}});assert(/Supera una mazmorra/.test(el('relicDesc').textContent),'no se explicó cómo desbloquearla');
+ Object.assign(st,prev);set.relic=prevRel;
+ console.log('Progresión: evolución de habilidades, mutaciones, reliquias por descubrimiento y continuar la partida: OK')}
 // 39. Exploración: gravedad por zonas, salas secretas, terminales y Códice, mecanismos, rescates y mazmorras
 {const fresh=()=>{reset();T.start('vanguard',1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;
   T.S.hunter={dead:1};T.S.gzones=[];T.S.en=[];const p=T.S.p;p.inv=1e9;p.m.dodge=0;p.m.crit=0;for(let i=0;i<120&&!p.ground;i++)step();return p};

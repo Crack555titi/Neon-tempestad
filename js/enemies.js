@@ -60,10 +60,10 @@ function spawnEnemy(type,x,y,noElite){
  // los terrestres caen desde arriba sobre lo que haya debajo
  const e={type,d,boss:0,x:clamp(x===undefined?S.p.x+side*R(520,720):x,30,WORLD-30),y:y===undefined?(isFlyer(d)?R(120,260):60):y,w:d.w,h:d.h,vx:0,vy:0,face:1,
   hp:d.hp*hpScale()*(it.greed?1.2+.2*it.greed:1),dmg:d.dmg*dmgScale(),spdx:1,ph:R(0,6),cd:R(1,2.5),flash:0,slowT:0,stunT:0,markT:0,aff:[],sh:0,tell:0};
- if(!noElite&&Math.random()<Math.min(.6,(.04+co*.012)*S.df.elite*(it.blacklens?2:1))){
+ if(!noElite&&Math.random()<Math.min(.6,(.04+co*.012)*S.df.elite*(REL().elite||1)*(it.blacklens?2:1))){
   const n=S.df.dbl?2:1,pool=AFX.slice().sort(()=>Math.random()-.5);e.hp*=2;e.dmg*=1.3;e.elite=1;
   for(let i=0;i<n;i++){const a=pool[i];e.aff.push(a);if(a.spd)e.spdx*=a.spd;if(a.hp)e.hp*=a.hp}}
- stormSpawn(e);e.maxHp=e.hp;ecoSpawn(e);legacySpawn(e);S.en.push(e);return e;
+ stormSpawn(e);e.maxHp=e.hp;ecoSpawn(e);legacySpawn(e);progSpawn(e);S.en.push(e);return e;
 }
 function updEnemy(e,dt){
  const p=S.p,d=e.d;e.flash-=dt;e.slowT-=dt;e.markT-=dt;updElements(e,dt);updEco(e,dt);if(e.dead)return;

@@ -34,7 +34,7 @@ const say=m=>{S.msg=m;S.msgT=4};
 /* run: instantánea guardada al empezar una etapa (save.js) para continuar o reintentar */
 function start(cid,did,run){
  Ev.h={};fxReset();const ch=CHARS[cid],df=DIFFS[did];
- ['title','menu','shop','codex','rank','login','end','mastery','storm','inv','altar','pause','opts','ctrls'].forEach(i=>$(i).style.display='none');
+ ['title','menu','shop','codex','rank','login','end','mastery','storm','choice','inv','altar','pause','opts','ctrls'].forEach(i=>$(i).style.display='none');
  S={st:'play',cid,ch,df,t:0,clock:df.start||0,stage:0,phase:1,cam:0,shake:0,en:[],zn:[],dr:[],sch:[],freeze:0,spawn:2,loop:0,bosses:[],boss:null,bossDone:0,bossName:'',msg:'',msgT:0,kills:0,mq:0,portal:{a:null,b:null},
   ints:[],near:null,note:null,chestT:40,altarT:150,tp:null,lava:0,walls:null,fade:1,lvlFx:null,
   p:{x:300,y:FLOOR,w:24,h:42,vx:0,vy:0,ground:0,wasG:1,plat:null,jumps:0,maxJ:2,face:1,aim:0,hp:ch.hp,maxHp:ch.hp,lvl:1,xp:0,need:40,dmgMul:1,inv:0,dash:null,drop:0,
@@ -54,8 +54,9 @@ function start(cid,did,run){
   for(const n of run.mastery){const m=MASTERY.find(x=>x.name===n);if(m){m.fx(p);p.mastery.push(n)}}
   recalcHp();S.loop=run.loop||0;if(run.hunter)S.hunter=run.hunter;S.legacy=run.legacy||[];loadStage(run.stage)}
  else{while(p.lvl<(df.startLvl||1))giveXp(p.need-p.xp);loadStage(0);saveRun()}
+ progStart(run);  // reliquia, mutaciones y evoluciones (se reaplican al continuar)
  p.hp=p.maxHp;
- trackRun();stormInit();combatInit();ecoInit();adaptiveInit();npcInit();bossplusInit();exploreInit(); // después de los niveles regalados de Pesadilla: no cuentan para logros
+ trackRun();stormInit();combatInit();ecoInit();adaptiveInit();npcInit();bossplusInit();exploreInit();progInit(); // después de los niveles regalados de Pesadilla: no cuentan para logros
  Snd.hooks();
 }
 
@@ -246,7 +247,7 @@ function updZone(z,dt){
 
 /* ===================== UPDATE ===================== */
 function update(dt){
- const s=S,p=s.p,fz=s.freeze>0;s.t+=dt;s.clock+=dt*s.df.clock*(p.items.invhour?1.5+.5*p.items.invhour:1)*(p.items.brokenclock?1.1+.1*p.items.brokenclock:1);s.cam=clamp(p.x-W/2,0,WORLD-W);
+ const s=S,p=s.p,fz=s.freeze>0;s.t+=dt;s.clock+=dt*s.df.clock*(p.items.invhour?1.5+.5*p.items.invhour:1)*(p.items.brokenclock?1.1+.1*p.items.brokenclock:1)*(REL().clock||1);s.cam=clamp(p.x-W/2,0,WORLD-W);
  for(const pl of PLAT){const a=pl.sp?Math.sin(s.t*pl.sp):0,nx=pl.x+(pl.ax||0)*a;pl.dx=pl.rx===undefined?0:nx-pl.rx;pl.rx=nx;pl.ry=pl.y+(pl.ay||0)*a;
   pl.on=s.phase>=pl.ph[0]&&s.phase<=pl.ph[1]&&!(pl.bl&&s.phase>=pl.bl&&Math.sin(s.t*1.6+pl.x*.01)<-.3)}  // bl: parpadea
  updBuffs(dt);drainP(p.maxHp*bsum('drain')*dt);if(s.st!=='play')return;
@@ -302,7 +303,7 @@ function update(dt){
  for(let i=0;i<PT.n;i++){const q=PT.a[i];q.l-=dt;if(q.ring){q.r+=(q.mr-q.r)*Math.min(1,dt*9)}else{q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.93;q.vy*=.93}}
  PT.sweep(deadL);for(let i=0;i<TX.n;i++){const t=TX.a[i];t.l-=dt;t.vy+=t.g*dt;t.x+=t.vx*dt;t.y+=t.vy*dt}TX.sweep(deadL);
  for(let i=0;i<BL.n;i++)BL.a[i].l-=dt;BL.sweep(deadL);
- s.shake*=.88;updKick(dt);updStorm(dt);updCombat(dt);updEcoStage(dt);updAdaptive(dt);updNpcs(dt);updExplore(dt);s.msgT-=dt;hsCd-=dt;s.fade=Math.max(0,s.fade-dt*1.8);if(s.lvlFx&&(s.lvlFx.t-=dt)<=0)s.lvlFx=null;
+ s.shake*=.88;updKick(dt);updStorm(dt);updCombat(dt);updEcoStage(dt);updAdaptive(dt);updNpcs(dt);updExplore(dt);updProg();s.msgT-=dt;hsCd-=dt;s.fade=Math.max(0,s.fade-dt*1.8);if(s.lvlFx&&(s.lvlFx.t-=dt)<=0)s.lvlFx=null;
 }
 
 /* ===================== RENDER ===================== */

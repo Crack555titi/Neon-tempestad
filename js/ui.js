@@ -12,7 +12,7 @@ const DIFF_TIERS=[['FÁCIL','#4cff7a'],['MEDIO','#c8ff3c'],['DIFÍCIL','#ffd23c'
 const KEYS={p:'LMB',s:'RMB',m:'SHIFT',u:'Q'};
 
 function hud(){
- const s=S,p=s.p,t=s.t;screen();drawStormHud();drawCombatHud();drawQuestHud();c.shadowBlur=0;c.textBaseline='alphabetic';
+ const s=S,p=s.p,t=s.t;screen();drawStormHud();drawCombatHud();drawQuestHud();drawProgHud();c.shadowBlur=0;c.textBaseline='alphabetic';
  // ---- arriba a la izquierda: oro y objetos ----
  const ids=sortedItems(),cols=Math.max(6,(W/2-262-36)/22|0),rows=Math.ceil(ids.length/cols);  // columnas que caben antes de la barra del jefe
  panel(10,8,Math.max(150,Math.min(cols,ids.length)*22+14),26+rows*22,'#ffd23c55');
@@ -210,7 +210,7 @@ const helpText=()=>`${keyName(BIND.left[0])}/${keyName(BIND.right[0])} mover · 
 /* ===================== ARRANQUE ===================== */
 /* ===================== PANTALLA DE INICIO ===================== */
 // vuelta a la pantalla de inicio desde cualquier sitio (fin de partida, pausa, ranking, tienda); la partida guardada se conserva
-function goHome(){for(const id of ['menu','end','rank','shop','codex','opts','ctrls','pause','inv','altar','mastery','storm'])hide(id);S=null;show('title');updateTitle()}
+function goHome(){for(const id of ['menu','end','rank','shop','codex','choice','opts','ctrls','pause','inv','altar','mastery','storm'])hide(id);S=null;show('title');updateTitle()}
 function updateTitle(){$('tGems').textContent=`💎 ${Save.d.shop.gems.toLocaleString('es')}`;buildMenu()}
 $('tPlay').onclick=()=>{hide('title');show('menu');buildMenu();Snd.play('ui')};
 $('mBack').onclick=()=>{hide('menu');show('title');updateTitle();Snd.play('ui')};

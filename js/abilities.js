@@ -122,7 +122,7 @@ const AB={
  queen(p,d){for(const m of count('queen'))m.life=0;S.dr.push({k:'queen',a:0,x:p.x,y:p.y-80,life:d.life,dmg:d.dmg,cd:0});say('¡La Reina Colmena despierta!')}
 };
 
-function ab(slot){const d=S.ch[SLOT[slot]];return d.forms?d.forms[S.p.form]:d}
+function ab(slot){const d=S.ch[SLOT[slot]];return modAbility(d.forms?d.forms[S.p.form]:d,S.p.abm&&S.p.abm[slot])}  // modAbility: evoluciones elegidas
 function cast(slot,f){
  const p=S.p,d=ab(slot),base=S.ch[SLOT[slot]];
  if(d.cost)p.hp=Math.max(1,p.hp*(1-d.cost));

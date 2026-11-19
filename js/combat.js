@@ -55,11 +55,11 @@ function comboHit(e,o){if(o.proc||o.dot)return;const p=S.p,C=cmb(),air=!p.ground
  if(air&&!e.boss&&!isFlyer(e.d)&&e.w<50&&!e.dead){e.vy=Math.min(e.vy,-300);e.gm=.35;e.juggle=.6}}
 
 /* ---------- sobrecarga ---------- */
-function addEnergy(n){const C=cmb(),p=S.p;if(p.buf.sobrecarga||p.buf.agotamiento)return;C.energy=Math.min(100,C.energy+n);
+function addEnergy(n){const C=cmb(),p=S.p;n*=REL().energy||1;if(p.buf.sobrecarga||p.buf.agotamiento)return;C.energy=Math.min(100,C.energy+n);
  if(C.energy<100)return;C.energy=0;Snd.play('ult');say('⚡ ¡SOBRECARGA! Habilidades potenciadas 6 s');chromaHit(.8);
  buff('sobrecarga',6,{dmg:1.25,cdm:.5,draw(){glow('#ffd23c',20);c.strokeStyle='#ffd23c';c.globalAlpha=.6+.3*Math.sin(S.t*20);c.lineWidth=2.5;
    c.beginPath();c.arc(p.x,p.y-p.h/2,26+Math.sin(S.t*14)*3,0,6.283);c.stroke();c.globalAlpha=1;c.shadowBlur=0},
-  end(){if(!S||S.p!==p)return;buff('agotamiento',3.5,{spd:.8});p.cd.s=Math.max(p.cd.s,3.5);p.cd.m=Math.max(p.cd.m,3.5);say('Agotamiento: sin secundaria ni movimiento 3,5 s')}})}
+  end(){if(!S||S.p!==p)return;const ex=3.5*(REL().exhaust||1);buff('agotamiento',ex,{spd:.8});p.cd.s=Math.max(p.cd.s,ex);p.cd.m=Math.max(p.cd.m,ex);say('Agotamiento: sin secundaria ni movimiento 3,5 s')}})}
 
 /* ---------- heridas ---------- */
 const WOUNDS={fractura:{name:'Fractura',col:'#c8a070',desc:'−25% velocidad',o:{spd:.75}},

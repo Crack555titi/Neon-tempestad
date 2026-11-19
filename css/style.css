@@ -189,3 +189,12 @@ h1.big span{animation:flick 6s steps(1) infinite}
 .cx b{color:var(--c,#fff);font-size:14px}.cx small{color:#cfc9f5;font-size:11px;font-style:italic}.cx span{color:#9a93c8;font-size:11px}
 .cx.unk{border-style:dashed;opacity:.55}.cx.unk b{color:#666}
 @media (max-width:700px){#codexList{grid-template-columns:repeat(2,1fr)}}
+
+/* ===== Reliquias y elecciones ===== */
+#relics{align-items:center;gap:6px}
+#relics .rl{font-size:12px;color:#9a93c8;margin-right:2px}
+#relics .diff{font-size:12px;padding:4px 10px}
+#relics .diff.lock{opacity:.45}
+#relicDesc{min-height:1em;color:#ffd23c}
+#choice{background:radial-gradient(ellipse at center,rgba(40,20,80,.6),rgba(5,3,13,.93))}
+#choiceOpts .card{max-width:250px}
