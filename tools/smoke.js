@@ -30,7 +30,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={RELICS,MUTATIONS,EVO_MODS,relicUnlocked,takeEvo,takeMutation,openPick,buildRelics,REL,ab,maxCd,bm,gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={addTaint,taint,borrow,debtStage,debtCost,takeCore,coreStage,CORE_OPTS,persEvent,persState,tempestSave,tempestLoad,spawnShade,RELICS,MUTATIONS,EVO_MODS,relicUnlocked,takeEvo,takeMutation,openPick,buildRelics,REL,ab,maxCd,bm,gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);if(T.S.st==='storm')el('stormOpts').onclick(pick0);if(T.S.st==='choice')el('choiceOpts').onclick(pick0);T.update(1/60);T.draw()}};
@@ -553,6 +553,39 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  T.stormUnleash('veloz');const rr=Math.random;Math.random=()=>.99;T.loadStage(1);Math.random=rr;  // .99: sin anomalía inicial al azar en la etapa nueva
  assert(T.S.pspd===1&&T.S.gmul===1&&!T.S.storm.act.length,'cambiar de etapa no limpió las anomalías');
  console.log('Tempestad: estabilidad, umbrales, tratos, anomalías, combinaciones y limpieza: OK')}
+// 32. La Tempestad viva: corrupción, Sombra, deuda, núcleos, personalidad y tormentas personales
+{const fresh=(ch)=>{reset();T.start(ch||'vanguard',1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.en.length=0;T.S.gmul=1;T.S.pspd=1;return T.S.p};
+ // corrupción: umbrales de daño y la Sombra al 100%
+ let p=fresh();const d0=T.bm('dmg');T.addTaint(30,'x');assert(T.bm('dmg')>d0*1.09,'la corrupción no subió el daño');
+ T.addTaint(30);assert(T.bm('healm')<1,'corrupción 50% no redujo la curación');
+ T.addTaint(50);assert.strictEqual(T.taint(),100);step(90);const sh=T.S.shade;assert(sh&&sh.type==='shade'&&T.S.en.includes(sh),'no apareció la Sombra');
+ step(120);sh.hp=1;sh.stunT=0;T.hurtE(sh,1e6,{raw:1});step(5);assert(!T.S.shade&&T.taint()===50,'vencer a la Sombra no bajó la corrupción');
+ // corrupción 75%: enemigos corruptos
+ p=fresh();T.addTaint(80);const ce=T.spawnEnemy('brute',p.x+300,500,true);assert(ce.corrupt,'no nació corrupto');
+ // deuda: préstamo, cobro con oro e impago que fortalece enemigos
+ p=fresh();let n0=Object.values(p.items).reduce((a,b)=>a+b,0);T.borrow({});assert(T.S.debt===1&&Object.values(p.items).reduce((a,b)=>a+b,0)===n0+1&&T.taint()===15,'el préstamo falló');
+ T.borrow({});assert.strictEqual(T.S.debt,3,'el segundo préstamo no costó 2');
+ const e1=T.spawnEnemy('brute',p.x+300,500,true);T.S.debt=0;const e2=T.spawnEnemy('brute',p.x+300,500,true);assert(e1.dmg>e2.dmg*1.2,'la deuda no fortaleció enemigos');
+ T.S.debt=3;p.gold=T.debtCost()*2+5;T.debtStage();assert(T.S.debt===1&&p.gold===5,'el Acreedor no cobró bien');
+ T.S.debt=3;T.S.collT=.01;step(3);assert(T.S.en.some(e=>e.collector),'no llegó el cobrador');
+ // núcleos: interactuar abre la elección; cada opción hace lo que dice y afecta la etapa siguiente
+ p=fresh();const core=T.S.ints.find(o=>o.k==='core');assert(core,'la etapa no tiene núcleo');T.S.near=core;T.interact();assert.strictEqual(T.S.st,'choice');step(1);
+ assert(core.open&&T.S.coreNext==='destruir'&&T.S.ints.some(o=>o.k==='chest'&&o.tier==='large'),'destruir falló');T.coreStage();assert.strictEqual(T.S.spawnMulCore,.7);
+ p=fresh();T.S.coreObj={x:p.x,y:p.y};T.stormUnleash('grav');T.addTaint(30);T.takeCore('estabilizar');assert(!T.S.storm.act.length&&T.taint()===10,'estabilizar falló');
+ p=fresh();T.S.coreObj={x:p.x,y:p.y};const d1=T.bm('dmg');T.takeCore('absorber');assert(T.bm('dmg')>d1*1.07&&T.taint()===30,'absorber falló');T.coreStage();assert.strictEqual(T.S.storm.act.length,1,'absorber no trajo anomalía');
+ // guardado
+ const sv=T.tempestSave();assert(sv.coreDmg>0&&sv.taint===30);p=fresh();T.tempestLoad(sv);assert(T.taint()===30&&T.bm('dmg')>1.07,'no se restauró la Tempestad');
+ // personalidad: los tres estilos se detectan y reaccionan
+ p=fresh();const P=T.persState();P.t=.01;P.kills=30;P.time=60;P.near=50;P.lastX=p.x;step(1);assert(P.event&&P.event.foes&&P.event.foes.length===3,'no detectó estilo agresivo');
+ for(const e of P.event.foes)T.hurtE(e,1e7,{raw:1});step(3);assert(!P.event,'el desafío no se completó');
+ p=fresh();T.persEvent('evasivo');step(60*11);assert(!T.persState().event,'el cerco no terminó');
+ p=fresh();const ni=T.S.ints.length;T.persEvent('explorador');assert(T.S.ints.length===ni+1&&T.S.en.some(e=>e.type==='crackwall'),'no premió la exploración');
+ // tormentas personales: solo la de su familia y alteran habilidades
+ const own={vanguard:'hierro',artillery:'ojivas',summoner:'espiritus',chrono:'temporal',hemo:'sangre'};
+ for(const ch in own){p=fresh(ch);for(let i=0;i<20;i++){T.stormUnleash();for(const k of T.S.storm.act){const f=T.ANOMALIES[k].fam;assert(!f||f===T.S.ch.fam,ch+' recibió la tormenta de otra familia: '+k)}for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[]}
+  T.S.spawn=2;T.stormUnleash(own[ch]);step(60*7)}
+ p=fresh();const c0=T.bm('cdm');T.stormUnleash('hierro');assert(T.bm('cdm')<c0*.8,'Tormenta de Hierro no bajó los enfriamientos');T.ANOMALIES.hierro.end();assert(!T.S.p.buf.ps_hierro,'la tormenta no se limpió');
+ console.log('Tempestad viva: corrupción, Sombra, deuda, núcleos, personalidad y tormentas personales: OK')}
 // 30. Tienda de cosméticos
 {const sd=T.Save.d.shop;sd.gems=0;sd.own={};sd.eq={};
  assert(!T.buyOrEquip('skin','oro'),'compró sin cristales');assert(!sd.own['skin:oro']&&!sd.eq.skin);

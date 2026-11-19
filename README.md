@@ -72,6 +72,12 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   - **Evolución de habilidades**: cada 4 niveles eliges una mejora real para una habilidad concreta (daño, enfriamiento, área, proyectiles, duración o velocidad).
   - **Mutaciones**: cada 7 niveles una mutación con ventaja y coste que dura toda la run (Piel de Vidrio, Sangre Volátil, Coraza Quitinosa…).
   - **Reliquias**: en la selección de personaje eliges una reliquia que cambia una regla de la partida. Se desbloquean **explorando**: salas secretas, terminales, rescates, mazmorras, el Cazador y el Heraldo.
+- **La Tempestad viva.**
+  - **Personalidad**: cada 50 s lee tu estilo y reacciona con premio: desafío de élites si eres agresivo, cerco de rayos si esquivas, secretos si exploras.
+  - **Deuda dimensional**: el Acreedor presta objetos raros y legendarios; cobra en oro al empezar cada etapa y, si no pagas, los enemigos pegan más y llegan cobradores.
+  - **Corrupción**: barra para todos los héroes (fragmentos, energía absorbida, préstamos, núcleos) que da daño a cambio de curación y enemigos más duros; al 100% aparece tu **Sombra Corrupta**.
+  - **Núcleo de cada escenario**: destruirlo, estabilizarlo o absorberlo cambia esta etapa y la siguiente.
+  - **Tormentas personales**: cada familia tiene su anomalía (Tormenta de Hierro, Lluvia de Ojivas, Marea de Espíritus, Anomalía Temporal, Tormenta Sangrienta) que también altera sus habilidades.
 - **Elementos.** Cinco elementos de daño (fuego, rayo, vacío, plasma, corrupción) y el estado de hielo. Cada héroe golpea con el suyo; cada enemigo y jefe tiene una debilidad (×1,5) y una resistencia (×0,6), y el plasma nunca es resistido. Las **reacciones** premian combinar: rayo sobre un enemigo helado (Resonancia, salta a los vecinos), fuego sobre helado (Choque Térmico), fuego sobre envenenado (Combustión) y vacío sobre electrizado (Colapso, atrae y aturde).
 - **Enemigos.** 15 tipos (voladores, tiradores, kamikazes, tanques, etc.) y 11 afijos de élite.
 - **Dificultades.**
@@ -244,6 +250,7 @@ Para borrar una puntuación (trampas, pruebas…) entra en la consola de Firebas
 | `js/bossplus.js` | Consecuencias de jefes, jefe secreto (Heraldo del Vacío) y jefes fusionados |
 | `js/explore.js` | Gravedad por zonas, salas secretas, terminales y Códice, mecanismos, rescates y mazmorras |
 | `js/progression.js` | Evolución de habilidades, mutaciones, reliquias y desbloqueos por descubrimiento |
+| `js/tempest.js` | Personalidad de la Tempestad, deuda, corrupción, Sombra Corrupta y núcleos |
 | `js/storm.js` | La Tempestad: estabilidad, anomalías, combinaciones y tratos |
 | `tools/` | Pruebas (`smoke.js`, `browser.js`) y scripts de empaquetado |
 

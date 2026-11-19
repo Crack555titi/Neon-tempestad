@@ -73,7 +73,7 @@ function openPick(kind){const p=S.p;S.st='choice';mouse.l=mouse.r=0;
 function takeEvo(sl,id){const m=S.p.abm[sl];EVO_MODS.find(x=>x.id===id).ap(m);m.lv++;modAbility.cache=null}
 function takeMutation(k,silent){const p=S.p;if(p.muts.includes(k))return;p.muts.push(k);MUTATIONS[k].ap(p);if(!silent){chromaHit(.5);burst(p.x,p.y-20,20,'#9b30ff',300,3)}}
 $('choiceOpts').onclick=e=>{const k=e.target.closest('.card');if(!k||!S||S.st!=='choice')return;const o=pickOpts[+k.dataset.i];
- if(o.kind==='evo'){takeEvo(o.sl,o.id);say(`⬆ ${o.title}: ${o.sub}`)}else{takeMutation(o.id);say(`☣ Mutación: ${o.title}`)}
+ if(o.fn)o.fn();else if(o.kind==='evo'){takeEvo(o.sl,o.id);say(`⬆ ${o.title}: ${o.sub}`)}else{takeMutation(o.id);say(`☣ Mutación: ${o.title}`)}
  $('choice').style.display='none';S.st='play';mouse.l=mouse.r=0};
 
 /* ---------- interfaz ---------- */

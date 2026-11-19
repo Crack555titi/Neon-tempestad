@@ -54,9 +54,9 @@ function start(cid,did,run){
   for(const n of run.mastery){const m=MASTERY.find(x=>x.name===n);if(m){m.fx(p);p.mastery.push(n)}}
   recalcHp();S.loop=run.loop||0;if(run.hunter)S.hunter=run.hunter;S.legacy=run.legacy||[];loadStage(run.stage)}
  else{while(p.lvl<(df.startLvl||1))giveXp(p.need-p.xp);loadStage(0);saveRun()}
- progStart(run);  // reliquia, mutaciones y evoluciones (se reaplican al continuar)
+ progStart(run);if(run)tempestLoad(run);  // reliquia, mutaciones y evoluciones (se reaplican al continuar)
  p.hp=p.maxHp;
- trackRun();stormInit();combatInit();ecoInit();adaptiveInit();npcInit();bossplusInit();exploreInit();progInit(); // después de los niveles regalados de Pesadilla: no cuentan para logros
+ trackRun();stormInit();combatInit();ecoInit();adaptiveInit();npcInit();bossplusInit();exploreInit();progInit();tempestInit(); // después de los niveles regalados de Pesadilla: no cuentan para logros
  Snd.hooks();
 }
 
@@ -286,7 +286,7 @@ function update(dt){
  // director: más presión mientras se carga el teletransportador, casi nada cuando ya está listo
  const T=s.tp,evt=T.state==='charging'?1.5:T.state==='ready'?.3:1;
  s.spawn-=dt*evt;
- if(s.spawn<=0){const L=Math.pow(1.5,s.loop),mx=Math.min(26*L,110,(5+coef()*1.6)*L)*(s.boss?.6:1)*(s.storm?s.storm.spawnMul:1);if(s.en.filter(e=>!e.boss).length<mx)spawnEnemy();s.spawn=Math.max(.5/L,2.6/(1+coef()*.12)/L)}
+ if(s.spawn<=0){const L=Math.pow(1.5,s.loop),mx=Math.min(26*L,110,(5+coef()*1.6)*L)*(s.boss?.6:1)*(s.storm?s.storm.spawnMul:1)*(s.spawnMulCore||1);if(s.en.filter(e=>!e.boss).length<mx)spawnEnemy();s.spawn=Math.max(.5/L,2.6/(1+coef()*.12)/L)}
  // enemigos (Tiempo Detenido congela enemigos, sus proyectiles, zonas y ataques programados)
  if(fz)s.freeze-=dt;else for(const e of s.en)updEnemy(e,dt);
  s.en=s.en.filter(e=>!e.dead);
@@ -303,7 +303,7 @@ function update(dt){
  for(let i=0;i<PT.n;i++){const q=PT.a[i];q.l-=dt;if(q.ring){q.r+=(q.mr-q.r)*Math.min(1,dt*9)}else{q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.93;q.vy*=.93}}
  PT.sweep(deadL);for(let i=0;i<TX.n;i++){const t=TX.a[i];t.l-=dt;t.vy+=t.g*dt;t.x+=t.vx*dt;t.y+=t.vy*dt}TX.sweep(deadL);
  for(let i=0;i<BL.n;i++)BL.a[i].l-=dt;BL.sweep(deadL);
- s.shake*=.88;updKick(dt);updStorm(dt);updCombat(dt);updEcoStage(dt);updAdaptive(dt);updNpcs(dt);updExplore(dt);updProg();s.msgT-=dt;hsCd-=dt;s.fade=Math.max(0,s.fade-dt*1.8);if(s.lvlFx&&(s.lvlFx.t-=dt)<=0)s.lvlFx=null;
+ s.shake*=.88;updKick(dt);updStorm(dt);updCombat(dt);updEcoStage(dt);updAdaptive(dt);updNpcs(dt);updExplore(dt);updProg();updTempest(dt);s.msgT-=dt;hsCd-=dt;s.fade=Math.max(0,s.fade-dt*1.8);if(s.lvlFx&&(s.lvlFx.t-=dt)<=0)s.lvlFx=null;
 }
 
 /* ===================== RENDER ===================== */

@@ -63,7 +63,7 @@ function spawnEnemy(type,x,y,noElite){
  if(!noElite&&Math.random()<Math.min(.6,(.04+co*.012)*S.df.elite*(REL().elite||1)*(it.blacklens?2:1))){
   const n=S.df.dbl?2:1,pool=AFX.slice().sort(()=>Math.random()-.5);e.hp*=2;e.dmg*=1.3;e.elite=1;
   for(let i=0;i<n;i++){const a=pool[i];e.aff.push(a);if(a.spd)e.spdx*=a.spd;if(a.hp)e.hp*=a.hp}}
- stormSpawn(e);e.maxHp=e.hp;ecoSpawn(e);legacySpawn(e);progSpawn(e);S.en.push(e);return e;
+ stormSpawn(e);e.maxHp=e.hp;ecoSpawn(e);legacySpawn(e);progSpawn(e);debtSpawn(e);S.en.push(e);return e;
 }
 function updEnemy(e,dt){
  const p=S.p,d=e.d;e.flash-=dt;e.slowT-=dt;e.markT-=dt;updElements(e,dt);updEco(e,dt);if(e.dead)return;
@@ -84,6 +84,7 @@ function enemyDeath(e){
 /* ---------- dibujo (el arte de cada silueta está en art.js) ---------- */
 function drawEnemy(e){
  if(e.d.structure)return drawStructure(e);
+ if(e.type==='shade')return drawShade(e);
  if(e.hidden)return e.def&&e.def.drawHidden&&e.def.drawHidden(e);
  const cx=e.x,cy=e.y-e.h/2,blink=e.tell>0&&Math.floor(S.t*16)%2,col=e.flash>0||blink?'#fff':(e.stun>0||e.stunT>0?'#888':e.d.color);
  c.globalAlpha=e.ghost>0?.25:1;glow(e.elite?e.aff[0].c:col,e.elite?22:12);c.fillStyle=col;

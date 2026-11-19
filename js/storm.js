@@ -17,7 +17,18 @@ const ANOMALIES={
  furia:{name:'Enemigos Tormentosos',col:'#e6ff3c',desc:'Los enemigos nuevos nacen cargados: más vida y velocidad, el doble de oro, y estallan al morir.',
   spawn(e){e.storm=1;e.hp*=1.35;e.spdx*=1.2},
   kill(e){if(e.storm)stormStrike(e.x,e.y-e.h/2,48,.55,'#e6ff3c',12)}},
- niebla:{name:'Niebla Dimensional',col:'#7a8cff',desc:'Solo ves lo que tienes cerca.'}};
+ niebla:{name:'Niebla Dimensional',col:'#7a8cff',desc:'Solo ves lo que tienes cerca.'},
+ // tormentas personales (idea 67): solo aparecen para su familia
+ hierro:{fam:'Vanguardia',name:'Tormenta de Hierro',col:'#ff6a3c',desc:'Caen hojas de metal, pero tus enfriamientos bajan un 25%.',every:1.8,
+  start(){buff('ps_hierro',Infinity,{cdm:.75})},end(){delete S.p.buf.ps_hierro},tick(){stormStrike(clamp(S.p.x+R(-260,260),40,WORLD-40),FLOOR,40,.8,'#ff6a3c',14,1)}},
+ ojivas:{fam:'Artillería',name:'Lluvia de Ojivas',col:'#ffd23c',desc:'Caen ojivas por todo el mapa, pero tus disparos hacen +20% de daño.',every:1.3,
+  start(){buff('ps_ojivas',Infinity,{dmg:1.2})},end(){delete S.p.buf.ps_ojivas},tick(){stormStrike(clamp(S.p.x+R(-600,600),40,WORLD-40),FLOOR,70,1,'#ffd23c',18,1)}},
+ espiritus:{fam:'Invocadores',name:'Marea de Espíritus',col:'#4cff9a',desc:'Llegan espíritus hostiles, pero también aliados que luchan contigo.',every:6,
+  tick(){spawnEnemy('wisp',clamp(S.p.x+R(-400,400),40,WORLD-40),R(120,240));S.dr.push({k:'orbit',sw:1,perm:1,a:R(0,6.28),life:8,cd:0,dmg:8,x:S.p.x,y:S.p.y})}},
+ temporal:{fam:'Tiempo/Espacio',name:'Anomalía Temporal',col:'#3cf0ff',desc:'El tiempo se espesa: los enemigos cercanos se ralentizan, pero tú también (−15%).',every:3,
+  start(){buff('ps_temp',Infinity,{spd:.85})},end(){delete S.p.buf.ps_temp},tick(){for(const e of S.en)if(!e.dead&&hyp(e.x-S.p.x,e.y-S.p.y)<320)e.slowT=Math.max(e.slowT,2.2);ring(S.p.x,S.p.y-20,320,'#3cf0ff',.25)}},
+ sangre:{fam:'Malditos/Híbridos',name:'Tormenta Sangrienta',col:'#ff1f4b',desc:'Pierdes vida poco a poco, pero cada baja te cura un 2%.',
+  start(){buff('ps_sangre',Infinity,{drain:.004})},end(){delete S.p.buf.ps_sangre},kill(){heal(S.p.maxHp*.02)}}};
 // combinaciones: con ambas anomalías activas aparece un efecto extra
 const STORM_COMBOS=[
  {a:'grav',b:'rayos',name:'Orbes Eléctricos Flotantes',col:'#bff4ff',every:2.6,
@@ -42,7 +53,7 @@ function stormStage(){const s=S;if(s.storm)for(const k of s.storm.act)ANOMALIES[
  // acontecimiento inicial: más probable en ciclos avanzados y dificultades altas
  if(Math.random()<Math.min(.8,.3+.1*s.loop+.05*DIFFS.indexOf(s.df)))stormUnleash(null,'La etapa empieza en plena tormenta');}
 // desata una anomalía (aleatoria si k es null); máximo 3 a la vez: la más antigua se disipa
-function stormUnleash(k,why){const st=S.storm,free=Object.keys(ANOMALIES).filter(a=>!st.act.includes(a));if(!free.length)return;
+function stormUnleash(k,why){const st=S.storm,free=Object.keys(ANOMALIES).filter(a=>!st.act.includes(a)&&(!ANOMALIES[a].fam||ANOMALIES[a].fam===S.ch.fam));if(!free.length)return;
  k=k&&!st.act.includes(k)?k:free[Math.random()*free.length|0];
  if(st.act.length>=3)stormEnd(st.act[0]);
  st.act.push(k);const A=ANOMALIES[k];if(A.start)A.start();st.flash=1;chromaHit(.6);S.shake=Math.max(S.shake,8);Snd.play('phase');
@@ -71,6 +82,7 @@ function openStormDeal(){S.st='storm';mouse.l=mouse.r=0;
 function takeDeal(id){const st=S.storm,p=S.p;
  if(id==='estabilizar'){st.stab=Math.min(100,st.stab+35);if(st.act.length)stormEnd(st.act[st.act.length-1]);st.spawnMul=.75;giveItem(rollItem('u'))}
  if(id==='alimentar'){stormUnleash(null,'Alimentas la tormenta');st.spawnMul=1.3;st.goldMul=1.5;giveItem(rollItem('r'))}
+ if(id==='absorber'){addTaint(25,'energía absorbida')}
  if(id==='absorber')buff('tempestad',60,{dmg:1.6,as:1.3,taken:1.4,end(){if(S&&S.storm===st)stormErode(25)},
   draw(){glow('#ffd23c',18);c.strokeStyle='#ffd23c';c.globalAlpha=.5+.3*Math.sin(S.t*12);c.lineWidth=2;c.beginPath();c.arc(p.x,p.y-p.h/2,30,0,6.283);c.stroke();c.globalAlpha=1;c.shadowBlur=0}});
  say(`Trato aceptado: ${STORM_DEALS.find(d=>d.id===id).name}`)}
