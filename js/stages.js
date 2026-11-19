@@ -17,7 +17,7 @@ function loadStage(i){
  s.ints=[];const t=st.tp[Math.random()*st.tp.length|0];s.tp={x:t.x,y:t.y,state:'idle',charge:0};s.ints.push({k:'tp',x:t.x,y:t.y,open:0});
  for(let k=0;k<5+2*s.loop;k++)spawnChest();spawnAltar();s.chestT=40;s.altarT=150;s.spawn=3;
  p.x=t.x<WORLD/2?WORLD-250:250;p.y=60;p.vy=0;p.dash=null;p.hp=p.maxHp;  // empiezas lejos del teletransportador
- genBg(st,i*7919+13);s.fade=1;stormStage();hunterStage();npcStage();
+ genBg(st,i*7919+13);s.fade=1;stormStage();hunterStage();npcStage();legacyStage();
  say(`${s.loop?`Loop ${s.loop+1} · `:''}Etapa ${i+1}/${STAGES.length}: ${st.name} · encuentra el teletransportador`);
 }
 /* ===================== MODO INFINITO =====================
@@ -46,7 +46,7 @@ function cashOut(){endGame(S.loop>0||S.stage>=STAGES.length-1,true)}
 // en ciclos posteriores al primero el jefe llega acompañado de otro (cada uno con un 75% de vida)
 const companionBoss=()=>STAGES[(S.stage+1+(S.loop-1)%(STAGES.length-1))%STAGES.length].boss;
 function useTP(choice){const T=S.tp;
- if(T.state==='idle'){T.state='charging';Snd.play('tp');if(S.loop){spawnBoss(null,{hp:.75,dx:-260});spawnBoss(companionBoss(),{hp:.75,dx:260})}else spawnBoss();
+ if(T.state==='idle'){T.state='charging';Snd.play('tp');if(S.loop&&S.stage>=STAGES.length-1)spawnFusion();else if(S.loop){spawnBoss(null,{hp:.75,dx:-260});spawnBoss(companionBoss(),{hp:.75,dx:260})}else spawnBoss();
   say(S.loop?'¡JEFES DUALES! Quédate cerca del teletransportador para cargarlo':`¡Teletransportador activado! Quédate cerca para cargarlo`)}
  else if(T.state==='ready')(choice==='end'?cashOut:nextStage)();
  else say(S.boss?'Derrota al jefe y termina la carga':'El teletransportador aún se está cargando')}

@@ -30,7 +30,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);if(T.S.st==='storm')el('stormOpts').onclick(pick0);T.update(1/60);T.draw()}};
@@ -257,13 +257,42 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  assert(T.coef()>c1*1.4,'la dificultad no escala con el ciclo');assert(T.capL(.6)>.6&&T.capL(.6)<=.95,'los topes no se relajan');
  // cada combinación jefe + acompañante aparece y combate sin errores; el acompañante nunca es el mismo jefe
  for(let l=1;l<=4;l++)for(let st=0;st<T.STAGES.length;st++){T.start('vanguard',1);T.S.loop=l;T.loadStage(st);T.S.spawn=1e9;T.useTP();
-  const [a,b]=T.S.bosses;assert(a&&b&&a.def!==b.def,'jefes duales incorrectos en etapa '+st);step(60*6)}
+  const [a,b]=T.S.bosses;if(st===T.STAGES.length-1)assert(T.S.bosses.length===1&&a.def.fused,'la última etapa del ciclo no tiene jefe fusionado');else assert(a&&b&&a.def!==b.def,'jefes duales incorrectos en etapa '+st);step(60*6)}
  // guardar y continuar conserva el ciclo
  T.start('artillery',1);T.S.loop=2;T.loadStage(3);T.saveRun();const r=T.loadRun();assert.strictEqual(r.loop,2);T.start(r.cid,r.did,r);assert(T.S.loop===2&&T.S.stage===3,'continuar perdió el ciclo');
  // terminar la run a mitad del primer ciclo: no es victoria, pero puntúa con la etapa superada
  T.start('vanguard',1);T.useTP();for(let i=0;i<3;i++)T.hurtE(T.S.bosses[0],1e12,{raw:1});T.S.tp.charge=1;step(2);T.S.p.x=T.S.tp.x-30;
  T.useTP('end');assert.strictEqual(T.S.st,'over');assert.strictEqual(T.loadRun(),null,'terminar la run no borró la partida guardada');
  console.log('Modo Infinito: paletas, escalado, jefes duales, guardado y portal dual: OK')}
+// 38. Jefes: consecuencias, jefe secreto (Heraldo del Vacío) y jefes fusionados
+{const fresh=(ch='vanguard')=>{reset();T.start(ch,1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;
+  T.S.hunter={dead:1};const p=T.S.p;p.inv=1e9;p.m.dodge=0;return p};
+ const items=r=>Object.keys(T.S.p.items).filter(k=>T.ITEM[k].r===r).reduce((a,k)=>a+T.S.p.items[k],0);
+ // derrotar al jefe deja su consecuencia, que se guarda con la partida
+ let p=fresh();T.useTP();const b0=T.S.boss;for(let i=0;i<3;i++)T.hurtE(b0,1e12,{raw:1});assert(T.S.legacy.includes('prisma'),'el Coloso no dejó consecuencia');
+ T.saveRun();assert.deepStrictEqual(T.loadRun().legacy,['prisma'],'la consecuencia no se guardó');const run=T.loadRun();T.start(run.cid,run.did,run);assert(T.S.legacy.includes('prisma'),'la consecuencia no se restauró');
+ // cada consecuencia hace lo que dice
+ p=fresh();T.S.legacy=['prisma'];let ch0=T.S.ints.filter(o=>o.k==='chest').length;T.legacyStage();assert.strictEqual(T.S.ints.filter(o=>o.k==='chest').length,ch0+2,'Refracción no añadió cofres');
+ T.S.legacy=['hydra'];assert(T.legacyWt('turret')===.5&&T.legacyWt('sniper')===.5&&T.legacyWt('brute')===1,'Red caída no redujo torretas');
+ T.S.legacy=[];let ph=T.spawnEnemy('phantom',p.x+400,p.y,1);const hpA=ph.maxHp;T.S.legacy=['queen'];ph=T.spawnEnemy('phantom',p.x+400,p.y,1);  // sin élite: comparación justaassert(Math.abs(ph.maxHp/hpA-.7)<.15,'Luto espectral no debilitó a los espectros');
+ T.S.legacy=[];const pr0=T.priceOf({tier:'small'});T.S.legacy=['leviathan'];assert(T.priceOf({tier:'small'})<pr0,'Marea de datos no abarató');T.legacyStage();assert.strictEqual(T.S.storm.stab,85,'Marea de datos no restó estabilidad');
+ T.S.legacy=['archon'];assert(T.legacyGold()>1,'Tempestad desatada no dio más oro');
+ // sello: no se abre sin condiciones; con 3 ejecuciones y estabilidad ≥ 50 libera al Heraldo
+ p=fresh();const seal={k:'seal',x:p.x,y:p.y};T.S.ints.push(seal);T.S.sealExec=2;assert(!T.sealReady(),'el sello se abrió con 2 ejecuciones');T.openSeal(seal);assert(!seal.open&&!T.S.boss);
+ T.S.sealExec=3;T.S.storm.stab=40;assert(!T.sealReady(),'el sello se abrió con la dimensión inestable');T.S.storm.stab=80;assert(T.sealReady());
+ const her=T.openSeal(seal);assert(her&&her.bid==='herald'&&seal.open,'el sello no liberó al Heraldo');
+ // el Heraldo pelea sus tres fases y al morir da dos legendarios
+ her.hidden=0;for(let f=0;f<60*20;f++){if(f===60*6||f===60*12){her.stun=0;T.hurtE(her,her.maxHp*.35,{raw:1})}if(f%120===0)p.hp=p.maxHp;step()}assert.strictEqual(her.ph,3,'el Heraldo no llegó a la fase 3');
+ const leg0=items('l');for(let i=0;i<3;i++)T.hurtE(her,1e12,{raw:1});assert(items('l')>=leg0+2,'el Heraldo no dio dos legendarios');  // +1 posible: todo jefe da además un objeto (20% legendario)
+ // haber matado al Heraldo no da por cumplido al jefe de la etapa
+ T.useTP();assert(T.S.boss&&!T.S.bossDone,'el teletransportador dio por muerto al jefe de la etapa');T.S.tp.charge=1;step(2);assert.notStrictEqual(T.S.tp.state,'ready','el teletransportador se abrió con el jefe vivo');
+ // fusiones: en el Modo Infinito la última etapa trae UN jefe con los ataques de dos; ambas fusiones combaten sin errores
+ for(const loop of [1,2]){p=fresh();T.S.loop=loop;T.loadStage(T.STAGES.length-1);T.useTP();const fb=T.S.boss;
+  assert(T.S.bosses.length===1&&fb.def.fused&&fb.def.moves.length>T.BOSSES.archon.moves.length,'no apareció un jefe fusionado (loop '+loop+')');
+  fb.hidden=0;for(let f=0;f<60*16;f++){if(f===60*5||f===60*10){fb.stun=0;fb.hidden=0;T.hurtE(fb,fb.maxHp*.36,{raw:1})}if(f%120===0)p.hp=p.maxHp;step()}
+  assert.strictEqual(fb.ph,3,fb.def.name+' no llegó a la fase 3');for(let i=0;i<3;i++){fb.hidden=0;T.hurtE(fb,1e12,{raw:1})}
+  assert(T.S.legacy.includes('archon')&&T.S.legacy.includes(fb.def.fused[1]),'la fusión no dejó las dos consecuencias')}
+ console.log('Jefes: consecuencias, sello y Heraldo del Vacío, y jefes fusionados: OK')}
 // 37. Neutrales (mercader, ermitaño y misiones) e IA adaptativa (imitador y jefes que recuerdan)
 {const fresh=(ch='vanguard')=>{reset();T.start(ch,1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;T.S.hunter={dead:1};
   const p=T.S.p;p.inv=1e9;p.m.dodge=0;return p};

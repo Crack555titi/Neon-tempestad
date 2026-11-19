@@ -52,10 +52,10 @@ function start(cid,did,run){
   for(const id in run.items)for(let k=0;k<run.items[id];k++)giveItem(id,1);
   p.lvl=run.lvl;p.xp=run.xp;p.need=Math.round(40*Math.pow(p.lvl,1.35));p.dmgMul=1+.05*(p.lvl-1);
   for(const n of run.mastery){const m=MASTERY.find(x=>x.name===n);if(m){m.fx(p);p.mastery.push(n)}}
-  recalcHp();S.loop=run.loop||0;if(run.hunter)S.hunter=run.hunter;loadStage(run.stage)}
+  recalcHp();S.loop=run.loop||0;if(run.hunter)S.hunter=run.hunter;S.legacy=run.legacy||[];loadStage(run.stage)}
  else{while(p.lvl<(df.startLvl||1))giveXp(p.need-p.xp);loadStage(0);saveRun()}
  p.hp=p.maxHp;
- trackRun();stormInit();combatInit();ecoInit();adaptiveInit();npcInit(); // después de los niveles regalados de Pesadilla: no cuentan para logros
+ trackRun();stormInit();combatInit();ecoInit();adaptiveInit();npcInit();bossplusInit(); // después de los niveles regalados de Pesadilla: no cuentan para logros
  Snd.hooks();
 }
 

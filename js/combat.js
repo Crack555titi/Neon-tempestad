@@ -67,7 +67,7 @@ const WOUNDS={fractura:{name:'Fractura',col:'#c8a070',desc:'−25% velocidad',o:
  desgarro:{name:'Desgarro',col:'#ff3c5a',desc:'pierdes 1,5% de vida por segundo',o:{drain:.015}}};
 const WOUND_BY={brute:'fractura',golem:'fractura',tank:'fractura',spitter:'infeccion',splitter:'infeccion',splitlet:'infeccion',
  shaman:'interferencia',hunter:'desgarro',phantom:'interferencia',wisp:'interferencia',crawler:'desgarro',leaper:'desgarro',swarm:'desgarro',sniper:'desgarro',
- prisma:'interferencia',hydra:'infeccion',queen:'interferencia',leviathan:'fractura',archon:'desgarro'};
+ prisma:'interferencia',hydra:'infeccion',queen:'interferencia',leviathan:'fractura',archon:'desgarro',herald:'interferencia'};
 // lo llama hurtP tras recibir daño: rompe el combo y quizá deja una herida (máx. 3 distintas)
 function combatHurt(d,src){const C=cmb(),p=S.p;C.combo=0;C.comboT=0;if(!src)return;
  const k=WOUND_BY[src.boss?src.bid:src.type];if(!k||!chance(src.boss?.4:.3))return;

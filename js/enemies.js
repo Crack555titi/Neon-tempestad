@@ -52,8 +52,8 @@ const EAI={
   if(e.cd<=0&&hyp(p.x-e.x,p.y-e.y)<170){e.cd=3.2;e.tell=.9;Z({x:e.x,y:e.y-10,r:150,warn:.9,dmg:e.dmg,hostile:1,col:'#ff6a3c'})}}
 };
 
-function pickEnemy(){const co=coef(),pool=STAGE.enemies.filter(k=>(ENEMIES[k].min||0)<=co&&ENEMIES[k].wt);
- let r=Math.random()*pool.reduce((a,k)=>a+ENEMIES[k].wt,0);for(const k of pool){r-=ENEMIES[k].wt;if(r<=0)return k}return pool[0]}
+function pickEnemy(){const co=coef(),pool=STAGE.enemies.filter(k=>(ENEMIES[k].min||0)<=co&&ENEMIES[k].wt),wt=k=>ENEMIES[k].wt*legacyWt(k);  // legacyWt: consecuencias de jefes
+ let r=Math.random()*pool.reduce((a,k)=>a+wt(k),0);for(const k of pool){r-=wt(k);if(r<=0)return k}return pool[0]}
 function spawnEnemy(type,x,y,noElite){
  const co=coef();type=type||pickEnemy();const d=ENEMIES[type],side=Math.random()<.5?-1:1,it=S.p.items;
  // los terrestres caen desde arriba sobre lo que haya debajo
@@ -62,7 +62,7 @@ function spawnEnemy(type,x,y,noElite){
  if(!noElite&&Math.random()<Math.min(.6,(.04+co*.012)*S.df.elite*(it.blacklens?2:1))){
   const n=S.df.dbl?2:1,pool=AFX.slice().sort(()=>Math.random()-.5);e.hp*=2;e.dmg*=1.3;e.elite=1;
   for(let i=0;i<n;i++){const a=pool[i];e.aff.push(a);if(a.spd)e.spdx*=a.spd;if(a.hp)e.hp*=a.hp}}
- stormSpawn(e);e.maxHp=e.hp;ecoSpawn(e);S.en.push(e);return e;
+ stormSpawn(e);e.maxHp=e.hp;ecoSpawn(e);legacySpawn(e);S.en.push(e);return e;
 }
 function updEnemy(e,dt){
  const p=S.p,d=e.d;e.flash-=dt;e.slowT-=dt;e.markT-=dt;updElements(e,dt);updEco(e,dt);if(e.dead)return;

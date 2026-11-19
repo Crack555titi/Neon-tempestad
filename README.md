@@ -57,6 +57,10 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   - **Ermitaño**: propone una misión (cacería, verdugo, reflejos, intocable o virtuoso) que recompensa con un objeto raro y oro.
   - **Eco Imitador**: enemigo que copia la última habilidad que usaste (disparo, embestida, salto tras de ti o explosión).
   - **Jefes que recuerdan**: observan tu distancia, tiempo en el aire, esquivas y habilidad favorita, y en cada fase suman una respuesta telegrafiada a ese estilo.
+- **Jefes con huella.**
+  - **Consecuencias**: cada jefe derrotado deja una huella para el resto de la partida (más cofres, menos torretas, espectros débiles, cofres más baratos pero menos estabilidad, más oro). Se ven en el inventario.
+  - **Jefe secreto**: a veces aparece un Sello Antiguo. Con 3 ejecuciones en la etapa y la estabilidad ≥ 50% se abre y libera al **Heraldo del Vacío**, que deja dos objetos legendarios.
+  - **Jefes fusionados**: en el Modo Infinito, la última etapa enfrenta a un solo jefe con los ataques del Arconte y de un jefe volador.
 - **Elementos.** Cinco elementos de daño (fuego, rayo, vacío, plasma, corrupción) y el estado de hielo. Cada héroe golpea con el suyo; cada enemigo y jefe tiene una debilidad (×1,5) y una resistencia (×0,6), y el plasma nunca es resistido. Las **reacciones** premian combinar: rayo sobre un enemigo helado (Resonancia, salta a los vecinos), fuego sobre helado (Choque Térmico), fuego sobre envenenado (Combustión) y vacío sobre electrizado (Colapso, atrae y aturde).
 - **Enemigos.** 15 tipos (voladores, tiradores, kamikazes, tanques, etc.) y 11 afijos de élite.
 - **Dificultades.**
@@ -226,6 +230,7 @@ Para borrar una puntuación (trampas, pruebas…) entra en la consola de Firebas
 | `js/combat.js` | Parry, ejecuciones, combos, sobrecarga, contexto y heridas |
 | `js/ecology.js` | Armaduras, evolución, devoradores y el Cazador del Vacío |
 | `js/adaptive.js`, `js/npcs.js` | IA adaptativa (imitador, jefes que recuerdan) y neutrales (mercader, ermitaño y misiones) |
+| `js/bossplus.js` | Consecuencias de jefes, jefe secreto (Heraldo del Vacío) y jefes fusionados |
 | `js/storm.js` | La Tempestad: estabilidad, anomalías, combinaciones y tratos |
 | `tools/` | Pruebas (`smoke.js`, `browser.js`) y scripts de empaquetado |
 

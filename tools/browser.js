@@ -62,6 +62,10 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  // neutrales e IA adaptativa: mercader con mercancía, ermitaño, misión en curso e imitador copiando
  await js("S.en.forEach(e=>e.dead=1);S.ints.push({k:'merchant',x:S.p.x-150,y:S.p.y,stock:[{id:rollItem('u'),r:'u'},{id:rollItem('r'),r:'r'}]},{k:'hermit',x:S.p.x+230,y:S.p.y,q:QUESTS[0]});S.quest={q:QUESTS[3],prog:12,t:0,done:0};const m=spawnEnemy('mimic',S.p.x+120,S.p.y);m.copy={name:'Riel',t:'proj'};m.copyT=4;S.p.x-=110");
  await sleep(500);await shot('03h-neutrales');
+ // jefes: el sello y el Heraldo del Vacío; después, un jefe fusionado del Modo Infinito
+ await js("S.en.forEach(e=>e.dead=1);S.sealExec=3;S.storm.stab=90;const o={k:'seal',x:S.p.x+120,y:S.p.y};S.ints.push(o);openSeal(o);S.boss.hidden=0;S.p.inv=99;S.p.hp=S.p.maxHp");
+ await sleep(2500);await shot('03i-heraldo');
+ await js("S.loop=1;loadStage(4);useTP();S.boss.hidden=0;S.p.inv=99;S.p.hp=S.p.maxHp");await sleep(3000);await shot('03j-fusion');
  await js("openStormDeal()");await sleep(500);await shot('03c-trato');await js("takeDeal('estabilizar');$('storm').style.display='none';S.st='play'");
  for(const [i,b] of [[0,'prisma'],[1,'hydra'],[2,'queen'],[3,'leviathan'],[4,'archon']]){
   await js(`if(S.st!=='play')document.querySelector('#nodes .card')?.click();loadStage(${i});useTP();S.boss.hidden=0;hurtE(S.boss,S.boss.maxHp*.5,{raw:1});S.p.hp=S.p.maxHp`);

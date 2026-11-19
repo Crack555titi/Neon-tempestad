@@ -16,7 +16,7 @@ const ENEMY_EL={crawler:{weak:'fuego',res:'corrupcion'},wisp:{weak:'vacio',res:'
  sniper:{weak:'vacio',res:'rayo'},kamikaze:{weak:'corrupcion',res:'rayo'},bomber:{weak:'rayo',res:'vacio'},tank:{weak:'rayo',res:'fuego'},
  leaper:{weak:'corrupcion',res:'vacio'},swarm:{weak:'fuego',res:'rayo'},turret:{weak:'rayo',res:'fuego'},splitter:{weak:'fuego',res:'corrupcion'},
  splitlet:{weak:'fuego',res:'corrupcion'},shaman:{weak:'vacio',res:'corrupcion'},phantom:{weak:'fuego',res:'vacio'},golem:{weak:'corrupcion',res:'fuego'},hunter:{weak:'plasma',res:'vacio'},mimic:{weak:'corrupcion',res:'rayo'}};
-const BOSS_EL={prisma:{weak:'vacio',res:'rayo'},hydra:{weak:'corrupcion',res:'rayo'},queen:{weak:'fuego',res:'vacio'},leviathan:{weak:'rayo',res:'vacio'},archon:{weak:'vacio',res:'fuego'}};
+const BOSS_EL={prisma:{weak:'vacio',res:'rayo'},hydra:{weak:'corrupcion',res:'rayo'},queen:{weak:'fuego',res:'vacio'},leviathan:{weak:'rayo',res:'vacio'},archon:{weak:'vacio',res:'fuego'},herald:{weak:'fuego',res:'vacio'}};
 const elemOf=e=>e.boss?BOSS_EL[e.bid]:ENEMY_EL[e.type];
 
 /* reacciones: estado presente en el enemigo + elemento del golpe → nombre, efecto y multiplicador del golpe */

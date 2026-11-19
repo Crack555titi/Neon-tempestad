@@ -96,6 +96,7 @@ function toggleInv(){
  if(S.st==='inv'){$('inv').style.display='none';S.st='play';mouse.l=mouse.r=0;return}
  const p=S.p,m=p.m,pct=v=>Math.round(v*100)+'%',ids=sortedItems();
  $('invStats').textContent=`${elemName(CHAR_EL[S.cid])} · Daño ×${(p.dmgMul*m.dmg*bm('dmg')).toFixed(2)} · Vel. ataque ×${(m.as*bm('as')).toFixed(2)} · Crítico ${pct(p.items.blacklens?1:m.crit)} · Robo de vida ${pct(m.ls)} · Armadura ${pct(Math.min(capL(.6),m.arm))} · Enfriamientos −${pct(Math.min(capL(.6),m.cdr))} · Suerte ${p.items.entropy?0:m.luck} · Oro ${p.gold}`;
+ $('invStats').textContent+=legacyText();
  $('invList').innerHTML=ids.length?ids.map(id=>itemCard(ITEM[id],p.items[id])).join(''):'<p>Aún no tienes objetos. Abre cofres con <b>E</b>.</p>';
  $('inv').style.display='flex';S.st='inv';
 }
