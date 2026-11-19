@@ -86,9 +86,10 @@ function drawStormHud(){const st=S.storm;if(!st)return;
  if(stormActive('niebla')){const px=S.p.x-S.cam,py=S.p.y-S.p.h/2,g=c.createRadialGradient(px,py,90,px,py,300);
   g.addColorStop(0,'rgba(8,6,24,0)');g.addColorStop(1,'rgba(8,6,24,.93)');c.fillStyle=g;c.fillRect(0,0,W,H)}
  if(st.flash>0){c.fillStyle=`rgba(190,240,255,${st.flash*.18})`;c.fillRect(0,0,W,H)}
- const x=W-216,y=H-46,low=st.stab<25,col=st.stab>50?'#4cff9a':st.stab>25?'#ffd23c':'#ff3c6a';
+ // en táctil, abajo a la derecha están los botones: el panel va debajo del minimapa y la lista crece hacia abajo
+ const tm=touchOn(),x=W-216,y=tm?(S.p.revive>0?132:118):H-46,low=st.stab<25,col=st.stab>50?'#4cff9a':st.stab>25?'#ffd23c':'#ff3c6a';
  panel(x,y,206,38,low?'#ff3c6a88':'#3cf0ff55');c.textAlign='left';c.font='bold 10px monospace';c.fillStyle='#9a93c8';c.fillText('ESTABILIDAD',x+10,y+14);
  c.textAlign='right';c.fillStyle=col;c.fillText(Math.ceil(st.stab)+'%',x+196,y+14);gbar(x+10,y+20,186,7,st.stab/100,col,'#fff',low);
  // anomalías activas (y combinaciones) apiladas encima
  const lines=st.act.map(k=>ANOMALIES[k]).concat(STORM_COMBOS.filter(cb=>st.act.includes(cb.a)&&st.act.includes(cb.b)).map(cb=>Object.assign({combo:1},cb)));
- lines.forEach((A,i)=>{c.textAlign='right';c.font=`bold ${A.combo?10:11}px monospace`;c.fillStyle=A.col;c.fillText(`${A.combo?'✦':'⚡'} ${A.name}`,W-40,y-8-i*15)})}  // W-40: deja sitio a la flecha del teletransportador
+ lines.forEach((A,i)=>{c.textAlign='right';c.font=`bold ${A.combo?10:11}px monospace`;c.fillStyle=A.col;c.fillText(`${A.combo?'✦':'⚡'} ${A.name}`,W-40,tm?y+52+i*15:y-8-i*15)})}  // W-40: deja sitio a la flecha del teletransportador

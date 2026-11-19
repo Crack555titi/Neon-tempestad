@@ -40,6 +40,13 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   - la densidad de enemigos, ×1,5;
   - cada jefe llega acompañado de otro;
   - los topes de armadura, esquiva y enfriamientos suben hasta el 95%, para que los objetos acumulados terminen rompiendo el juego.
+- **Combate.**
+  - **Parry** (F · LB en mando · botón ⛨ en táctil): ventana de 0,2 s que anula el golpe, devuelve el proyectil y cura una herida. Cada familia responde distinto: Vanguardia contraataca, Artillería devuelve todos los proyectiles cercanos, Invocadores reciben dos drones, Tiempo/Espacio ralentiza alrededor y Malditos absorben vida y daño.
+  - **Ejecuciones** (Interactuar junto a un enemigo debilitado, marcado con un rombo rojo): lo rematan dando vida, oro y energía.
+  - **Combos**: golpes encadenados suben el daño (hasta +30%); en el aire cuentan doble y dejan a los enemigos suspendidos.
+  - **Sobrecarga**: habilidades, parries, ejecuciones y combos cargan energía; al 100% hay 6 s de habilidades potenciadas y después agotamiento.
+  - **Ataques contextuales**: más daño en el aire, desde arriba, justo después de un movimiento y contra enemigos aturdidos.
+  - **Heridas**: algunos enemigos y jefes dejan fractura, infección, interferencia o desgarro durante 5 s.
 - **Elementos.** Cinco elementos de daño (fuego, rayo, vacío, plasma, corrupción) y el estado de hielo. Cada héroe golpea con el suyo; cada enemigo y jefe tiene una debilidad (×1,5) y una resistencia (×0,6), y el plasma nunca es resistido. Las **reacciones** premian combinar: rayo sobre un enemigo helado (Resonancia, salta a los vecinos), fuego sobre helado (Choque Térmico), fuego sobre envenenado (Combustión) y vacío sobre electrizado (Colapso, atrae y aturde).
 - **Enemigos.** 15 tipos (voladores, tiradores, kamikazes, tanques, etc.) y 11 afijos de élite.
 - **Dificultades.**
@@ -206,6 +213,7 @@ Para borrar una puntuación (trampas, pruebas…) entra en la consola de Firebas
 | `js/main.js`, `js/preload.js`, `js/updater.js` | Ventana de escritorio (Electron) y actualización automática verificada |
 | `js/cosmetics.js` | Tienda: skins, estelas y auras |
 | `js/elements.js` | Elementos: debilidades, resistencias y reacciones |
+| `js/combat.js` | Parry, ejecuciones, combos, sobrecarga, contexto y heridas |
 | `js/storm.js` | La Tempestad: estabilidad, anomalías, combinaciones y tratos |
 | `tools/` | Pruebas (`smoke.js`, `browser.js`) y scripts de empaquetado |
 

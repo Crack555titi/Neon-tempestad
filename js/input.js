@@ -5,9 +5,9 @@
    - mando (Gamepad API) y táctil (touch.js), que escriben en PADV / TOUCHV
    AIM.ang ≠ null: el apuntado lo da el mando o el táctil (joystick derecho o apuntado automático). */
 const ACTIONS={left:'Izquierda',right:'Derecha',jump:'Saltar',down:'Bajar de plataforma',primary:'Disparo primario',secondary:'Habilidad secundaria',
- move:'Movimiento',ult:'Definitiva',interact:'Interactuar',inventory:'Inventario',pause:'Pausa',mute:'Silenciar'};
+ move:'Movimiento',ult:'Definitiva',parry:'Parry',interact:'Interactuar / Ejecutar',inventory:'Inventario',pause:'Pausa',mute:'Silenciar'};
 const BIND_DEF={left:['KeyA','ArrowLeft'],right:['KeyD','ArrowRight'],jump:['Space','KeyW','ArrowUp'],down:['KeyS','ArrowDown'],
- primary:['Mouse0'],secondary:['Mouse2'],move:['ShiftLeft','ShiftRight'],ult:['KeyQ'],interact:['KeyE'],inventory:['Tab','KeyI'],pause:['Escape','KeyP'],mute:['KeyM']};
+ primary:['Mouse0'],secondary:['Mouse2'],move:['ShiftLeft','ShiftRight'],ult:['KeyQ'],parry:['KeyF'],interact:['KeyE'],inventory:['Tab','KeyI'],pause:['Escape','KeyP'],mute:['KeyM']};
 let BIND=JSON.parse(JSON.stringify(BIND_DEF));
 const PADV={},TOUCHV={},AIM={ang:null};
 let rebind=null;  // {a, i}: esperando la tecla nueva para la acción a, ranura i
@@ -27,7 +27,8 @@ function pressAction(a){
  if(S.st==='pause'&&a==='jump')return togglePause();
  if(S.st!=='play')return;
  if(a==='jump')jump();
- if(a==='interact')interact();
+ if(a==='parry')tryParry();
+ if(a==='interact'){const t=execTarget();if(t)return execute(t);interact()}
 }
 function onPress(code){
  Snd.init();
@@ -61,7 +62,7 @@ function pollPad(){
  const gp=typeof navigator!=='undefined'&&navigator.getGamepads?[...navigator.getGamepads()].find(g=>g&&g.connected):null;
  if(!gp){if(padUsed){for(const a in PADV)PADV[a]=0;padUsed=false}return}
  const b=i=>!!(gp.buttons[i]&&gp.buttons[i].pressed),ax=gp.axes,lx=ax[0]||0,ly=ax[1]||0,rx=ax[2]||0,ry=ax[3]||0,rs=hyp(rx,ry)>.45;
- const st={left:lx<-.35||b(14),right:lx>.35||b(15),down:ly>.65||b(13),jump:b(0),primary:b(7)||rs,secondary:b(6),move:b(1)||b(5),ult:b(3)||b(4),
+ const st={left:lx<-.35||b(14),right:lx>.35||b(15),down:ly>.65||b(13),jump:b(0),primary:b(7)||rs,secondary:b(6),move:b(1)||b(5),ult:b(3),parry:b(4),
   interact:b(2),inventory:b(8),pause:b(9),up:ly<-.65||b(12)};
  const any=Object.values(st).some(v=>v)||hyp(lx,ly)>.3;
  if(any&&!padUsed){padUsed=true}

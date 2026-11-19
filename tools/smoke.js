@@ -30,7 +30,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);if(T.S.st==='storm')el('stormOpts').onclick(pick0);T.update(1/60);T.draw()}};
@@ -264,6 +264,47 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  T.start('vanguard',1);T.useTP();for(let i=0;i<3;i++)T.hurtE(T.S.bosses[0],1e12,{raw:1});T.S.tp.charge=1;step(2);T.S.p.x=T.S.tp.x-30;
  T.useTP('end');assert.strictEqual(T.S.st,'over');assert.strictEqual(T.loadRun(),null,'terminar la run no borró la partida guardada');
  console.log('Modo Infinito: paletas, escalado, jefes duales, guardado y portal dual: OK')}
+// 35. Combate: parry, ejecuciones, combos aéreos, sobrecarga, contexto y heridas
+{const fresh=ch=>{reset();T.start(ch,1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;
+  const p=T.S.p;p.m.dodge=0;p.items.ankh=0;p.inv=0;for(let i=0;i<120&&!p.ground;i++)step();return p};
+ const foe=(type,dx=40,hp=1e5)=>{const e=T.spawnEnemy(type,T.S.p.x+dx,T.S.p.y);e.hp=e.maxHp=hp;e.aff=[];e.elite=0;e.y=T.S.p.y;return e};
+ // parry: la tecla F abre la ventana; un golpe dentro no hace daño, carga energía y desata la respuesta de la familia
+ let p=fresh('vanguard');const near=foe('brute',60);key('KeyF',false);assert(T.cmb().parryT>0,'F no abrió la ventana de parry');
+ let hp=p.hp;assert.strictEqual(T.hurtP(50,near),true,'el parry no anuló el golpe');assert.strictEqual(p.hp,hp);assert.strictEqual(T.cmb().energy,25);
+ assert(near.stunT>0,'el contraataque de Vanguardia no aturdió');
+ // fuera de la ventana sí hace daño (y el golpe rompe el combo)
+ p.inv=0;T.cmb().parryT=0;T.cmb().combo=9;hp=p.hp;T.hurtP(20,near);assert(p.hp<hp,'sin parry no hubo daño');assert.strictEqual(T.cmb().combo,0,'recibir daño no rompió el combo');
+ // devolver un proyectil: deja de ser hostil y sigue vivo
+ p=fresh('artillery');T.cmb().parryCd=0;key('KeyF',false);const q=T.fxProj({x:p.x+10,y:p.y-p.h/2,vx:-200,vy:0,r:6,life:3,hostile:1,dmg:10});step(1);
+ assert(!q.hostile&&q.life>0,'el parry no devolvió el proyectil');
+ // cada familia responde sin errores
+ for(const ch of ['vanguard','artillery','summoner','chrono','hemo']){p=fresh(ch);foe('crawler',80);T.cmb().parryT=.2;assert.strictEqual(T.hurtP(30,null),true,ch+' no paró');step(30)}
+ // una herida se cura con el parry
+ p=fresh('vanguard');T.buff('w_fractura',5,{spd:.75});T.cmb().parryT=.2;T.hurtP(10,null);assert(!(p.buf.w_fractura&&p.buf.w_fractura.t>0),'el parry no curó la herida');
+ // ejecución: E junto a un enemigo debilitado lo remata y recompensa; con mucha vida no es ejecutable
+ p=fresh('vanguard');const strong=foe('brute',40,1000);strong.hp=600;assert(!T.execTarget(),'un enemigo al 60% quedó ejecutable');
+ strong.hp=100;assert.strictEqual(T.execTarget(),strong);const g0=p.gold,e0=T.cmb().energy;key('KeyE',false);
+ assert(strong.dead,'la ejecución no mató');assert(p.gold>g0&&T.cmb().energy===e0+20,'la ejecución no dio recompensa');
+ // combos: los golpes suman, el multiplicador sube y en el aire cuentan doble y suspenden al enemigo
+ p=fresh('vanguard');const dummy=foe('crawler',40);const m0=T.combatMul(dummy,{});for(let i=0;i<5;i++)T.hurtE(dummy,1,{});assert.strictEqual(T.cmb().combo,5);
+ assert(T.combatMul(dummy,{})>m0,'el combo no subió el daño');p.ground=0;p.y-=80;T.hurtE(dummy,1,{});assert.strictEqual(T.cmb().combo,7,'en el aire no contó doble');assert(dummy.vy<0&&dummy.juggle>0,'el enemigo no quedó suspendido');
+ step(60*2);assert.strictEqual(T.cmb().combo,0,'el combo no caducó');
+ // contexto: justo tras un movimiento el golpe hace más daño
+ p=fresh('vanguard');const d2=foe('tank',60);const base=T.combatMul(d2,{});T.cmb().dashT=1;assert(Math.abs(T.combatMul(d2,{})/base-1.3)<.01,'sin bono de contragolpe');
+ // sobrecarga: al 100% se activa; al terminar llega el agotamiento y bloquea secundaria y movimiento
+ p=fresh('vanguard');T.addEnergy(100);assert(p.buf.sobrecarga,'no entró en sobrecarga');p.buf.sobrecarga.t=0;step(2);
+ assert(p.buf.agotamiento&&p.cd.s>=3&&p.cd.m>=3,'el agotamiento no bloqueó habilidades');T.addEnergy(50);assert.strictEqual(T.cmb().energy,0,'cargó energía estando agotado');
+ // heridas: el Bruto deja fractura (−25% de velocidad); la infección corta la regeneración
+ p=fresh('vanguard');const br=foe('brute',300);const rnd=Math.random;Math.random=()=>0;p.inv=0;T.hurtP(5,br);Math.random=rnd;assert(p.buf.w_fractura,'el Bruto no dejó fractura');
+ T.S.en=[];p.inv=1e9;p.x=900;p.vx=0;T.keys.KeyD=1;step(40);const vSlow=Math.abs(p.vx);delete p.buf.w_fractura;p.x=900;step(40);const vNorm=Math.abs(p.vx);T.keys.KeyD=0;p.inv=0;  // sin enemigos ni bordes: solo la heridaassert(vSlow<vNorm*.85,'la fractura no frenó');
+ p=fresh('vanguard');p.hp=p.maxHp*.5;T.buff('w_infeccion',5,{healm:.5,noregen:1});const h1=p.hp;step(60);assert(p.hp<=h1,'la infección no cortó la regeneración');
+ // mando: LB hace parry; Y sigue siendo la definitiva
+ p=fresh('vanguard');let pad={connected:1,axes:[0,0,0,0],buttons:Array.from({length:17},()=>({pressed:false}))};Object.defineProperty(globalThis,'navigator',{value:{getGamepads:()=>[pad]},configurable:true});
+ pad.buttons[4].pressed=true;T.pollInput();assert(T.cmb().parryT>0,'LB no hizo parry');pad.buttons[4].pressed=false;T.pollInput();Object.defineProperty(globalThis,'navigator',{value:{getGamepads:()=>[]},configurable:true});T.pollInput();
+ // partida real con todo activo y cada familia: sin excepciones
+ for(const ch of ['vanguard','artillery','summoner','chrono','hemo']){p=fresh(ch);T.S.spawn=2;Object.assign(T.mouse,{x:700,y:300});
+  for(let f=0;f<60*10;f++){T.mouse.l=f%40<30;if(f%45===0)key('KeyF',false);if(f%70===0)key('KeyE',false);if(f%120===0)p.hp=p.maxHp;step()}}
+ console.log('Combate: parry por familia, proyectil devuelto, ejecuciones, combos aéreos, contexto, sobrecarga, heridas y mando: OK')}
 // 34. Rendimiento en teléfonos: tope de resolución por calidad y calidad automática
 {const st=T.Save.d.settings,prevQ=st.quality;global.devicePixelRatio=3;
  T.setQuality('baja');assert.strictEqual(T.cv.width,960,'la calidad baja no limitó la resolución a 1x');
@@ -282,7 +323,7 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
 // 33. Elementos: debilidades, resistencias, plasma, elemento de los DoT y reacciones
 {const fresh=(ch)=>{reset();T.start(ch,1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;const p=T.S.p;p.m.crit=0;return p};
  const mk=(type,dx=80)=>{const e=T.spawnEnemy(type,T.S.p.x+dx,T.S.p.y);e.hp=e.maxHp=1e6;e.aff=[];e.elite=0;return e};
- const hit=(e,d,o)=>{const h=e.hp;T.hurtE(e,d,o||{});return h-e.hp};
+ const hit=(e,d,o)=>{const p=T.S.p;p.ground=1;if(p.cmb){p.cmb.combo=0;p.cmb.dashT=0}e.stunT=0;const h=e.hp;T.hurtE(e,d,o||{});return h-e.hp};  // aislado del combo y del contexto
  // todos los enemigos y jefes tienen debilidad y resistencia distintas; todos los héroes están en la tabla
  for(const k in T.ENEMIES)assert(T.ENEMY_EL[k]&&T.ENEMY_EL[k].weak!==T.ENEMY_EL[k].res,k+' sin elementos');for(const k in T.BOSSES)assert(T.BOSS_EL[k],k+' sin elementos');for(const k in T.CHARS)assert(k in T.CHAR_EL,k+' sin elemento');
  // Centinela (fuego) contra Reptador (débil a fuego) ×1,5 y contra Fuego Fatuo (resiste fuego) ×0,6
@@ -320,7 +361,7 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  p.inv=0;p.m.dodge=0;T.hurtP(5);assert.strictEqual(p.m.luck,l0,'Destino no perdió la suerte al recibir daño');
  // Contrato del Vacío: élites con recompensa doble y jefes con los ataques de la fase siguiente
  p=give('vanguard','voidpact');const el=T.spawnEnemy(Object.keys(T.ENEMIES)[0],p.x+200,p.y);el.elite=1;el.aff=[Object.values(T.AFX)[0]];const g0=p.gold,x0=p.xp;T.hurtE(el,1e9,{raw:1});
- const el2=(()=>{reset();T.start('vanguard',1);T.S.spawn=1e9;const q=T.S.p,e=T.spawnEnemy(Object.keys(T.ENEMIES)[0],q.x+200,q.y);e.elite=1;e.aff=[Object.values(T.AFX)[0]];const g=q.gold,x=q.xp;T.hurtE(e,1e9,{raw:1});return [q.gold-g,q.xp-x]})();
+ const el2=(()=>{give('vanguard','sharp');const q=T.S.p,e=T.spawnEnemy(Object.keys(T.ENEMIES)[0],q.x+200,q.y);e.elite=1;e.aff=[Object.values(T.AFX)[0]];const g=q.gold,x=q.xp;T.hurtE(e,1e9,{raw:1});return [q.gold-g,q.xp-x]})();
  assert(p.gold-g0>=el2[0]*1.9&&p.xp-x0>=el2[1]*1.9,'Contrato del Vacío no dobló la recompensa');
  // Memoria Artificial y Parásito de Dimensión: lo que repiten aparece con retraso
  p=give('artillery','dimparasite');step(50);T.mouse.l=1;step(2);T.mouse.l=0;const n0=T.PR.n;step(50);assert(T.PR.n>0||n0>0,'Parásito de Dimensión no repitió el disparo');assert(p.ist.dimAt,'el parásito no tiene posición');
@@ -347,7 +388,8 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  fresh();T.stormUnleash('furia');const e=T.spawnEnemy(Object.keys(T.ENEMIES)[0]);assert(e.storm,'el enemigo no nació tormentoso');
  // máximo 3 a la vez; cambiar de etapa limpia todo
  fresh();for(const k of ['grav','veloz','rayos','niebla'])T.stormUnleash(k);assert.strictEqual(T.S.storm.act.length,3);assert.strictEqual(T.S.gmul,1,'la anomalía más antigua no se disipó');
- T.stormUnleash('veloz');T.loadStage(1);assert(T.S.pspd===1&&T.S.gmul===1,'cambiar de etapa no limpió las anomalías');
+ T.stormUnleash('veloz');const rr=Math.random;Math.random=()=>.99;T.loadStage(1);Math.random=rr;  // .99: sin anomalía inicial al azar en la etapa nueva
+ assert(T.S.pspd===1&&T.S.gmul===1&&!T.S.storm.act.length,'cambiar de etapa no limpió las anomalías');
  console.log('Tempestad: estabilidad, umbrales, tratos, anomalías, combinaciones y limpieza: OK')}
 // 30. Tienda de cosméticos
 {const sd=T.Save.d.shop;sd.gems=0;sd.own={};sd.eq={};

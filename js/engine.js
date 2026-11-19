@@ -55,7 +55,7 @@ function start(cid,did,run){
   recalcHp();S.loop=run.loop||0;loadStage(run.stage)}
  else{while(p.lvl<(df.startLvl||1))giveXp(p.need-p.xp);loadStage(0);saveRun()}
  p.hp=p.maxHp;
- trackRun();stormInit(); // después de los niveles regalados de Pesadilla: no cuentan para logros
+ trackRun();stormInit();combatInit(); // después de los niveles regalados de Pesadilla: no cuentan para logros
  Snd.hooks();
 }
 
@@ -112,7 +112,7 @@ function hurtE(e,d,o){
  if(e.dead||e.hidden||e.ghost>0)return;const p=S.p,bl=p.items.blacklens;o=o||NOOPT;let crit=false;
  if(!o.raw){crit=!o.dot&&(bl||o.crit||Math.random()<p.m.crit);
   d*=p.dmgMul*p.m.dmg*bm('dmg')*(crit?(bl?1.5:2)+p.m.critm:1)*(e.stun>0?1.5:1)*(e.markT>0?1.5:1);
-  for(const it of p.dmItems)d*=it.dm(p.items[it.id],e);d=applyElement(e,d,o)}
+  for(const it of p.dmItems)d*=it.dm(p.items[it.id],e);d*=combatMul(e,o);d=applyElement(e,d,o)}
  if(o.raw&&o.el)d=applyElement(e,d,o);
  if(e.d.front&&sgn(p.x-e.x)===e.face&&!e.chT)d*=e.d.front;  // escudo frontal del Acorazado
  for(const a of e.aff)if(a.taken)d=a.taken(e,d);
@@ -146,8 +146,9 @@ function kill(e){
   else{S.bossDone=1;S.phase=1;S.walls=null;S.lava=0;say(`¡${e.def.name} derrotado! Termina de cargar el teletransportador`)}}
  else enemyDeath(e);
 }
-function hurtP(d,src){
+function hurtP(d,src,proj){
  const p=S.p;if(p.inv>0||S.st!=='play'||bany('intang'))return;
+ if(combatParry(d,src,proj))return true;
  for(const id in p.buf){const b=p.buf[id];if(b.onHurt&&b.onHurt(b,d))return}
  if(p.m.dodge&&chance(Math.min(capL(.5),p.m.dodge))){p.inv=.25;txt(p.x,p.y-56,'ESQUIVA','#9ae6ff');return}
  // invulnerable ANTES de reflejar: si no, Fortaleza ↔ élite Reflectante se devuelven el daño sin fin
@@ -157,7 +158,7 @@ function hurtP(d,src){
  const rf=bsum('reflect');if(rf)aoe(p.x,p.y-20,220,d*rf,RAW);
  for(const id in p.buf){const b=p.buf[id];if(b.absorb>0){const a=Math.min(b.absorb,d);b.absorb-=a;b.stored+=a;d-=a;if(b.absorb<=0)b.t=0}}
  if(d<=0){ring(p.x,p.y-20,40,'#c8d2ff',.25);return}
- p.hp-=d;burst(p.x,p.y-20,10,'#f44',260,3);txt(p.x,p.y-56,'-'+Math.ceil(d),'#ff4d6d',18);if(d>p.maxHp*.15)chromaHit(.7);
+ p.hp-=d;combatHurt(d,src);burst(p.x,p.y-20,10,'#f44',260,3);txt(p.x,p.y-56,'-'+Math.ceil(d),'#ff4d6d',18);if(d>p.maxHp*.15)chromaHit(.7);
  if(src&&!src.dead&&src.aff)for(const a of src.aff)if(a.hit)a.hit(src,d);  // afijos de élite al golpear (vampírico, gélido)
  if(p.hp<=0&&bany('floor'))p.hp=1;
  Ev.emit('onTakeDamage',d);if(p.hp<=0)die();
@@ -208,7 +209,7 @@ function updProj(q,dt){
  if(!q.hostile&&!q.ported&&P.a&&P.b){const A=hyp(q.x-P.a.x,q.y-P.a.y)<30?P.a:hyp(q.x-P.b.x,q.y-P.b.y)<30?P.b:null;
   if(A){const B=A===P.a?P.b:P.a;q.x=B.x;q.y=B.y;q.ported=1;q.dmg*=1.6;q.r*=1.3;ring(B.x,B.y,40,'#3cffd8',.25)}}
  if(q.harmless){}
- else if(q.hostile){if(!bany('intang')&&hyp(q.x-p.x,q.y-(p.y-p.h/2))<q.r+13){hurtP(q.dmg,q.src);q.life=0}}
+ else if(q.hostile){if(!bany('intang')&&hyp(q.x-p.x,q.y-(p.y-p.h/2))<q.r+13){if(!hurtP(q.dmg,q.src,q))q.life=0}}
  else for(const e of s.en){if(e.dead||e.hidden||q.hit.has(e))continue;
   if(hyp(e.x-q.x,e.y-e.h/2-q.y)<q.r+Math.max(e.w,e.h)/2){q.hit.add(e);projHit(q,e);if(q.life<=0)break;if(q.boom){q.life=0;break}if(--q.pierce<0){q.life=0;break}}}
  const out=q.x<0||q.x>WORLD;
@@ -276,7 +277,7 @@ function update(dt){
   if(root||(noatk&&k!=='m')||(nomove&&k==='m')){p.chg[k]=0;continue}
   if(d.hold){if(down&&p.cd[k]<=0)p.chg[k]=Math.min(d.max,p.chg[k]+dt);else if(p.chg[k]>0){cast(k,p.chg[k]/d.max);p.chg[k]=0}}
   else if(down&&p.cd[k]<=0)cast(k)}
- if(!p.items.bloodoath)heal(p.maxHp*(.008+p.m.regen)*dt);
+ if(!p.items.bloodoath&&!bany('noregen'))heal(p.maxHp*(.008+p.m.regen)*dt);  // noregen: herida de infección
  // escudo: se recarga tras 4 s sin recibir daño
  p.shT-=dt;const shMax=p.maxHp*p.m.shield;if(p.shT<=0&&p.sh<shMax)p.sh=Math.min(shMax,p.sh+shMax*.5*dt);
  Ev.emit('onTick',dt);updLoot(dt);updStage(dt);if(s.st!=='play')return;
@@ -300,7 +301,7 @@ function update(dt){
  for(let i=0;i<PT.n;i++){const q=PT.a[i];q.l-=dt;if(q.ring){q.r+=(q.mr-q.r)*Math.min(1,dt*9)}else{q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.93;q.vy*=.93}}
  PT.sweep(deadL);for(let i=0;i<TX.n;i++){const t=TX.a[i];t.l-=dt;t.vy+=t.g*dt;t.x+=t.vx*dt;t.y+=t.vy*dt}TX.sweep(deadL);
  for(let i=0;i<BL.n;i++)BL.a[i].l-=dt;BL.sweep(deadL);
- s.shake*=.88;updKick(dt);updStorm(dt);s.msgT-=dt;hsCd-=dt;s.fade=Math.max(0,s.fade-dt*1.8);if(s.lvlFx&&(s.lvlFx.t-=dt)<=0)s.lvlFx=null;
+ s.shake*=.88;updKick(dt);updStorm(dt);updCombat(dt);s.msgT-=dt;hsCd-=dt;s.fade=Math.max(0,s.fade-dt*1.8);if(s.lvlFx&&(s.lvlFx.t-=dt)<=0)s.lvlFx=null;
 }
 
 /* ===================== RENDER ===================== */
@@ -324,7 +325,7 @@ function draw(){
  c.shadowBlur=0;
  drawLoot();
  for(const e of s.en)drawEnemy(e);
- drawStormWorld();drawElements();
+ drawStormWorld();drawElements();drawCombatWorld();
  for(const m of s.dr)MIN[m.k].draw(m);c.shadowBlur=0;
  drawPlayer(s.p);
  for(const id in s.p.buf){const b=s.p.buf[id];if(b.draw)b.draw(b)}

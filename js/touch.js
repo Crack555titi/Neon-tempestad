@@ -15,7 +15,7 @@ function buildTouch(){
   <div class="tzone" id="tzR"><div class="stick"><div class="nub"></div></div></div>
   <button class="tb big" data-a="primary" id="tFire">✦</button><button class="tb" data-a="jump" style="right:16px;bottom:16px">⤒</button>
   <button class="tb" data-a="secondary" style="right:92px;bottom:26px">◈</button><button class="tb" data-a="move" style="right:24px;bottom:92px">»</button>
-  <button class="tb" data-a="ult" style="right:100px;bottom:100px">★</button><button class="tb small" data-a="interact" id="tUse" style="right:170px;bottom:30px">E</button>
+  <button class="tb" data-a="ult" style="right:100px;bottom:100px">★</button><button class="tb small" data-a="interact" id="tUse" style="right:170px;bottom:30px">E</button><button class="tb small" data-a="parry" style="right:178px;bottom:210px">⛨</button>
   <button class="tb small" data-a="inventory" style="left:12px;top:38%">☰</button><button class="tb small" data-a="pause" style="left:12px;top:calc(38% + 56px)">❚❚</button>`;
  $('wrap').appendChild(root);TUI=root;
  // botones: pulsar = acción mantenida (TOUCHV) + pulsación (pressAction)
@@ -41,6 +41,6 @@ function pollTouch(){
  const playing=on&&S&&S.st==='play';TUI.style.display=playing?'block':'none';document.body.classList.toggle('touchmode',on);
  if(!playing){for(const a in TOUCHV)TOUCHV[a]=0;return}
  const auto=Save.d.settings.aim!=='stick';$('tzR').style.display=auto?'none':'block';$('tFire').style.display=auto?'block':'none';
- $('tUse').style.display=S.near?'block':'none';
+ $('tUse').style.display=S.near||execTarget()?'block':'none';
  AIM.ang=TOUCHV.aim!=null?TOUCHV.aim:autoAim();  // en táctil siempre hay apuntado: joystick o enemigo más cercano
 }

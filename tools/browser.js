@@ -53,6 +53,9 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  await js("for(const id of ['dimparasite','unstableprism','destiny','stormheart'])giveItem(id,1);S.p.hp=S.p.maxHp");await sleep(2500);await shot('03d-objetos-originales');
  // elementos: símbolo de debilidad sobre cada enemigo, texto DÉBIL/RESISTE y reacción de Resonancia
  await js("for(const e of S.en)if(!e.boss){e.slowT=3;e.shockT=3}");await sleep(700);await shot('03e-elementos');
+ // combate: combo, energía, herida, ventana de parry y un enemigo ejecutable con su aviso
+ await js("const C=cmb();C.combo=17;C.comboT=1.4;C.energy=70;buff('w_fractura',5,{spd:.75});const e=spawnEnemy('brute',S.p.x+50,S.p.y);e.hp=e.maxHp*.1;e.aff=[];C.parryT=.2");
+ await sleep(250);await shot('03f-combate');
  await js("openStormDeal()");await sleep(500);await shot('03c-trato');await js("takeDeal('estabilizar');$('storm').style.display='none';S.st='play'");
  for(const [i,b] of [[0,'prisma'],[1,'hydra'],[2,'queen'],[3,'leviathan'],[4,'archon']]){
   await js(`if(S.st!=='play')document.querySelector('#nodes .card')?.click();loadStage(${i});useTP();S.boss.hidden=0;hurtE(S.boss,S.boss.maxHp*.5,{raw:1});S.p.hp=S.p.maxHp`);
