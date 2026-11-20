@@ -146,10 +146,9 @@ function buildLoadout(){const box=$('loadout');if(!box)return;const cid=selC,M=m
  box.innerHTML=`<div class="mt"><span class="rl">Maestría de ${esc(CHARS[cid].name)} · ${M.pts} punto${M.pts===1?'':'s'}</span>${tree}<button class="sec mini" data-mt="r">↺</button></div>
   <div class="row"><span class="rl">Secundaria:</span><div class="diff ${!(st.alt&&st.alt[cid])?'sel':''}" data-alt="0">${esc(CHARS[cid].secondary.name)}</div><div class="diff ${st.alt&&st.alt[cid]?'sel':''} ${altOk(cid)?'':'lock'}" data-alt="1" title="${esc(ALT_FAM[CHARS[cid].fam].d)}">${altOk(cid)?'':'🔒 '}${esc(CHARS[cid].secondary.name+' '+ALT_FAM[CHARS[cid].fam].n)}</div></div>
   <div class="row"><span class="rl">Arma:</span>${wm}</div><div class="row"><span class="rl">Compañero:</span>${cp}</div>
-  <small class="help">${st.wmod&&WMODS[st.wmod]?'🔧 '+WMODS[st.wmod].d+' · ':''}${syn&&CHARS[st.comp].fam!==CHARS[cid].fam?'✦ Sinergia: '+syn.n+' · ':''}⚖ Guardianes ${R.guard} · Culto ${R.cult} · Gremio ${R.guild}</small>
-  <div class="row"><button class="sec" id="goCamp">📜 CAMPAÑA</button><button class="sec" id="goInv">👾 INVERSIÓN</button></div>`}
-if($('loadout')){$('loadout').onclick=e=>{const t=e.target.closest('[data-mt],[data-wm],[data-cp],[data-alt],#goCamp,#goInv');if(!t)return;const st=Save.d.settings;
- if(t.id==='goCamp'){MODE_NEXT='camp';return start(selC,selD)}if(t.id==='goInv'){MODE_NEXT='inv';return start(selC,selD)}
+  <small class="help">${st.wmod&&WMODS[st.wmod]?'🔧 '+WMODS[st.wmod].d+' · ':''}${syn&&CHARS[st.comp].fam!==CHARS[cid].fam?'✦ Sinergia: '+syn.n+' · ':''}⚖ Guardianes ${R.guard} · Culto ${R.cult} · Gremio ${R.guild}</small>`;
+ const d=$('arsDot');if(d)d.style.display=M.pts>0?'inline-block':'none'}
+if($('loadout')){$('loadout').onclick=e=>{const t=e.target.closest('[data-mt],[data-wm],[data-cp],[data-alt]');if(!t)return;const st=Save.d.settings;
  if(t.dataset.mt!==undefined){t.dataset.mt==='r'?mtReset(selC):mtSpend(selC,+t.dataset.mt)}
  else if(t.dataset.wm!==undefined){const k=t.dataset.wm;if(k&&!wmodOk(selC,k)){Snd.play('hurt');return}st.wmod=k||null}
  else if(t.dataset.cp!==undefined)st.comp=t.dataset.cp||null;

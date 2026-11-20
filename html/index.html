@@ -40,7 +40,7 @@
     <small class="help">Instálala y vuelve a abrir el juego. Tu progreso, cuentas y récords se conservan.</small>
   </div>
 
-  <div id="title" class="ov">
+  <div id="title" class="ov" style="display:none">
     <div id="who"></div>
     <div id="updBar" style="display:none"></div>
     <small id="verTag"></small>
@@ -55,7 +55,6 @@
     </div>
     <div class="tmenu">
       <button id="tPlay">▶ JUGAR</button>
-      <button id="cont" class="sec" style="display:none"></button>
       <div class="row"><button class="sec" id="tShop">🛒 TIENDA</button><button class="sec" id="mRank">🏆 RANKING</button><button class="sec" id="tCodex">📖 CÓDICE</button></div>
       <div class="row"><button class="sec" id="mOpts">⚙ OPCIONES</button><button class="sec" id="mCtrls">🎮 CONTROLES</button></div>
     </div>
@@ -85,23 +84,35 @@
     <button class="sec" id="shopBack">← VOLVER</button>
   </div>
 
-  <div id="menu" class="ov" style="display:none">
-    <button class="sec" id="mBack">← VOLVER</button>
-    <h1>NEÓN <span>TEMPESTAD</span></h1>
-    <div id="sel">
-      <div class="left">
-        <div id="fams"></div>
-        <small id="unl"></small>
-        <div class="row" id="diffs"></div>
-        <div id="dd"></div>
-        <div class="row" id="relics"></div>
-        <small id="relicDesc" class="help"></small>
-        <div id="loadout"></div>
-        <div class="row"><button id="go">▶ NUEVA PARTIDA</button></div>
+  <div id="menu" class="ov lobby" style="display:flex">
+    <header class="lbar">
+      <div class="lmark">NEÓN <b>TEMPESTAD</b></div>
+      <nav class="ltabs" id="ltabs">
+        <button class="ltab on" data-tab="heroes">Héroes</button>
+        <button class="ltab" data-tab="arsenal">Arsenal<i class="dot" id="arsDot"></i></button>
+        <button class="ltab" data-tab="shop">Tienda</button>
+        <button class="ltab" data-tab="codex">Códice</button>
+      </nav>
+      <div class="lside" id="lside"><span id="lGems"></span><button class="lico" id="lRank" title="Ranking" aria-label="Ranking">🏆</button><button class="lico" id="lOpts" title="Opciones" aria-label="Opciones">⚙</button><button class="lico" id="lCtrls" title="Controles" aria-label="Controles">🎮</button></div>
+    </header>
+    <section class="lpane" id="paneHeroes"><div id="info"></div></section>
+    <section class="lpane" id="paneArsenal" style="display:none">
+      <div class="row" id="relics"></div>
+      <small id="relicDesc" class="help"></small>
+      <div id="loadout"></div>
+      <small id="unl" class="help"></small>
+      <p class="help" id="help"></p>
+    </section>
+    <footer class="lfoot">
+      <div id="fams"></div>
+      <div class="lctl">
+        <div class="seg" id="modes"><button class="on" data-m="normal">Normal</button><button data-m="camp">Campaña</button><button data-m="inv">Inversión</button></div>
+        <button class="slot" id="relicSlot"></button>
+        <div class="ddw"><button class="slot" id="diffBtn"></button><div class="pop" id="diffPop" style="display:none"><div id="diffs"></div><small id="dd"></small></div></div>
+        <button id="cont" class="slot cont" style="display:none"></button>
+        <button id="go" class="cta">ENTRAR</button>
       </div>
-      <div id="info"></div>
-    </div>
-    <p class="help" id="help"></p>
+    </footer>
   </div>
 
   <div id="inv" class="ov" style="display:none">
@@ -194,6 +205,7 @@
 <script src="../js/touch.js"></script>
 <script src="../js/ui.js"></script>
 <script src="../js/cosmetics.js"></script>
+<script src="../js/lobby.js"></script>
 <script src="../js/storm.js"></script>
 <script src="../js/combat.js"></script>
 <script src="../js/ecology.js"></script>

@@ -72,6 +72,7 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   - **Evolución de habilidades**: cada 4 niveles eliges una mejora real para una habilidad concreta (daño, enfriamiento, área, proyectiles, duración o velocidad).
   - **Mutaciones**: cada 7 niveles una mutación con ventaja y coste que dura toda la run (Piel de Vidrio, Sangre Volátil, Coraza Quitinosa…).
   - **Reliquias**: en la selección de personaje eliges una reliquia que cambia una regla de la partida. Se desbloquean **explorando**: salas secretas, terminales, rescates, mazmorras, el Cazador y el Heraldo.
+- **Lobby nuevo.** Se entra directo al héroe en escena (sin portada): un taller bajo la tormenta con relámpagos que iluminan al personaje, un letrero de neón roto como luz principal, charco con reflejo, lluvia y grano. Pestañas Héroes · Arsenal · Tienda · Códice, ficha corta (las descripciones aparecen al tocar cada habilidad), tira de retratos, modo, reliquia, dificultad y ENTRAR como única acción en ámbar. Respeta «reducir movimiento».
 - **Preparación y modos.**
   - **Maestría individual**: 3 ramas por héroe (su elemento, una técnica de su familia y resistencia), con puntos que se ganan jugando.
   - **Habilidades alternativas**: completar la historia personal de un héroe desbloquea una versión alternativa de su secundaria.
@@ -271,6 +272,7 @@ Para borrar una puntuación (trampas, pruebas…) entra en la consola de Firebas
 | `js/bossplus.js` | Consecuencias de jefes, jefe secreto (Heraldo del Vacío) y jefes fusionados |
 | `js/explore.js` | Gravedad por zonas, salas secretas, terminales y Códice, mecanismos, rescates y mazmorras |
 | `js/progression.js` | Evolución de habilidades, mutaciones, reliquias y desbloqueos por descubrimiento |
+| `js/lobby.js` | Escena del lobby (capas, luz, lluvia, cambio de héroe) y controles de pestañas, modo, dificultad y ENTRAR |
 | `js/routes.js` | Rutas alternativas, bioma oculto y plataformas de transporte |
 | `js/loadout.js` | Maestría individual, armas, compañero y sinergias, reputación, finales, campaña e inversión |
 | `js/world.js` | Fracturas temporales, clima, mapa que aprende y objetos que se comunican |

@@ -140,36 +140,45 @@ function abHtml(lbl,a){
  if(a.forms)return Object.values(a.forms).map(f=>abHtml(lbl,f)).join('');
  return `<li><kbd>${lbl}</kbd><b>${esc(a.name)}</b>${a.hold?' <em>mantener</em>':''}<span>${esc(a.desc||'')}</span></li>`;
 }
+// Lobby: el héroe en escena (lobby.js lo dibuja en el canvas), una ficha corta, la tira de retratos y ENTRAR.
+// Los números exactos y las descripciones solo aparecen al tocar una habilidad (sin muros de texto).
+const famCol=f=>({'Vanguardia':'#c8613f','Artillería':'#c99a3a','Invocadores':'#5fae7c','Tiempo/Espacio':'#5f9fb4','Malditos/Híbridos':'#a8546a'}[f]||'#888');
+const lbar=(n,v,mx)=>{const k=Math.max(1,Math.min(5,Math.round(v/mx*5)));return `<div class="lstat"><span>${n}</span><i>${'<b></b>'.repeat(k)}${'<em></em>'.repeat(5-k)}</i></div>`};
+let abSel=-1;
+function abList(v){const out=[];for(const [sl,a] of [['p',v.primary],['s',v.secondary],['m',v.move],['u',v.ult]]){if(a.forms)for(const f of Object.values(a.forms))out.push([sl,f]);else out.push([sl,a])}return out}
 function buildMenu(){
  if(!isUnlocked(selC))selC='vanguard';
- $('fams').innerHTML=FAMILIES.map(f=>`<div class="fam"><h3>${f}</h3>${Object.entries(CHARS).filter(([,v])=>v.fam===f).map(([k,v])=>{const lk=!isUnlocked(k);
-  return `<div class="card mini ${k===selC?'sel':''} ${lk?'lock':''}" data-k="${k}" style="--c:${v.color}"><b>${lk?'🔒 ':''}${esc(v.name)}</b></div>`}).join('')}</div>`).join('');
- const v=CHARS[selC];
- $('info').style.setProperty('--c',v.color);
- previewC=selC;
- $('info').innerHTML=`<canvas id="prev" width="220" height="130"></canvas><h2 style="color:${v.color}">${esc(v.name)}</h2><i>${esc(v.fam)} · ${esc(v.role)}</i>
-  <div class="stats">Vida ${v.hp} · Velocidad ${v.spd} · Salto ${v.jump} · Elemento: ${elemName(CHAR_EL[selC])}</div>
-  ${v.passive?`<p class="passive">◆ ${esc(v.passive.desc)}</p>`:''}
-  <ul>${abHtml('LMB',v.primary)}${abHtml('RMB',v.secondary)}${abHtml('SHIFT',v.move)}${abHtml('Q',v.ult)}</ul>`;
- $('diffs').innerHTML=DIFFS.map((d,i)=>`<div class="diff ${i===selD?'sel':''}" data-i="${i}">${i+1}. ${d.name}</div>`).join('');
+ const order=FAMILIES.flatMap(f=>Object.keys(CHARS).filter(k=>CHARS[k].fam===f));
+ $('fams').innerHTML=order.map(k=>{const v=CHARS[k],lk=!isUnlocked(k);
+  return `<button class="pt ${k===selC?'sel':''} ${lk?'lock':''}" data-k="${k}" style="--f:${famCol(v.fam)}" title="${esc(v.name)} · ${esc(v.fam)}" aria-label="${esc(v.name)}"><canvas width="96" height="96"></canvas></button>`}).join('');
+ if(typeof drawPortraits==='function')drawPortraits();
+ const v=CHARS[selC];previewC=selC;showInfo(v,false);
+ $('diffs').innerHTML=DIFFS.map((d,i)=>`<button class="dopt ${i===selD?'sel':''}" data-i="${i}">${i+1}. ${esc(d.name)}</button>`).join('');
  const rec=Save.d.records[selD],fmt=t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`;
  $('dd').textContent=DIFFS[selD].desc+(rec?` · Récord: etapa ${rec.stage}/${STAGES.length} (${rec.ch})${rec.wins?` · ${rec.wins} victoria${rec.wins>1?'s':''}, mejor ${fmt(rec.best)}`:''}`:'');
+ $('diffBtn').innerHTML=`<small>Dificultad</small>${esc(DIFFS[selD].name)} ▾`;
  $('help').textContent=helpText();
- const n=Object.keys(CHARS).filter(isUnlocked).length;$('unl').textContent=`${n}/${Object.keys(CHARS).length} desbloqueados`;
+ const n=Object.keys(CHARS).filter(isUnlocked).length;$('unl').textContent=`${n}/${Object.keys(CHARS).length} héroes desbloqueados`;
  const run=loadRun();$('cont').style.display=run?'inline-block':'none';
- if(run)$('cont').textContent=`▶ CONTINUAR · ${CHARS[run.cid].name} · ${run.loop?`Loop ${run.loop+1} · `:''}Etapa ${run.stage+1} · ${DIFFS[run.did].name}`;
+ if(run)$('cont').innerHTML=`<small>Continuar</small>${esc(CHARS[run.cid].name)} · ${run.loop?`L${run.loop+1} · `:''}E${run.stage+1}`;
 }
-function showLocked(k){
- const v=CHARS[k],a=ACHIEVEMENTS[v.unlock];
- $('info').style.setProperty('--c','#555');
- previewC=k;
- $('info').innerHTML=`<canvas id="prev" width="220" height="130"></canvas><h2>🔒 ${esc(v.name)}</h2><i>${esc(v.fam)} · ${esc(v.role)}</i>
-  <p class="passive">Logro «${esc(a.name)}»: ${esc(a.desc)}</p>
-  <div class="prog"><div style="width:${Math.min(100,Save.val(a.stat)/a.goal*100)}%"></div></div>
-  <small>${Math.floor(Math.min(Save.val(a.stat),a.goal))} / ${a.goal}</small>`;
+function showInfo(v,locked,k){const id=k||selC,el=CHAR_EL[id];
+ $('info').style.setProperty('--f',famCol(v.fam));
+ if(locked){const a=ACHIEVEMENTS[v.unlock];
+  $('info').innerHTML=`<h2>🔒 ${esc(v.name)}</h2><p class="lrole">${esc(v.fam)} · ${esc(v.role)}</p><p class="lhint">Logro «${esc(a.name)}»: ${esc(a.desc)}</p>
+   <div class="prog"><div style="width:${Math.min(100,Save.val(a.stat)/a.goal*100)}%"></div></div><small>${Math.floor(Math.min(Save.val(a.stat),a.goal))} / ${a.goal}</small>`;return}
+ const abs=abList(v);if(abSel>=abs.length)abSel=-1;
+ $('info').innerHTML=`<h2>${esc(v.name)}</h2><p class="lrole">${esc(v.fam)} · ${esc(v.role)}</p>
+  ${el?`<span class="lel" style="--e:${ELEMENTS[el].col}">${ELEMENTS[el].sym} ${ELEMENTS[el].name}</span>`:'<span class="lel">Físico</span>'}
+  <div class="lstats">${lbar('Vida',v.hp,190)}${lbar('Velocidad',v.spd,320)}${lbar('Salto',v.jump,760)}</div>
+  <div class="labs">${abs.map(([sl,a],i)=>`<button class="abi ${i===abSel?'on':''}" data-i="${i}" title="${esc(a.name)}"><canvas width="64" height="64" data-sl="${sl}"></canvas><span>${esc(a.name)}</span></button>`).join('')}</div>
+  <p class="ldesc">${abSel>=0?`<b>${esc(abs[abSel][1].name)}</b>${abs[abSel][1].hold?' · mantener':''} — ${esc(abs[abSel][1].desc||'')}`:(v.passive?`◆ ${esc(v.passive.desc)}`:'Toca una habilidad para ver qué hace.')}</p>`;
+ if($('info').querySelectorAll)$('info').querySelectorAll('.abi canvas').forEach((k2,i)=>{const g=k2.getContext&&k2.getContext('2d');if(!g)return;g.clearRect(0,0,64,64);drawGlyph(g,abs[i][1],12,12,40,'#e9dfcc')});
 }
-$('fams').onclick=e=>{const k=e.target.closest('.card');if(!k)return;if(isUnlocked(k.dataset.k)){selC=k.dataset.k;buildMenu()}else showLocked(k.dataset.k)};
-$('diffs').onclick=e=>{const k=e.target.closest('.diff');if(k){selD=+k.dataset.i;buildMenu()}};
+$('info').onclick=e=>{const b=e.target.closest('.abi');if(!b)return;const i=+b.dataset.i;abSel=abSel===i?-1:i;showInfo(CHARS[selC],false);Snd.play('ui')};
+function showLocked(k){previewC=k;showInfo(CHARS[k],true,k)}
+$('fams').onclick=e=>{const k=e.target.closest('[data-k]');if(!k)return;if(isUnlocked(k.dataset.k)){selC=k.dataset.k;buildMenu()}else showLocked(k.dataset.k)};
+$('diffs').onclick=e=>{const k=e.target.closest('[data-i]');if(k){selD=+k.dataset.i;$('diffPop').style.display='none';buildMenu();Snd.play('ui')}};
 $('go').onclick=()=>start(selC,selD);
 $('cont').onclick=()=>{const r=loadRun();if(r)start(r.cid,r.did,r)};
 $('retry').onclick=()=>{const r=loadRun();if(r){$('end').style.display='none';start(r.cid,r.did,r)}};
@@ -211,10 +220,9 @@ const helpText=()=>`${keyName(BIND.left[0])}/${keyName(BIND.right[0])} mover · 
 /* ===================== ARRANQUE ===================== */
 /* ===================== PANTALLA DE INICIO ===================== */
 // vuelta a la pantalla de inicio desde cualquier sitio (fin de partida, pausa, ranking, tienda); la partida guardada se conserva
-function goHome(){for(const id of ['menu','end','rank','shop','codex','choice','opts','ctrls','pause','inv','altar','mastery','storm'])hide(id);S=null;show('title');updateTitle()}
+function goHome(){for(const id of ['title','menu','end','rank','shop','codex','choice','opts','ctrls','pause','inv','altar','mastery','storm'])hide(id);S=null;show('menu');updateTitle()}  // se entra directo al lobby
 function updateTitle(){$('tGems').textContent=`💎 ${Save.d.shop.gems.toLocaleString('es')}`;buildMenu()}
 $('tPlay').onclick=()=>{hide('title');show('menu');buildMenu();Snd.play('ui')};
-$('mBack').onclick=()=>{hide('menu');show('title');updateTitle();Snd.play('ui')};
 $('tShop').onclick=()=>openShop();
 applySettings();updateTitle();
 addEventListener('DOMContentLoaded',()=>requestAnimationFrame(loop));  // el bucle arranca cuando ya cargaron todos los scripts (cosmetics, auth, update…)
