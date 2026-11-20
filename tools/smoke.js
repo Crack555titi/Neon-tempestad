@@ -30,9 +30,10 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={LORE,MEMORIES,memoryGet,echoRecord,echoStage,echoUse,secState,chalOf,loreHtml,endGame,addTaint,taint,borrow,debtStage,debtCost,takeCore,coreStage,CORE_OPTS,persEvent,persState,tempestSave,tempestLoad,spawnShade,RELICS,MUTATIONS,EVO_MODS,relicUnlocked,takeEvo,takeMutation,openPick,buildRelics,REL,ab,maxCd,bm,gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={WORLDCFG,ERAS,WEATHER,TALKS,eraShift,eraEnd,weatherStart,heatOf,heatStage,talkCheck,goldFor,applyElement,LORE,MEMORIES,memoryGet,echoRecord,echoStage,echoUse,secState,chalOf,loreHtml,endGame,addTaint,taint,borrow,debtStage,debtCost,takeCore,coreStage,CORE_OPTS,persEvent,persState,tempestSave,tempestLoad,spawnShade,RELICS,MUTATIONS,EVO_MODS,relicUnlocked,takeEvo,takeMutation,openPick,buildRelics,REL,ab,maxCd,bm,gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
+T.WORLDCFG.on=0;  // épocas, clima y mapa que aprende solo en su propia sección
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);if(T.S.st==='storm')el('stormOpts').onclick(pick0);if(T.S.st==='choice')el('choiceOpts').onclick(pick0);T.update(1/60);T.draw()}};
 const key=(code,repeat)=>L.keydown({code,repeat,preventDefault(){}});
 const reset=()=>{for(const k in T.keys)T.keys[k]=0;T.mouse.l=T.mouse.r=0};
@@ -613,6 +614,31 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  T.Save.write();T.Save.load();assert(T.Save.d.lore.chal.artillery.step===3&&T.Save.d.lore.mem.prisma,'la memoria no sobrevivió a guardar y cargar');
  T.openCodex();
  console.log('Memoria del mundo: ecos, recuerdos de jefes, eventos secretos y desafíos personales: OK')}
+// 34. Mundo vivo: épocas, clima, el mapa aprende y objetos que se comunican
+{T.WORLDCFG.on=1;const fresh=(ch)=>{reset();T.start(ch||'vanguard',1);T.S.spawn=1e9;T.S.en.length=0;if(T.S.era)T.eraEnd();return T.S.p};const items=()=>Object.values(T.S.p.items).reduce((a,b)=>a+b,0);
+ // épocas: cambian colores y reglas durante 40 s y luego vuelven
+ let p=fresh();const sky0=T.STAGE.sky[0];T.eraShift('futuro');assert(T.STAGE.sky[0]!==sky0&&T.bm('cdm')<.85,'la época futura no cambió nada');
+ assert(Math.abs(T.S.era.t-40)<.1,'la época no dura 40 s');T.S.era.t=.05;step(6);assert(!T.S.era&&T.STAGE.sky[0]===sky0&&!p.buf.era,'la época no terminó: '+JSON.stringify([T.S.st,T.S.era&&T.S.era.t,T.S.era&&T.S.era.k,T.S.t,T.STAGE.sky[0],sky0]));
+ p=fresh();T.eraShift('colapso');assert(T.bm('dmg')>1.25&&T.bm('taken')>1.25,'el colapso no subió el daño');T.eraEnd();
+ p=fresh();const e3=T.spawnEnemy('brute',p.x+400,500,true);const g0=T.goldFor(e3);T.eraShift('pasado');assert(T.goldFor(e3)>g0*1.2&&e3.spdx<.85,'las ruinas no cambiaron oro y velocidad');T.eraEnd();assert(Math.abs(e3.spdx-1)<.01||e3.aff.length,'la velocidad no volvió');
+ // cambiar de etapa en mitad de una época la limpia
+ p=fresh();T.eraShift('futuro');T.loadStage(1);assert(!T.S.era&&!p.buf.era,'la época sobrevivió al cambio de etapa');
+ // clima
+ p=fresh();T.S.weather=null;const ev=T.spawnEnemy('brute',p.x+400,500,true);ev.armor=0;const base=T.applyElement(ev,100,{el:'rayo'});T.weatherStart('lluvia');
+ assert(Math.abs(T.applyElement(ev,100,{el:'rayo'})/base-1.25)<.01,'la lluvia no potenció el rayo');step(30);
+ p=fresh();T.weatherStart('ceniza');assert(T.S.p.buf.ceniza&&T.S.wGold>1,'las cenizas no hicieron efecto');
+ p=fresh();T.weatherStart('viento');p.ground=0;p.y=200;const x0=p.x;T.S.wind=90;for(let i=0;i<30;i++){T.S.p.ground=0;step()}assert(p.x!==x0,'el viento no empujó');
+ p=fresh();T.weatherStart('nieve');step(60);
+ // el mapa aprende: zona caliente vigilada y nido en la zona fría
+ p=fresh();const h=T.heatOf(T.S.stage);h.fill(1);h[3]=200;T.S.ints=[];T.S.en.length=0;T.heatStage();assert(T.S.hot&&T.S.hot.x0<1000,'no detectó la zona más usada');
+ assert(T.S.en.some(e=>e.nest)&&T.S.ints.some(o=>o.nest),'no apareció el nido en la zona ignorada');
+ p.x=(T.S.hot.x0+T.S.hot.x1)/2;T.S.hot.t=.01;const n0=T.S.en.length;step(3);assert(T.S.en.length>n0,'la zona vigilada no envió patrulla');
+ T.S.heatAcc=Array(12).fill(0);T.S.heatAcc[5]=50;const h5=h[5];T.loadStage(T.S.stage);assert(T.heatOf(0)[5]>h5,'no se guardó por dónde anduviste');
+ // objetos que se comunican: juntar la pareja da su efecto (y una sola vez el diálogo)
+ p=fresh();let d0=T.bm('dmg');T.giveItem('memory');T.giveItem('parasite');assert(T.bm('dmg')>d0*1.14&&T.S.talks.memory,'los objetos no hablaron');
+ p=fresh();const ee=T.spawnEnemy('brute',p.x+400,500,true);const gg=T.goldFor(ee);T.giveItem('voidpact');T.giveItem('clover');assert(T.goldFor(ee)>gg*1.25&&T.bm('as')<1,'el conflicto no tuvo efecto');
+ for(const t of T.TALKS)assert(T.ITEM[t.a]&&T.ITEM[t.b],'objeto inexistente en las parejas: '+t.a+'/'+t.b);
+ T.WORLDCFG.on=0;console.log('Mundo vivo: épocas, clima, el mapa aprende y objetos que se comunican: OK')}
 // 30. Tienda de cosméticos
 {const sd=T.Save.d.shop;sd.gems=0;sd.own={};sd.eq={};
  assert(!T.buyOrEquip('skin','oro'),'compró sin cristales');assert(!sd.own['skin:oro']&&!sd.eq.skin);

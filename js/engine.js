@@ -303,7 +303,7 @@ function update(dt){
  for(let i=0;i<PT.n;i++){const q=PT.a[i];q.l-=dt;if(q.ring){q.r+=(q.mr-q.r)*Math.min(1,dt*9)}else{q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.93;q.vy*=.93}}
  PT.sweep(deadL);for(let i=0;i<TX.n;i++){const t=TX.a[i];t.l-=dt;t.vy+=t.g*dt;t.x+=t.vx*dt;t.y+=t.vy*dt}TX.sweep(deadL);
  for(let i=0;i<BL.n;i++)BL.a[i].l-=dt;BL.sweep(deadL);
- s.shake*=.88;updKick(dt);updStorm(dt);updCombat(dt);updEcoStage(dt);updAdaptive(dt);updNpcs(dt);updExplore(dt);updProg();updTempest(dt);updLore(dt);s.msgT-=dt;hsCd-=dt;s.fade=Math.max(0,s.fade-dt*1.8);if(s.lvlFx&&(s.lvlFx.t-=dt)<=0)s.lvlFx=null;
+ s.shake*=.88;updKick(dt);updStorm(dt);updCombat(dt);updEcoStage(dt);updAdaptive(dt);updNpcs(dt);updExplore(dt);updProg();updTempest(dt);updLore(dt);updWorld(dt);s.msgT-=dt;hsCd-=dt;s.fade=Math.max(0,s.fade-dt*1.8);if(s.lvlFx&&(s.lvlFx.t-=dt)<=0)s.lvlFx=null;
 }
 
 /* ===================== RENDER ===================== */
@@ -327,7 +327,7 @@ function draw(){
  c.shadowBlur=0;
  drawLoot();
  for(const e of s.en)drawEnemy(e);
- drawStormWorld();drawElements();drawCombatWorld();drawTouchAim();drawEco();drawAdaptive();
+ drawWorldBack();drawStormWorld();drawElements();drawCombatWorld();drawTouchAim();drawEco();drawAdaptive();
  for(const m of s.dr)MIN[m.k].draw(m);c.shadowBlur=0;
  drawPlayer(s.p);
  for(const id in s.p.buf){const b=s.p.buf[id];if(b.draw)b.draw(b)}

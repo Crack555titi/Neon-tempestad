@@ -72,6 +72,11 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   - **Evolución de habilidades**: cada 4 niveles eliges una mejora real para una habilidad concreta (daño, enfriamiento, área, proyectiles, duración o velocidad).
   - **Mutaciones**: cada 7 niveles una mutación con ventaja y coste que dura toda la run (Piel de Vidrio, Sangre Volátil, Coraza Quitinosa…).
   - **Reliquias**: en la selección de personaje eliges una reliquia que cambia una regla de la partida. Se desbloquean **explorando**: salas secretas, terminales, rescates, mazmorras, el Cazador y el Heraldo.
+- **Mundo vivo.**
+  - **Fracturas temporales**: la etapa salta 40 s a otra época (Ruinas Antiguas, Ciudad del Mañana, Dimensión Colapsada) con otros colores y reglas.
+  - **Clima**: lluvia, nevada, viento o cenizas, que cambian el daño elemental, el movimiento, la curación o el oro.
+  - **El mapa aprende**: la zona que más usas en cada etapa queda vigilada por patrullas y la que ignoras cría un nido con cofre.
+  - **Objetos que se comunican**: 7 parejas de artefactos que, al juntarse, hablan y desbloquean un efecto secreto o entran en conflicto.
 - **Memoria del mundo.**
   - **Ecos**: al morir dejas un eco en esa etapa; en otra partida puede devolverte un objeto, oro o un desafío.
   - **Recuerdos**: cada jefe derrotado por primera vez revela un fragmento de la historia (en el Códice).
@@ -255,6 +260,7 @@ Para borrar una puntuación (trampas, pruebas…) entra en la consola de Firebas
 | `js/bossplus.js` | Consecuencias de jefes, jefe secreto (Heraldo del Vacío) y jefes fusionados |
 | `js/explore.js` | Gravedad por zonas, salas secretas, terminales y Códice, mecanismos, rescates y mazmorras |
 | `js/progression.js` | Evolución de habilidades, mutaciones, reliquias y desbloqueos por descubrimiento |
+| `js/world.js` | Fracturas temporales, clima, mapa que aprende y objetos que se comunican |
 | `js/lore.js` | Ecos de partidas anteriores, recuerdos de jefes, eventos secretos y desafíos personales |
 | `js/tempest.js` | Personalidad de la Tempestad, deuda, corrupción, Sombra Corrupta y núcleos |
 | `js/storm.js` | La Tempestad: estabilidad, anomalías, combinaciones y tratos |
