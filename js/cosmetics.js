@@ -96,7 +96,7 @@ $('shopBack').onclick=()=>{hide('shop');goHome()};
 // vista previa animada: el héroe elegido corre con lo equipado + lo que se está mirando
 function drawShopPreview(t){const k=$('shopPrev');if(!k||!k.getContext||$('shop').style.display==='none')return;const g=k.getContext('2d');if(!g)return;
  const pick=cat=>shopCat===cat&&shopSel!==null?shopSel:equipped(cat),W2=k.width,H2=k.height,cx=W2/2,gy=H2-30,base=CHARS[selC].color;
- g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,W2,H2);g.fillStyle='#3cf0ff33';g.fillRect(0,gy,W2,2);
+ g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,W2,H2);g.fillStyle='#3a3f48';g.fillRect(0,gy,W2,2);
  g.save();g.translate(cx,gy);g.scale(2.4,2.4);const col=skinColor(pick('skin'),base,t);
  const pts=Array.from({length:24},(_,i)=>({x:-i*4.5,y:-22+Math.sin(t*10-i*.5)*1.5,a:i/24}));
  drawTrail(g,pick('trail'),pts,col,t);drawAura(g,pick('aura'),0,0,t,col,true);

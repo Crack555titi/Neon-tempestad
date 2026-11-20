@@ -341,3 +341,44 @@ h1.big span{animation:flick 6s steps(1) infinite}
 @media (max-width:640px){#menu .lmark{display:none}#menu #info{width:58%}#menu #paneArsenal>*{width:100%}}
 @media (prefers-reduced-motion:reduce){#menu .lpane,#menu .pt{animation:none;transition:none}}
 body.touchmode #menu .lside #who{display:none}
+
+/* ===== Tienda y Códice dentro del lobby: mismas placas, sin brillo; el ámbar solo en COMPRAR/EQUIPAR ===== */
+#menu .lsub{position:absolute;left:0;right:0;bottom:0;top:clamp(36px,8vh,52px);z-index:2;background:var(--grain),rgba(14,16,21,.9);
+ flex-direction:column;justify-content:flex-start;align-items:center;gap:10px;padding:clamp(8px,1.6vh,16px) clamp(10px,2vw,24px);overflow-y:auto;
+ font-family:var(--cond);color:var(--bone);text-align:left;animation:paneIn .18s ease-out}
+#menu .lsub h2{align-self:stretch;max-width:900px;margin:0 auto;width:100%;font-size:clamp(12px,1.4vw,14px);font-weight:600;letter-spacing:.22em;color:var(--dim);text-shadow:none;
+ border-bottom:1px solid var(--edge);padding-bottom:6px;display:flex;justify-content:space-between;align-items:baseline}
+#menu .lsub h2 span{font-family:var(--mono);color:var(--bone);text-shadow:none;letter-spacing:0;font-size:13px;margin:0}
+#menu .lsub>button.sec{display:none}  /* se vuelve con las pestañas */
+#menu .lsub .help{color:var(--dim)}
+/* tienda */
+#menu #shopTabs{display:flex;gap:0;border:1px solid var(--edge);flex-wrap:nowrap}
+#menu #shopTabs .tab{background:var(--plate);border:0;border-radius:0;color:var(--dim);font-size:clamp(11px,1.3vw,13px);text-transform:uppercase;padding:6px clamp(10px,1.4vw,16px);box-shadow:none}
+#menu #shopTabs .tab+.tab{border-left:1px solid var(--edge)}
+#menu #shopTabs .tab.on{background:var(--plate2);color:var(--bone);box-shadow:inset 0 -2px 0 var(--copper)}
+#menu .shopBody{gap:clamp(10px,2vw,22px);max-width:900px}
+#menu #shopGrid{gap:6px}
+#menu .sitem{background:var(--plate);border:1px solid var(--edge);border-left:3px solid #2c3038;border-radius:0;padding:8px 10px;gap:3px;box-shadow:none}
+#menu .sitem:hover{border-color:var(--edge);border-left-color:var(--dim);background:var(--plate2);transform:none}
+#menu .sitem b{font-size:14px;color:var(--bone);font-weight:600}
+#menu .sitem span{font-family:var(--mono);font-size:11px;color:var(--dim)}
+#menu .sitem.sel{background:var(--plate2);border-color:var(--bone);border-left-color:var(--amber);box-shadow:none}
+#menu .sitem.eq span{color:#9fbf8a}
+#menu .shopSide{gap:6px}
+#menu #shopPrev{border:1px solid var(--edge);border-radius:0;background:var(--grain),linear-gradient(180deg,#1b1e25,#111317);box-shadow:6px 6px 0 rgba(0,0,0,.35)}
+#menu #shopName{font-size:clamp(16px,2vw,20px);letter-spacing:.06em;color:var(--bone);text-shadow:none}
+#menu #shopDesc{color:#bdb4a5;font-size:13px;text-align:center}
+#menu #shopBuy{background:var(--amber);color:#1a1206;border:0;border-radius:0;font-weight:800;letter-spacing:.12em;padding:10px 26px;
+ clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+#menu #shopBuy:hover{background:#ffc552}
+#menu #shopBuy:disabled{background:var(--plate2);color:var(--dim)}
+/* códice */
+#menu #codexStats{max-width:900px;width:100%;font-family:var(--mono);font-size:11px;color:var(--dim)}
+#menu #codexList{gap:6px}
+#menu .cx{background:var(--plate);border:1px solid var(--edge);border-left:3px solid color-mix(in srgb,var(--c,#666) 55%,#6b6b6b);border-radius:0;padding:7px 10px;box-shadow:none}
+#menu .cx b{color:var(--bone);font-size:14px;font-weight:600}
+#menu .cx small{color:#bdb4a5;font-size:12px}
+#menu .cx span{color:var(--dim);font-size:11px;font-family:var(--mono)}
+#menu .cx.unk{border-style:dashed;border-left-style:solid;border-left-color:#2c3038;opacity:.5}
+#menu .cx.unk b{color:var(--dim)}
+#menu #codexList .cxh{color:var(--bone);font-size:13px;letter-spacing:.22em;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--edge);padding-bottom:4px;margin:12px 0 2px}

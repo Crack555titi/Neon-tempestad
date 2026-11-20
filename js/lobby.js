@@ -77,6 +77,7 @@ function drawLobby(dt){const L=LOBBY;if(!L.sky)lobbyInit();L.t+=dt;const t=L.t,s
  c.strokeStyle='rgba(90,95,105,.35)';c.lineWidth=1.5;c.beginPath();c.moveTo(-20,88);c.bezierCurveTo(70,146+Math.sin(t*.7)*4,170,116,258,-14);c.stroke();
  // viñeta y grano
  const vg=c.createRadialGradient(W*.4,H*.55,H*.35,W*.5,H*.5,H*.95);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.6)');c.fillStyle=vg;c.fillRect(0,0,W,H);
+ if(typeof drawShopPreview==='function')drawShopPreview(t);
  if(LOBBY.grain){c.save();c.globalAlpha=.05;c.fillStyle=LOBBY.grain;c.translate((Math.random()*128)|0,(Math.random()*128)|0);c.fillRect(-128,-128,W+256,H+256);c.restore()}
 }
 /* retratos de la tira inferior: busto del héroe dibujado con su propio renderizador */
@@ -86,9 +87,12 @@ function drawPortraits(){document.querySelectorAll&&document.querySelectorAll('#
  if(lk){g.fillStyle='rgba(10,11,14,.55)';g.fillRect(0,0,96,96)}})}
 /* ---------- interfaz del lobby: pestañas, modo, dificultad, reliquia y ENTRAR ---------- */
 let lobbyMode='normal';
-function lobbyTab(tab){if(tab==='shop'){hide('menu');return openShop()}if(tab==='codex'){hide('menu');return openCodex()}
- document.querySelectorAll&&document.querySelectorAll('#ltabs .ltab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
- $('paneHeroes').style.display=tab==='heroes'?'':'none';$('paneArsenal').style.display=tab==='arsenal'?'':'none';LOBBY.camT=tab==='arsenal'?60:0}
+// Tienda y Códice se abren dentro del lobby (bajo la misma barra de pestañas), con la escena atenuada detrás
+function lobbyTabs(tab){document.querySelectorAll&&document.querySelectorAll('#ltabs .ltab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+ $('paneHeroes').style.display=tab==='heroes'?'':'none';$('paneArsenal').style.display=tab==='arsenal'?'':'none';LOBBY.camT=tab==='arsenal'?60:0;
+ if(tab!=='shop')hide('shop');if(tab!=='codex')hide('codex');
+ const ft=document.querySelector&&document.querySelector('#menu .lfoot');if(ft)ft.style.visibility=tab==='shop'||tab==='codex'?'hidden':''}  // la escena sigue detrás; el pie no asoma
+function lobbyTab(tab){if(tab==='shop')return openShop();if(tab==='codex')return openCodex();lobbyTabs(tab)}
 function lobbyRefresh(){if(!$('relicSlot'))return;const R=Save.d.settings.relic&&RELICS[Save.d.settings.relic];
  $('relicSlot').innerHTML=`<small>Reliquia</small>${R?esc(R.name):'Ninguna'}`;$('lGems').textContent=`💎 ${Save.d.shop.gems.toLocaleString('es')}`;
  document.querySelectorAll&&document.querySelectorAll('#modes [data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m===lobbyMode))}
@@ -103,10 +107,17 @@ if($('ltabs')){
   if(LOBBY.rm||typeof setTimeout!=='function')return go();b.classList.add('charging');Snd.play('tp');LOBBY.flash=1;setTimeout(go,300)};
  if(typeof addEventListener==='function')addEventListener('pointerdown',e=>{const p=$('diffPop');if(p&&p.style.display!=='none'&&!e.target.closest('.ddw'))p.style.display='none'});
  const who=$('who');if(who&&$('lside')&&$('lside').prepend)$('lside').prepend(who);
+ for(const id of ['shop','codex']){const o=$(id);if(o&&$('menu').appendChild){$('menu').appendChild(o);o.classList&&o.classList.add('lsub')}}
  // deslizar sobre la escena cambia de héroe
  let sx0=null;$('paneHeroes').addEventListener&&$('paneHeroes').addEventListener('pointerdown',e=>{if(e.target===$('paneHeroes'))sx0=e.clientX});
  typeof addEventListener==='function'&&addEventListener('pointerup',e=>{if(sx0===null)return;const dx=e.clientX-sx0;sx0=null;if(Math.abs(dx)<50)return;menuPress(dx<0?'right':'left')})}
 {const _bm=buildMenu;buildMenu=function(){_bm();lobbyRefresh()}}
 
 // primera construcción con todo cargado (retratos, ranura de reliquia y cristales)
-if(typeof addEventListener==='function')addEventListener('DOMContentLoaded',()=>{if($('menu').style.display!=='none')buildMenu()});
+if(typeof addEventListener==='function')addEventListener('DOMContentLoaded',()=>{
+ // abrir la tienda o el Códice desde cualquier sitio los muestra dentro del lobby; «volver» regresa a Héroes
+ const wrap=(open,tab)=>function(){if(S)return open.apply(this,arguments);hide('title');show('menu');lobbyTabs(tab);return open.apply(this,arguments)};
+ openShop=wrap(openShop,'shop');openCodex=wrap(openCodex,'codex');
+ {const _b=buildShop;buildShop=function(){_b();lobbyRefresh()}}  // los cristales de la barra siguen a las compras
+ $('shopBack').onclick=()=>{lobbyTabs('heroes');buildMenu()};$('codexBack').onclick=()=>{lobbyTabs('heroes');buildMenu()};
+ if($('menu').style.display!=='none')buildMenu()});
