@@ -6,10 +6,10 @@ const SAVE_KEY='neonTempestad.v1',RUN_KEY='neonTempestad.run';
 const STORE=(()=>{try{localStorage.setItem('_nt','1');localStorage.removeItem('_nt');return localStorage}
  catch(e){const m={};return {getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}}}})();
 const Save={
- d:{stats:{},ach:{},settings:{vol:{}},records:{},shop:{gems:0,own:{},eq:{}},codex:{}},
+ d:{stats:{},ach:{},settings:{vol:{}},records:{},shop:{gems:0,own:{},eq:{}},codex:{},lore:{echoes:[],mem:{},chal:{}}},
  load(){let raw=null;try{raw=JSON.parse(STORE.getItem(SAVE_KEY))}catch(e){}  // guardado corrupto: se empieza de cero
   this.d={stats:Object.assign({},raw&&raw.stats),ach:Object.assign({},raw&&raw.ach),settings:Object.assign({quality:'auto',shake:1,mute:false,touch:'auto',aim:'auto',binds:null},raw&&raw.settings),records:Object.assign({},raw&&raw.records),
-   shop:Object.assign({gems:0,own:{},eq:{}},raw&&raw.shop),codex:Object.assign({},raw&&raw.codex)};
+   shop:Object.assign({gems:0,own:{},eq:{}},raw&&raw.shop),codex:Object.assign({},raw&&raw.codex),lore:Object.assign({echoes:[],mem:{},chal:{}},raw&&raw.lore)};
   this.d.settings.vol=Object.assign({master:.8,sfx:.8,music:.6},this.d.settings.vol);
   // hasta la v1.3 «alta» era solo el valor por defecto (también en teléfonos): esos guardados pasan a automática una vez
   const st=this.d.settings;if(!st.qv){st.quality='auto';st.qv=1}

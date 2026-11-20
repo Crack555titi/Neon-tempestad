@@ -30,7 +30,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={addTaint,taint,borrow,debtStage,debtCost,takeCore,coreStage,CORE_OPTS,persEvent,persState,tempestSave,tempestLoad,spawnShade,RELICS,MUTATIONS,EVO_MODS,relicUnlocked,takeEvo,takeMutation,openPick,buildRelics,REL,ab,maxCd,bm,gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={LORE,MEMORIES,memoryGet,echoRecord,echoStage,echoUse,secState,chalOf,loreHtml,endGame,addTaint,taint,borrow,debtStage,debtCost,takeCore,coreStage,CORE_OPTS,persEvent,persState,tempestSave,tempestLoad,spawnShade,RELICS,MUTATIONS,EVO_MODS,relicUnlocked,takeEvo,takeMutation,openPick,buildRelics,REL,ab,maxCd,bm,gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);if(T.S.st==='storm')el('stormOpts').onclick(pick0);if(T.S.st==='choice')el('choiceOpts').onclick(pick0);T.update(1/60);T.draw()}};
@@ -367,7 +367,7 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
 // 37. Neutrales (mercader, ermitaño y misiones) e IA adaptativa (imitador y jefes que recuerdan)
 {const fresh=(ch='vanguard')=>{reset();T.start(ch,1);T.S.spawn=1e9;for(const k of T.S.storm.act.slice())T.ANOMALIES[k].end&&T.ANOMALIES[k].end();T.S.storm.act=[];T.S.gmul=1;T.S.hunter={dead:1};
   const p=T.S.p;p.inv=1e9;p.m.dodge=0;return p};
- const near=o=>{const p=T.S.p;p.x=o.x;p.y=o.y;p.vx=p.vy=0;step(1);assert.strictEqual(T.S.near,o,'no quedó junto al '+o.k)};
+ const near=o=>{const p=T.S.p;for(const x of T.S.ints)if(x!==o&&Math.abs(x.x-o.x)<150)x.x=o.x>1200?o.x-400:o.x+400;p.x=o.x;p.y=o.y;p.vx=p.vy=0;step(1);assert.strictEqual(T.S.near,o,'no quedó junto al '+o.k)};
  const rnd=Math.random;
  // mercader: con oro compra el primer objeto; sin oro no
  let p=fresh();T.S.ints=T.S.ints.filter(o=>o.k!=='merchant'&&o.k!=='hermit');Math.random=()=>.1;T.npcStage();Math.random=rnd;
@@ -586,6 +586,33 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
   T.S.spawn=2;T.stormUnleash(own[ch]);step(60*7)}
  p=fresh();const c0=T.bm('cdm');T.stormUnleash('hierro');assert(T.bm('cdm')<c0*.8,'Tormenta de Hierro no bajó los enfriamientos');T.ANOMALIES.hierro.end();assert(!T.S.p.buf.ps_hierro,'la tormenta no se limpió');
  console.log('Tempestad viva: corrupción, Sombra, deuda, núcleos, personalidad y tormentas personales: OK')}
+// 33. Memoria del mundo: ecos, recuerdos, eventos secretos y desafíos personales
+{const fresh=(ch)=>{reset();T.start(ch||'vanguard',1);T.S.spawn=1e9;T.S.en.length=0;return T.S.p};const L=T.LORE();L.echoes=[];L.mem={};L.chal={};
+ // eco: morir deja un eco con tus mejores objetos; en otra partida aparece en esa etapa y se consume al usarlo
+ let p=fresh();T.giveItem(T.ITEMS.find(i=>i.r==='l').id);p.gold=400;T.S.stage=0;T.S.st='play';T.endGame(false);
+ assert(L.echoes.length===1&&L.echoes[0].items.length===1&&L.echoes[0].gold===200,'morir no dejó un eco');T.S.st='play';L.echoes[0].t-=1e4;
+ p=fresh();const rr=Math.random;Math.random=()=>.1;T.loadStage(0);Math.random=rr;const eo=T.S.ints.find(o=>o.k==='echo');assert(eo,'el eco no apareció en su etapa');
+ for(const r of [.1,.5,.9]){const o=Object.assign({},eo,{open:0});L.echoes=[o.echo];const n0=Object.values(p.items).reduce((a,b)=>a+b,0),g0=p.gold,e0=T.S.en.length;Math.random=()=>r;T.echoUse(o);Math.random=rr;
+  assert(!L.echoes.length,'el eco no se consumió');
+  if(r===.1)assert(Object.values(p.items).reduce((a,b)=>a+b,0)===n0+1,'el eco no dio su objeto');
+  if(r===.5)assert(p.gold>g0,'el eco no dio oro');
+  if(r===.9){const f=T.S.en[e0];assert(f&&f.echoFoe,'el eco no dio desafío');const g1=p.gold;T.hurtE(f,1e9,{raw:1});step(3);assert(p.gold>g1,'vencer el desafío del eco no pagó')}}
+ assert(T.S.p.hp>0);
+ // recuerdos: el primer jefe derrotado deja uno, solo una vez, y se ve en el Códice
+ p=fresh();assert(T.memoryGet('prisma')&&!T.memoryGet('prisma')&&L.mem.prisma,'el recuerdo no se guardó una sola vez');assert(T.loreHtml().includes(T.MEMORIES.prisma.t),'el Códice no muestra el recuerdo');
+ p=fresh();const b=T.spawnBoss('hydra');T.kill(b);step(5);assert(L.mem.hydra,'matar al jefe no dejó recuerdo');
+ // eventos secretos
+ p=fresh();let n0=Object.values(p.items).reduce((a,b)=>a+b,0);T.secState().streak=15;step(2);assert(Object.values(p.items).reduce((a,b)=>a+b,0)===n0+1,'Intocable no premió');
+ p=fresh();const c0=T.S.ints.filter(o=>o.k==='chest').length;for(let i=0;i<60*11;i++){p.vx=0;p.x=p.x;step()}assert(T.S.ints.filter(o=>o.k==='chest').length>c0||T.secState().done.quietud,'Quietud no ocurrió');
+ p=fresh();const g2=p.gold;p.x=60;step(2);p.x=2340;step(2);assert(T.secState().done.cartografo&&p.gold>g2,'Cartógrafo no ocurrió');
+ // desafíos personales: 150 bajas → capítulo 1, jefe → capítulo 2, última etapa → capítulo 3, cada uno con cristales
+ p=fresh('artillery');const gm=T.Save.d.shop.gems;T.chalOf('artillery').kills=149;const e=T.spawnEnemy('brute',p.x+300,500,true);T.hurtE(e,1e9,{raw:1});step(3);
+ assert(T.chalOf('artillery').step===1&&T.Save.d.shop.gems===gm+30,'el capítulo 1 no se completó');
+ const b2=T.spawnBoss('prisma');T.kill(b2);step(5);assert.strictEqual(T.chalOf('artillery').step,2,'el capítulo 2 no se completó');
+ T.loadStage(T.STAGES.length-1);assert.strictEqual(T.chalOf('artillery').step,3,'el capítulo 3 no se completó');
+ T.Save.write();T.Save.load();assert(T.Save.d.lore.chal.artillery.step===3&&T.Save.d.lore.mem.prisma,'la memoria no sobrevivió a guardar y cargar');
+ T.openCodex();
+ console.log('Memoria del mundo: ecos, recuerdos de jefes, eventos secretos y desafíos personales: OK')}
 // 30. Tienda de cosméticos
 {const sd=T.Save.d.shop;sd.gems=0;sd.own={};sd.eq={};
  assert(!T.buyOrEquip('skin','oro'),'compró sin cristales');assert(!sd.own['skin:oro']&&!sd.eq.skin);

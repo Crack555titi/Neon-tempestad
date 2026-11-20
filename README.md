@@ -72,6 +72,11 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   - **Evolución de habilidades**: cada 4 niveles eliges una mejora real para una habilidad concreta (daño, enfriamiento, área, proyectiles, duración o velocidad).
   - **Mutaciones**: cada 7 niveles una mutación con ventaja y coste que dura toda la run (Piel de Vidrio, Sangre Volátil, Coraza Quitinosa…).
   - **Reliquias**: en la selección de personaje eliges una reliquia que cambia una regla de la partida. Se desbloquean **explorando**: salas secretas, terminales, rescates, mazmorras, el Cazador y el Heraldo.
+- **Memoria del mundo.**
+  - **Ecos**: al morir dejas un eco en esa etapa; en otra partida puede devolverte un objeto, oro o un desafío.
+  - **Recuerdos**: cada jefe derrotado por primera vez revela un fragmento de la historia (en el Códice).
+  - **Eventos secretos**: Quietud, Intocable y Cartógrafo, con condiciones ocultas.
+  - **Desafíos personales**: cada héroe tiene una historia de 3 capítulos que da cristales.
 - **La Tempestad viva.**
   - **Personalidad**: cada 50 s lee tu estilo y reacciona con premio: desafío de élites si eres agresivo, cerco de rayos si esquivas, secretos si exploras.
   - **Deuda dimensional**: el Acreedor presta objetos raros y legendarios; cobra en oro al empezar cada etapa y, si no pagas, los enemigos pegan más y llegan cobradores.
@@ -250,6 +255,7 @@ Para borrar una puntuación (trampas, pruebas…) entra en la consola de Firebas
 | `js/bossplus.js` | Consecuencias de jefes, jefe secreto (Heraldo del Vacío) y jefes fusionados |
 | `js/explore.js` | Gravedad por zonas, salas secretas, terminales y Códice, mecanismos, rescates y mazmorras |
 | `js/progression.js` | Evolución de habilidades, mutaciones, reliquias y desbloqueos por descubrimiento |
+| `js/lore.js` | Ecos de partidas anteriores, recuerdos de jefes, eventos secretos y desafíos personales |
 | `js/tempest.js` | Personalidad de la Tempestad, deuda, corrupción, Sombra Corrupta y núcleos |
 | `js/storm.js` | La Tempestad: estabilidad, anomalías, combinaciones y tratos |
 | `tools/` | Pruebas (`smoke.js`, `browser.js`) y scripts de empaquetado |

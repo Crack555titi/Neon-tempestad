@@ -225,3 +225,5 @@ h1.big span{animation:flick 6s steps(1) infinite}
 #relicDesc{min-height:1em;color:#ffd23c}
 #choice{background:radial-gradient(ellipse at center,rgba(40,20,80,.6),rgba(5,3,13,.93))}
 #choiceOpts .card{max-width:250px}
+
+#codexList .cxh{grid-column:1/-1;margin:14px 0 2px;color:#ffd23c;font-size:14px;letter-spacing:2px}
