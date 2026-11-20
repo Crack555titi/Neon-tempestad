@@ -23,12 +23,12 @@
     </form>
   </div>
 
-  <div id="rank" class="ov" style="display:none">
-    <h2>🏆 CLASIFICACIÓN</h2>
+  <div id="rank" class="ov lskin" style="display:none">
+    <h2>CLASIFICACIÓN</h2>
     <div class="row" id="rTabs"></div>
     <table id="rTable"><thead><tr><th>#</th><th>Usuario</th><th>Personaje</th><th>Nivel</th><th>Loop</th><th>Tiempo</th><th>Puntuación</th></tr></thead><tbody id="rBody"></tbody></table>
     <small class="help" id="rNote"></small>
-    <button id="rBack">VOLVER</button>
+    <button class="lback" id="rBack">← VOLVER</button>
   </div>
 
   <div id="update" class="ov" style="display:none">
@@ -137,7 +137,7 @@
     <small class="help">La partida se guarda al empezar cada etapa: podrás continuarla desde el menú.</small>
   </div>
 
-  <div id="opts" class="ov" style="display:none">
+  <div id="opts" class="ov lskin" style="display:none">
     <h2>OPCIONES</h2>
     <div class="optgrid">
       <label for="qual">Calidad gráfica</label><select id="qual"><option value="auto">Automática (recomendada)</option><option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja (equipos lentos)</option></select>
@@ -149,14 +149,14 @@
       <label for="tMode">Controles táctiles</label><select id="tMode"><option value="auto">Automático</option><option value="on">Siempre</option><option value="off">Nunca</option></select>
       <label for="aMode">Apuntado táctil</label><select id="aMode"><option value="auto">Tocar = automático, arrastrar = apuntar</option><option value="stick">Sin apuntado automático</option></select>
     </div>
-    <button id="oBack">VOLVER</button>
+    <button class="lback" id="oBack">← VOLVER</button>
   </div>
 
-  <div id="ctrls" class="ov" style="display:none">
+  <div id="ctrls" class="ov lskin" style="display:none">
     <h2>CONTROLES</h2>
     <div id="ctrlList"></div>
     <small class="help">Haz clic en una tecla y pulsa la nueva (Esc cancela). Mando: stick/cruceta mover · A saltar · RT o stick derecho disparar · LT secundaria · B/RB movimiento · Y definitiva · LB parry · X interactuar/ejecutar · Select inventario · Start pausa.</small>
-    <div class="row"><button class="sec" id="cReset">RESTABLECER</button><button id="cBack">VOLVER</button></div>
+    <div class="row"><button class="sec" id="cReset">RESTABLECER</button><button class="lback" id="cBack">← VOLVER</button></div>
   </div>
 
   <div id="rotate">↻ Gira el dispositivo para jugar en horizontal</div>
