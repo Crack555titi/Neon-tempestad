@@ -64,7 +64,7 @@ function interact(){
  const pr=priceOf(o);if(p.gold<pr){say(`Oro insuficiente (${pr})`);return}
  p.gold-=pr;o.open=1;
  if(p.items.elegy&&Math.random()<1/3){ring(o.x,o.y-15,120,'#5ab4ff',.4);burst(o.x,o.y-15,30,'#5ab4ff',400,4);hurtP(p.maxHp*.15);say('¡El cofre se hace añicos! (Elegía)')}
- else{o.got=rollItem(p.items.elegy?RORD[Math.random()*5|0]:rollR(CHESTS[o.tier].w));giveItem(o.got)}
+ else{o.got=rollItem(p.items.elegy?RORD[Math.random()*5|0]:rollR(CHESTS[o.tier].w));giveItem(o.got);o.revT=S.t}  // revT: el objeto sale del cofre (drawReveal)
  Ev.emit('onChestOpen',o);
 }
 function chooseFragment(o,id){const p=S.p;p.hp=Math.max(1,p.hp*(1-ALTAR.cost));o.open=1;giveItem(id);addTaint(20,'fragmento')}
@@ -82,7 +82,8 @@ function drawLoot(){
    c.globalAlpha=o.open?.35:1;glow(C.col,o.open?0:14);c.fillStyle='#1a1030';c.strokeStyle=C.col;c.lineWidth=2;
    c.fillRect(o.x-w/2,o.y-h,w,h);c.strokeRect(o.x-w/2,o.y-h,w,h);
    c.beginPath();if(o.open){c.moveTo(o.x-w/2,o.y-h);c.lineTo(o.x-w/2-6,o.y-h-14)}else{c.moveTo(o.x-w/2,o.y-h*.6);c.lineTo(o.x+w/2,o.y-h*.6)}c.stroke();
-   if(!o.open){c.fillStyle=C.col;c.fillRect(o.x-3,o.y-h*.6-3,6,7)}}
+   if(!o.open){c.fillStyle=C.col;c.fillRect(o.x-3,o.y-h*.6-3,6,7)}
+   if(o.revT!==undefined)drawReveal(o,h)}
   else{c.globalAlpha=o.open?.3:1;glow(ALTAR.col,o.open?0:18);c.fillStyle='#0c1a30';c.strokeStyle=ALTAR.col;c.lineWidth=2;
    c.beginPath();c.moveTo(o.x-18,o.y);c.lineTo(o.x-10,o.y-46);c.lineTo(o.x+10,o.y-46);c.lineTo(o.x+18,o.y);c.closePath();c.fill();c.stroke();
    if(!o.open){const fy=o.y-64+Math.sin(S.t*2.5)*5;c.fillStyle=ALTAR.col;c.beginPath();c.moveTo(o.x,fy-9);c.lineTo(o.x+7,fy);c.lineTo(o.x,fy+9);c.lineTo(o.x-7,fy);c.fill()}}
@@ -95,3 +96,14 @@ function drawLoot(){
    T.state==='idle'?'[E] Activar teletransportador (despierta al jefe)':T.state==='ready'?(S.p.x<T.x?'[E] ← Terminar run y guardar puntuación':S.stage>=STAGES.length-1?'[E] Continuar ciclo (Loop +1) →':'[E] Siguiente etapa →'):'';
   if(msg)c.fillText(msg,o.x,o.y-(o.k==='altar'?82:o.k==='tp'?96:40))}
 }
+
+/* el objeto sale del cofre: sube con un haz del color de su rareza, se queda flotando con su nombre y vuela hacia ti */
+function drawReveal(o,h){const a=S.t-o.revT,it=ITEM[o.got];if(!it||a>1.7){if(a>1.7)delete o.revT;return}
+ const rc=RARITY[it.r].col,big='rlmf'.includes(it.r),rise=Math.min(1,a/.35),e=1-Math.pow(1-rise,3),fly=a>1.25?Math.min(1,(a-1.25)/.45):0;
+ let x=o.x,y=o.y-h-10-e*46;const p=S.p;if(fly){const f=fly*fly;x+=(p.x-x)*f;y+=(p.y-30-y)*f}
+ const sz=(18+e*14)*(1-fly*.6);
+ c.save();c.globalAlpha=(1-fly)*(.35+.25*Math.sin(a*12));const bw=big?34:22,gr=c.createLinearGradient(0,o.y-h-140,0,o.y-h);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,rc);
+ c.fillStyle=gr;c.fillRect(o.x-bw/2,o.y-h-140,bw,140*e);c.restore();
+ c.save();c.globalAlpha=1-fly*.3;glow(rc,big?24:14);drawIcon(it,x-sz/2,y-sz/2,sz);c.shadowBlur=0;
+ if(!fly&&a>.3){c.globalAlpha=Math.min(1,(a-.3)*5);c.textAlign='center';c.font='bold 12px monospace';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.8)';c.strokeText(it.name,o.x,y-sz/2-8);c.fillStyle=rc;c.fillText(it.name,o.x,y-sz/2-8)}
+ c.restore()}

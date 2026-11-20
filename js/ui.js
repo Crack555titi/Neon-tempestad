@@ -85,13 +85,13 @@ function drawMinimap(x,y,w,h){const s=S,sx=w/WORLD,sy=(h-8)/(FLOOR+40),X=v=>x+v*
  c.fillStyle='#fff';c.fillRect(X(s.p.x)-2,Y(s.p.y-20)-2,4,4);c.restore()}
 const sortedItems=()=>Object.keys(S.p.items).filter(id=>S.p.items[id]>0).sort((a,b)=>'curlmf'.indexOf(ITEM[a].r)-'curlmf'.indexOf(ITEM[b].r));
 function drawIcon(it,x,y,s,n){const rc=RARITY[it.r].col;c.fillStyle='#120a26';c.fillRect(x,y,s,s);c.fillStyle=it.col;c.fillRect(x+3,y+3,s-6,s-6);
- c.strokeStyle=rc;c.lineWidth=2;c.strokeRect(x,y,s,s);drawGlyph(c,it,x+s*.2,y+s*.2,s*.6,'#0b0618');
+ c.strokeStyle=rc;c.lineWidth=2;c.strokeRect(x,y,s,s);drawGlyph(c,it,x+s*.2,y+s*.2,s*.6,icoInk(it.col));
  if(n>1){c.fillStyle='#fff';c.font='bold 9px monospace';c.textAlign='right';c.fillText(n,x+s+2,y+s+2)}}
 function wrapText(t,x,y,w,lh){let line='';for(const word of t.split(' ')){const tl=line?line+' '+word:word;if(c.measureText(tl).width>w&&line){c.fillText(line,x,y);y+=lh;line=word}else line=tl}c.fillText(line,x,y)}
 
 /* ===================== INVENTARIO Y ALTAR ===================== */
 function itemCard(it,n){const rc=RARITY[it.r].col;
- return `<div class="item" style="--c:${rc}"><span class="ico" style="background:${it.col}">${glyphSvg(it,'#0b0618')}</span><div><b>${esc(it.name)}${n>1?' ×'+n:''}</b> <em>${RARITY[it.r].n}</em>
+ return `<div class="item" style="--c:${rc}"><span class="ico" style="background:${it.col}">${glyphSvg(it,icoInk(it.col))}</span><div><b>${esc(it.name)}${n>1?' ×'+n:''}</b> <em>${RARITY[it.r].n}</em>
   <small>${esc(it.desc)}</small>${it.tags?`<i>Sinergia: ${it.tags.join(', ')}</i>`:''}</div></div>`}
 function toggleInv(){
  if(S.st==='inv'){$('inv').style.display='none';S.st='play';mouse.l=mouse.r=0;return}
@@ -101,7 +101,7 @@ function toggleInv(){
  // estadísticas como fichas cortas; objetos como iconos: al pasar el ratón o tocarlos se ve qué hacen
  $('invStats').innerHTML=$('invStats').textContent.split(' · ').filter(Boolean).map(t=>`<span>${esc(t)}</span>`).join('');
  $('invList').innerHTML=ids.length?ids.map(id=>{const it=ITEM[id],n=p.items[id];
-  return `<button class="itile" data-id="${id}" style="--c:${RARITY[it.r].col}" title="${esc(it.name)}" aria-label="${esc(it.name)}"><span class="ico" style="background:${it.col}">${glyphSvg(it,'#0b0618')}</span>${n>1?`<em>×${n}</em>`:''}</button>`}).join('')
+  return `<button class="itile" data-id="${id}" style="--c:${RARITY[it.r].col}" title="${esc(it.name)}" aria-label="${esc(it.name)}"><span class="ico" style="background:${it.col}">${glyphSvg(it,icoInk(it.col))}</span>${n>1?`<em>×${n}</em>`:''}</button>`}).join('')
   :'<p class="help">Aún no tienes objetos. Abre cofres con <b>E</b>.</p>';
  invShow(ids[0]);
  $('inv').style.display='flex';S.st='inv';
