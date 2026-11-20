@@ -3,6 +3,7 @@
    - MAESTRÍA INDIVIDUAL (31): cada héroe tiene 3 ramas (su elemento, una técnica de su familia y resistencia) de 3 niveles.
      Ganas 1 punto por partida en la que llegas a la etapa 2 y otro si derrotas a un jefe (máx. 9). Se reparten en el selector.
    - ARMAS MODIFICABLES (37): un componente para el ataque principal: cargador, núcleo, alcance o mecanismo.
+   - HABILIDADES ALTERNATIVAS (20): completar la historia personal de un héroe desbloquea una versión alternativa de su secundaria.
    - COMPAÑERO Y SINERGIAS (17): eliges a otro héroe como compañero: te sigue, dispara y, cuando usas la definitiva,
      hace el movimiento de su familia. Ciertas parejas de familias combinan ambos en una SINERGIA.
    - REPUTACIÓN (38): Guardianes del Equilibrio, Culto de la Tormenta y Gremio Mercante recuerdan tus decisiones
@@ -30,6 +31,18 @@ const wmCache=new WeakMap();
 function wmodApply(d,k){const W=WMODS[k];if(!W)return d;let o=wmCache.get(d);if(o&&o.k===k)return o.v;const v=Object.assign({},d),m=W.m;
  if(m.dmg){if(v.dmg)v.dmg*=m.dmg;if(v.dps)v.dps*=m.dmg}if(m.cd&&v.cd)v.cd*=m.cd;if(m.r){if(v.r)v.r*=m.r;if(v.range)v.range*=m.r}if(m.n&&PROJ_T.includes(v.t))v.n=(v.n||1)+m.n;
  wmCache.set(d,{k,v});return v}
+/* ---------- habilidades alternativas (20): se desbloquean al completar la historia personal del héroe ---------- */
+const ALT_FAM={'Vanguardia':{n:'Pesada',d:'+50% de daño, +30% de enfriamiento',m:{dmg:1.5,cd:1.3}},'Artillería':{n:'Dispersa',d:'+2 proyectiles, −20% de daño',m:{n:2,dmg:.8}},
+ 'Invocadores':{n:'Persistente',d:'+50% de duración, +20% de daño',m:{time:1.5,dmg:1.2}},'Tiempo/Espacio':{n:'Expandida',d:'+50% de área y alcance',m:{r:1.5}},
+ 'Malditos/Híbridos':{n:'Voraz',d:'+30% de daño, −15% de enfriamiento',m:{dmg:1.3,cd:.85}}};
+const altOk=cid=>LORE().chal[cid]&&LORE().chal[cid].step>=3;
+const altCache=new WeakMap();
+function altApply(d,fam){const A=ALT_FAM[fam];if(!A)return d;let v=altCache.get(d);if(v)return v;v=Object.assign({},d,{name:d.name+' '+A.n});const m=A.m;
+ // sin el rasgo que mejora (proyectiles, área, duración) el coste no se aplica y se compensa con daño: nunca es peor que la original
+ const proj=PROJ_T.includes(v.t),hasD=v.dmg||v.dps||v.pct,dm=m.n&&!proj?1.25:m.dmg||1;
+ if(dm!==1){if(v.dmg)v.dmg*=dm;if(v.dps)v.dps*=dm;if(v.pct)v.pct*=dm}if(m.cd&&v.cd&&(m.cd<1||hasD))v.cd*=m.cd;
+ if(m.r){if(v.r)v.r*=m.r;if(v.range)v.range*=m.r;if(v.dist)v.dist*=m.r;if(!v.r&&!v.range&&!v.dist&&v.dmg)v.dmg*=1.3}
+ if(m.time){if(v.time)v.time*=m.time;if(v.dur)v.dur*=m.time}if(m.n&&proj)v.n=(v.n||1)+m.n;altCache.set(d,v);return v}
 /* ---------- compañero y sinergias ---------- */
 const COMP_MOVE={
  'Vanguardia':{n:'Muro',fx(){buff('comp',4,{taken:.6});ring(S.p.x,S.p.y-20,90,'#ff5a3c',.4)}},
@@ -100,12 +113,13 @@ function loadoutStart(run){const s=S;
  s.mode=run?run.mode||null:MODE_NEXT==='inv'?'inv':null;s.campaign=run?!!run.campaign:MODE_NEXT==='camp';MODE_NEXT=null;
  s.wmod=run?run.wmod||null:(Save.d.settings.wmod&&wmodOk(s.cid,Save.d.settings.wmod)?Save.d.settings.wmod:null);
  const cc=run?run.comp:Save.d.settings.comp;s.comp=cc&&CHARS[cc]&&cc!==s.cid&&s.mode!=='inv'?{cid:cc,fam:CHARS[cc].fam,x:s.p.x,y:s.p.y,cd:1}:null;
+ s.alt=run?!!run.alt:!!(Save.d.settings.alt&&Save.d.settings.alt[s.cid]&&altOk(s.cid));
  s.runBoss=0;mtApply();repApply(!run);
  if(s.mode==='inv'){if(run)s.wave=run.wave||0;invStart()}
  if(s.campaign&&!run)s.sch.push({t:.6,f:()=>{if(S===s&&s.st==='play')storyCard(CAMPAIGN[0].t,CAMPAIGN[0].d)}})}
 function loadoutStage(){const s=S;if(!s||!s.p)return;if(s.mode==='inv'){s.spawn=1e9;s.ints=s.ints.filter(o=>o.k!=='tp')}
  if(s.campaign&&s.stage>0&&!s.loop){const C=CAMPAIGN[s.stage];if(C){const L=LORE();L.camp=Math.max(L.camp||0,s.stage+1);Save.write();s.sch.push({t:.8,f:()=>{if(S===s&&s.st==='play')storyCard(C.t,C.d)}})}}}
-const loadoutSave=()=>({mode:S.mode||null,wave:S.wave||0,campaign:!!S.campaign,wmod:S.wmod||null,comp:S.comp?S.comp.cid:null});
+const loadoutSave=()=>({mode:S.mode||null,wave:S.wave||0,campaign:!!S.campaign,wmod:S.wmod||null,comp:S.comp?S.comp.cid:null,alt:!!S.alt});
 function loadoutInit(){Ev.on('onCast',sl=>{if(sl==='u')compAct()});Ev.on('onKill',e=>{if(e.boss)S.runBoss=1})}
 function updLoadout(dt){updComp(dt);updInversion(dt)}
 /* reputación: las decisiones existentes la mueven */
@@ -115,7 +129,7 @@ function updLoadout(dt){updComp(dt);updInversion(dt)}
 {const _ds=debtStage;debtStage=function(){const d0=S.debt||0;_ds();const d1=S.debt||0;if(d1<d0)repAdd('guild',3*(d0-d1));if(d1>0)repAdd('guild',-6)}}
 {const _ni=npcInteract;npcInteract=function(o){const g=S.p.gold,r=_ni(o);if(o.k==='merchant'&&S.p.gold<g)repAdd('guild',3);return r}}
 {const _sa=Save.add.bind(Save);Save.add=function(k,n){_sa(k,n);if(S&&S.p&&S.st!=='over'){if(k==='rescues')repAdd('guard',6);if(k==='secretEvents')repAdd('guard',2)}}}
-{const _ab=ab;ab=function(slot){const d=_ab(slot);return slot==='p'&&S&&S.wmod?wmodApply(d,S.wmod):d}}
+{const _ab=ab;ab=function(slot){const d=_ab(slot);if(!S)return d;if(slot==='p'&&S.wmod)return wmodApply(d,S.wmod);if(slot==='s'&&S.alt)return altApply(d,S.ch.fam);return d}}
 {const _ps=progStart;progStart=function(run){_ps(run);loadoutStart(run)}}
 {const _su=Auth.submit.bind(Auth);Auth.submit=function(win){if(S&&S.mode==='inv')return {score:Math.round((S.wave||0)*500+S.kills*10)};return _su(win)}}
 {const _eg=endGame;endGame=function(win,cashout){const first=S&&S.st!=='over';_eg(win,cashout);if(!first)return;
@@ -130,14 +144,16 @@ function buildLoadout(){const box=$('loadout');if(!box)return;const cid=selC,M=m
  const cp=`<div class="diff ${!st.comp?'sel':''}" data-cp="">Sin compañero</div>`+Object.keys(CHARS).filter(k=>k!==cid&&isUnlocked(k)).map(k=>`<div class="diff ${st.comp===k?'sel':''}" data-cp="${k}">${esc(CHARS[k].name)}</div>`).join('');
  const syn=st.comp&&CHARS[st.comp]?SYNERGY[synKey(CHARS[cid].fam,CHARS[st.comp].fam)]:null;
  box.innerHTML=`<div class="mt"><span class="rl">Maestría de ${esc(CHARS[cid].name)} · ${M.pts} punto${M.pts===1?'':'s'}</span>${tree}<button class="sec mini" data-mt="r">↺</button></div>
+  <div class="row"><span class="rl">Secundaria:</span><div class="diff ${!(st.alt&&st.alt[cid])?'sel':''}" data-alt="0">${esc(CHARS[cid].secondary.name)}</div><div class="diff ${st.alt&&st.alt[cid]?'sel':''} ${altOk(cid)?'':'lock'}" data-alt="1" title="${esc(ALT_FAM[CHARS[cid].fam].d)}">${altOk(cid)?'':'🔒 '}${esc(CHARS[cid].secondary.name+' '+ALT_FAM[CHARS[cid].fam].n)}</div></div>
   <div class="row"><span class="rl">Arma:</span>${wm}</div><div class="row"><span class="rl">Compañero:</span>${cp}</div>
   <small class="help">${st.wmod&&WMODS[st.wmod]?'🔧 '+WMODS[st.wmod].d+' · ':''}${syn&&CHARS[st.comp].fam!==CHARS[cid].fam?'✦ Sinergia: '+syn.n+' · ':''}⚖ Guardianes ${R.guard} · Culto ${R.cult} · Gremio ${R.guild}</small>
   <div class="row"><button class="sec" id="goCamp">📜 CAMPAÑA</button><button class="sec" id="goInv">👾 INVERSIÓN</button></div>`}
-if($('loadout')){$('loadout').onclick=e=>{const t=e.target.closest('[data-mt],[data-wm],[data-cp],#goCamp,#goInv');if(!t)return;const st=Save.d.settings;
+if($('loadout')){$('loadout').onclick=e=>{const t=e.target.closest('[data-mt],[data-wm],[data-cp],[data-alt],#goCamp,#goInv');if(!t)return;const st=Save.d.settings;
  if(t.id==='goCamp'){MODE_NEXT='camp';return start(selC,selD)}if(t.id==='goInv'){MODE_NEXT='inv';return start(selC,selD)}
  if(t.dataset.mt!==undefined){t.dataset.mt==='r'?mtReset(selC):mtSpend(selC,+t.dataset.mt)}
  else if(t.dataset.wm!==undefined){const k=t.dataset.wm;if(k&&!wmodOk(selC,k)){Snd.play('hurt');return}st.wmod=k||null}
  else if(t.dataset.cp!==undefined)st.comp=t.dataset.cp||null;
+ else if(t.dataset.alt!==undefined){if(t.dataset.alt==='1'&&!altOk(selC)){Snd.play('hurt');return}(st.alt||(st.alt={}))[selC]=t.dataset.alt==='1'}
  Save.write();buildLoadout();Snd.play('ui')}}
 {const _bm=buildMenu;buildMenu=function(){_bm();buildLoadout()}}
 // Códice: reputación, finales y campaña

@@ -74,6 +74,7 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   - **Reliquias**: en la selección de personaje eliges una reliquia que cambia una regla de la partida. Se desbloquean **explorando**: salas secretas, terminales, rescates, mazmorras, el Cazador y el Heraldo.
 - **Preparación y modos.**
   - **Maestría individual**: 3 ramas por héroe (su elemento, una técnica de su familia y resistencia), con puntos que se ganan jugando.
+  - **Habilidades alternativas**: completar la historia personal de un héroe desbloquea una versión alternativa de su secundaria.
   - **Armas modificables**: cargador ampliado, núcleo sobrecargado, cañón largo o mecanismo rápido para el ataque principal.
   - **Compañero y sinergias**: otro héroe te acompaña, dispara y actúa con tu definitiva; 5 parejas de familias combinan sus poderes.
   - **Reputación**: Guardianes del Equilibrio, Culto de la Tormenta y Gremio Mercante recuerdan tus decisiones.
