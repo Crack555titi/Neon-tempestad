@@ -115,11 +115,11 @@
     </footer>
   </div>
 
-  <div id="inv" class="ov" style="display:none">
-    <h2>INVENTARIO</h2>
+  <div id="inv" class="ov lskin" style="display:none">
+    <div class="invHead"><h2>INVENTARIO</h2><button class="cta" id="invClose">✕ VOLVER AL JUEGO</button></div>
     <div id="invStats"></div>
-    <div id="invList"></div>
-    <small class="help">Tab / I / Esc para volver</small>
+    <div class="invBody"><div id="invList"></div><div id="invDetail"></div></div>
+    <small class="help" id="invHelp">Pasa el ratón o toca un objeto para ver qué hace · Tab / I / Esc para volver</small>
   </div>
 
   <div id="altar" class="ov" style="display:none">
@@ -129,9 +129,9 @@
     <button id="altarNo">Rechazar</button>
   </div>
 
-  <div id="pause" class="ov" style="display:none">
+  <div id="pause" class="ov lskin" style="display:none">
     <h2>PAUSA</h2>
-    <button id="pResume">▶ CONTINUAR</button>
+    <button class="cta" id="pResume">▶ CONTINUAR</button>
     <div class="row"><button class="sec" id="pOpts">⚙ OPCIONES</button><button class="sec" id="pCtrls">🎮 CONTROLES</button></div>
     <button class="sec" id="pQuit">ABANDONAR AL MENÚ</button>
     <small class="help">La partida se guarda al empezar cada etapa: podrás continuarla desde el menú.</small>
@@ -177,12 +177,12 @@
     <div class="row" id="nodes"></div>
   </div>
 
-  <div id="end" class="ov" style="display:none">
+  <div id="end" class="ov lskin" style="display:none">
     <h2 id="endT"></h2>
     <p id="endS"></p>
     <p id="endScore"></p>
     <p id="endExtra" class="help"></p>
-    <div class="row"><button id="retry" style="display:none">↻ REINTENTAR ETAPA</button><button class="sec" id="endRank">🏆 RANKING</button><button id="again">VOLVER AL MENÚ</button></div>
+    <div class="row"><button class="sec" id="retry" style="display:none">↻ REINTENTAR ETAPA</button><button class="sec" id="endRank">RANKING</button><button class="cta" id="again">VOLVER AL MENÚ</button></div>
   </div>
 </div>
 <!-- Scripts clásicos (no módulos) para que funcione abriendo index.html con doble clic. El orden importa. -->

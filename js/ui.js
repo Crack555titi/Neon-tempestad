@@ -98,9 +98,19 @@ function toggleInv(){
  const p=S.p,m=p.m,pct=v=>Math.round(v*100)+'%',ids=sortedItems();
  $('invStats').textContent=`${elemName(CHAR_EL[S.cid])} · Daño ×${(p.dmgMul*m.dmg*bm('dmg')).toFixed(2)} · Vel. ataque ×${(m.as*bm('as')).toFixed(2)} · Crítico ${pct(p.items.blacklens?1:m.crit)} · Robo de vida ${pct(m.ls)} · Armadura ${pct(Math.min(capL(.6),m.arm))} · Enfriamientos −${pct(Math.min(capL(.6),m.cdr))} · Suerte ${p.items.entropy?0:m.luck} · Oro ${p.gold}`;
  $('invStats').textContent+=legacyText();
- $('invList').innerHTML=ids.length?ids.map(id=>itemCard(ITEM[id],p.items[id])).join(''):'<p>Aún no tienes objetos. Abre cofres con <b>E</b>.</p>';
+ // estadísticas como fichas cortas; objetos como iconos: al pasar el ratón o tocarlos se ve qué hacen
+ $('invStats').innerHTML=$('invStats').textContent.split(' · ').filter(Boolean).map(t=>`<span>${esc(t)}</span>`).join('');
+ $('invList').innerHTML=ids.length?ids.map(id=>{const it=ITEM[id],n=p.items[id];
+  return `<button class="itile" data-id="${id}" style="--c:${RARITY[it.r].col}" title="${esc(it.name)}" aria-label="${esc(it.name)}"><span class="ico" style="background:${it.col}">${glyphSvg(it,'#0b0618')}</span>${n>1?`<em>×${n}</em>`:''}</button>`}).join('')
+  :'<p class="help">Aún no tienes objetos. Abre cofres con <b>E</b>.</p>';
+ invShow(ids[0]);
  $('inv').style.display='flex';S.st='inv';
 }
+function invShow(id){const d=$('invDetail');if(!id){d.innerHTML='';return}const it=ITEM[id];if(!it)return;
+ d.innerHTML=itemCard(it,S.p.items[id]);d.style.setProperty('--c',RARITY[it.r].col);
+ if($('invList').querySelectorAll)$('invList').querySelectorAll('.itile').forEach(b=>b.classList.toggle('sel',b.dataset.id===id))}
+$('invList').onmouseover=$('invList').onclick=e=>{const b=e.target.closest&&e.target.closest('.itile');if(b)invShow(b.dataset.id)};
+$('invClose').onclick=()=>{if(S&&S.st==='inv')toggleInv()};
 function openAltar(o){
  S.st='altar';const opts=FRAGMENTS.slice().sort(()=>Math.random()-.5).slice(0,ALTAR.choices);
  $('altarOpts').innerHTML=opts.map((it,i)=>`<div class="pick" data-i="${i}">${itemCard(it,(S.p.items[it.id]||0)+1)}</div>`).join('');

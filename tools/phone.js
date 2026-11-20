@@ -54,7 +54,14 @@ const PHONES=[{n:'20x9',w:800,h:360,dpr:3},{n:'16x9',w:640,h:360,dpr:2},{n:'tabl
   const [jx,jy]=mid(btn('jump'));await touch('touchStart',[[120,ph.h-90,0]]);await touch('touchMove',[[180,ph.h-90,0]]);await touch('touchStart',[[180,ph.h-90,0],[jx,jy,1]]);await sleep(200);
   check(await js('!S.p.ground||S.p.vy<0'),ph.n+': el salto multitáctil no funcionó');await touch('touchEnd',[]);
   await sleep(900);await shot(`m-${ph.n}-3-combate`);
+  // inventario: se abre con el botón táctil, tocar un objeto muestra qué hace y hay un botón para volver al juego
+  await js("for(const id of ['sharp','lens','coil','tesla','ankh'])giveItem(id,1)");const rc=async sel=>js(`(()=>{const r=document.querySelector('${sel}').getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2]})()`);
+  let [ix,iy]=await rc('#touch [data-a="inventory"]');await touch('touchStart',[[ix,iy]]);await touch('touchEnd',[]);await sleep(300);check(await js("S.st==='inv'"),ph.n+': el botón no abrió el inventario');
+  [ix,iy]=await rc('#invList .itile:nth-child(3)');await touch('touchStart',[[ix,iy]]);await touch('touchEnd',[]);await sleep(200);
+  check(await js("document.querySelector('#invList .itile:nth-child(3)').classList.contains('sel')&&$('invDetail').textContent.length>10"),ph.n+': tocar un objeto no mostró qué hace');
+  await shot(`m-${ph.n}-4-inventario`);[ix,iy]=await rc('#invClose');await touch('touchStart',[[ix,iy]]);await touch('touchEnd',[]);await sleep(200);
+  check(await js("S.st==='play'"),ph.n+': no se pudo salir del inventario en el teléfono');
  }
  check(!errors.length,'errores de consola:\n'+errors.join('\n'));
- console.log(fails?`${fails} fallos`:'Teléfono: joystick, ataque apuntado, definitiva al soltar, enfriamientos, multitáctil y botones dentro de pantalla: OK');
+ console.log(fails?`${fails} fallos`:'Teléfono: joystick, ataque apuntado, definitiva al soltar, enfriamientos, multitáctil, inventario táctil y botones dentro de pantalla: OK');
  ws.close();br.kill();process.exit(fails?1:0)})();
