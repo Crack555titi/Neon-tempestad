@@ -1,9 +1,9 @@
 {
-  "latest": "1.4.1",
-  "min": "1.4.1",
-  "notes": "Neón Tempestad 2.0 (parte 2): controles táctiles nuevos estilo arena y pantalla completa en Android; la Tempestad viva (personalidad, deuda, corrupción y tu Sombra, núcleos y tormentas personales); ecos de partidas anteriores, recuerdos de jefes, eventos secretos y desafíos personales; fracturas temporales, clima, el mapa que aprende y objetos que hablan; maestría por personaje, habilidades alternativas, armas modificables, compañero con sinergias, reputación con facciones y 6 finales; modos Campaña e Inversión; rutas alternativas, bioma oculto y plataformas de transporte.",
+  "latest": "1.4.2",
+  "min": "1.4.2",
+  "notes": "Nuevo lobby antes de la partida (escena del taller bajo la tormenta, pestañas y un solo botón ENTRAR). Tienda, Códice, Ranking, Opciones, Controles, Pausa, Fin de partida, Cuenta y las elecciones en partida con el mismo estilo. Inventario con iconos y ficha al pasar el ratón o tocar, y botón para volver al juego en el teléfono. Cada objeto tiene su propio icono y al abrir un cofre se ve el objeto que sale con un haz de su rareza y su nombre.",
   "url": "https://github.com/Crack555titi/Neon-tempestad/releases/latest",
-  "exe": "NeonTempestad-Setup-1.4.1.exe",
-  "apk": "NeonTempestad-1.4.1.apk",
-  "sha256": "3fdceb4d1ab6a686002abb324064a7c619760d5e4b96c0b1a302b2825f45caf9"
+  "exe": "NeonTempestad-Setup-1.4.2.exe",
+  "apk": "NeonTempestad-1.4.2.apk",
+  "sha256": "fdd4bdc72b311cd1532065bbd4687c3fea38cabd52cf3b7a6ff03bb085ed43bc"
 }

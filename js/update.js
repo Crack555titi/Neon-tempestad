@@ -7,7 +7,7 @@
    Si se descubre en mitad de una partida, el bloqueo espera a que esta termine (nunca se pierde una run).
    shortcut: sin conexión (o si GitHub no responde) se deja jugar; bloquear sin red dejaría el juego inutilizable offline.
    Publicar una versión nueva: `npm run release -- 1.3.0 "notas"` (versión, instalables, release y main, en ese orden). */
-const APP_VERSION='1.4.1';  // la mantiene en sincronía con package.json tools/bump.js
+const APP_VERSION='1.4.2';  // la mantiene en sincronía con package.json tools/bump.js
 const UPDATE_URL='https://raw.githubusercontent.com/Crack555titi/Neon-tempestad/main/version.json';
 const RELEASES_URL='https://github.com/Crack555titi/Neon-tempestad/releases/latest';
 
