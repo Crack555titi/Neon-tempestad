@@ -52,7 +52,8 @@ function hud(){
  if(s.ch.passive&&s.ch.passive.t==='corrupt'){gbar(276,by+13,60,5,p.corr/100,'#5a10a0','#d070ff',!!p.buf.void);c.font='8px monospace';c.fillStyle='#d070ff';c.fillText(p.buf.void?'VACÍO':'CORRUP.',276,by+29)}
  if(s.ch.primary.forms){c.font='bold 9px monospace';c.fillStyle=p.form==='b'?'#2aff1a':'#7dff6a';c.fillText(p.form==='b'?'BESTIA':'ESPINAS',276,by+22)}
  // ---- habilidades con enfriamiento radial ----
- SLOTS.split('').forEach((k,i)=>{const d=ab(k),x=W/2-74+i*38,y=H-37,cd=p.cd[k],mx=maxCd(k,d),ready=cd<=0;
+ if(!touchOn())SLOTS.split('').forEach((k,i)=>{  // en táctil los enfriamientos se ven en los propios botones
+const d=ab(k),x=W/2-74+i*38,y=H-37,cd=p.cd[k],mx=maxCd(k,d),ready=cd<=0;
   panel(x,y,33,33,ready?col:'#444',.85);
   drawGlyph(c,d,x+7.5,y+7.5,18,ready?col:'#666');c.textAlign='center';
   if(!ready){c.save();c.beginPath();c.moveTo(x+16.5,y+16.5);c.arc(x+16.5,y+16.5,15,-Math.PI/2,-Math.PI/2+6.283*clamp(cd/mx,0,1));c.closePath();c.fillStyle='rgba(0,0,0,.6)';c.fill();c.restore();

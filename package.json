@@ -12,6 +12,7 @@
     "dist": "node tools/build-exe.js",
     "test": "node tools/smoke.js",
     "test:browser": "node tools/browser.js",
+    "test:phone": "node tools/phone.js",
     "www": "node tools/build-www.js",
     "android": "node tools/build-www.js && npx cap sync android && node tools/android-setup.js",
     "android:open": "npx cap open android",

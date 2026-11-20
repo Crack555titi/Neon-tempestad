@@ -327,7 +327,7 @@ function draw(){
  c.shadowBlur=0;
  drawLoot();
  for(const e of s.en)drawEnemy(e);
- drawStormWorld();drawElements();drawCombatWorld();drawEco();drawAdaptive();
+ drawStormWorld();drawElements();drawCombatWorld();drawTouchAim();drawEco();drawAdaptive();
  for(const m of s.dr)MIN[m.k].draw(m);c.shadowBlur=0;
  drawPlayer(s.p);
  for(const id in s.p.buf){const b=s.p.buf[id];if(b.draw)b.draw(b)}

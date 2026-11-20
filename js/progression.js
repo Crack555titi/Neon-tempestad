@@ -63,7 +63,7 @@ function updProg(){if(S.st==='play'&&S.pick&&S.pick.length&&!S.mq)openPick(S.pic
 let pickOpts=[];
 function openPick(kind){const p=S.p;S.st='choice';mouse.l=mouse.r=0;
  if(kind==='evo'){const cands=[];for(const sl of 'psmu'){const d=S.ch[SLOT[sl]],base=d.forms?d.forms.a:d;for(const M of EVO_MODS)if(M.ok(base))cands.push({sl,M,ab:base})}
-  pickOpts=cands.sort(()=>Math.random()-.5).slice(0,3).map(c=>({kind,sl:c.sl,id:c.M.id,title:`${c.ab.name} (${SLOT_KEY[c.sl]})`,sub:`${c.M.name}: ${c.M.desc}`,col:'#3cf0ff'}));
+  pickOpts=cands.sort(()=>Math.random()-.5).slice(0,3).map(c=>({kind,sl:c.sl,id:c.M.id,title:`${c.ab.name} (${(touchOn()?TOUCH_KEY:SLOT_KEY)[c.sl]})`,sub:`${c.M.name}: ${c.M.desc}`,col:'#3cf0ff'}));
   $('choiceT').textContent='⬆ EVOLUCIÓN DE HABILIDAD'}
  else{const free=Object.keys(MUTATIONS).filter(k=>!p.muts.includes(k)).sort(()=>Math.random()-.5).slice(0,3);
   pickOpts=free.map(k=>({kind,id:k,title:MUTATIONS[k].name,sub:`✚ ${MUTATIONS[k].good}<br>✖ ${MUTATIONS[k].bad}`,col:'#9b30ff'}));$('choiceT').textContent='☣ MUTACIÓN'}

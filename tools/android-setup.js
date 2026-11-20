@@ -20,3 +20,27 @@ fs.cpSync(path.join(root,'build','android','res'),path.join(main,'res'),{recursi
 const bg=path.join(main,'res','values','ic_launcher_background.xml');  // fondo de la capa trasera del icono adaptativo
 fs.writeFileSync(bg,'<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#05030D</color>\n</resources>\n');
 console.log('Iconos y pantalla de carga copiados');
+// pantalla completa inmersiva (sin barras de estado ni de navegación, también bajo el notch),
+// pantalla siempre encendida y aceleración por GPU: el juego usa todo el teléfono y no se apaga mientras juegas
+const act=path.join(main,'java','com','neontempestad','juego','MainActivity.java');
+fs.writeFileSync(act,`package com.neontempestad.juego;
+
+import android.os.Build;
+import android.os.Bundle;
+import android.view.WindowManager;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {
+  @Override public void onCreate(Bundle b){super.onCreate(b);getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    if(Build.VERSION.SDK_INT>=28)getWindow().getAttributes().layoutInDisplayCutoutMode=WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;immersive();}
+  @Override public void onWindowFocusChanged(boolean f){super.onWindowFocusChanged(f);if(f)immersive();}
+  private void immersive(){WindowCompat.setDecorFitsSystemWindows(getWindow(),false);
+    WindowInsetsControllerCompat c=WindowCompat.getInsetsController(getWindow(),getWindow().getDecorView());
+    c.hide(WindowInsetsCompat.Type.systemBars());c.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);}
+}
+`);
+let ms=fs.readFileSync(f,'utf8');if(!/hardwareAccelerated/.test(ms))ms=ms.replace(/<application\b/,'<application android:hardwareAccelerated="true"');fs.writeFileSync(f,ms);
+console.log('Pantalla completa inmersiva y pantalla siempre encendida');
