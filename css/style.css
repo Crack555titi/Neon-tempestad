@@ -467,3 +467,34 @@ body.touchmode #menu .lside #who{display:none}
 @media (max-height:420px){#inv.lskin{gap:5px;padding:6px 10px}#invStats span{font-size:10px;padding:1px 5px}#inv.lskin #invList{grid-template-columns:repeat(auto-fill,minmax(40px,1fr))}#invHelp{display:none}}
 #invDetail .item,#invDetail .item div{text-align:left}
 #pause.lskin,#inv.lskin{background:var(--grain),rgba(14,16,21,.84)}
+
+/* ===== Cuenta y elecciones en partida con el estilo del lobby ===== */
+.lskin h2{text-align:center;border-bottom:0;width:auto}
+#rank.lskin h2,#opts.lskin h2,#ctrls.lskin h2{text-align:left;border-bottom:1px solid var(--edge);width:min(760px,100%)}
+.lskin .card{background:var(--grain),var(--plate);border:1px solid var(--edge);border-top:3px solid color-mix(in srgb,var(--c,#888) 60%,#777);border-radius:0;box-shadow:6px 6px 0 rgba(0,0,0,.35);text-align:left;padding:12px 14px}
+.lskin .card b{color:var(--bone);text-shadow:none;font-size:16px;font-weight:700;letter-spacing:.02em}
+.lskin .card i{color:var(--dim)}
+.lskin .card small{color:#bdb4a5;font-size:12px}
+.lskin .card:hover,.lskin .card.sel{box-shadow:6px 6px 0 rgba(0,0,0,.35);border-color:var(--edge);border-top-color:color-mix(in srgb,var(--c,#888) 60%,#777)}
+.lskin .card:hover{background:var(--grain),var(--plate2);outline:1px solid var(--bone);transform:translateY(-2px)}
+.lskin .stormT{color:var(--dim);text-shadow:none}
+.lskin h2 small{color:var(--dim);font-family:var(--mono);font-size:12px}
+#choice.lskin,#storm.lskin,#mastery.lskin,#altar.lskin{background:var(--grain),rgba(14,16,21,.86)}
+.lskin .item{background:var(--grain),var(--plate);border:1px solid var(--edge);border-top:3px solid var(--c);border-radius:0;text-align:left}
+.lskin .item .ico{border:1px solid #0008;border-radius:0}
+.lskin .item b{color:var(--bone)}.lskin .item em{color:var(--c);font-family:var(--mono)}.lskin .item small{color:#bdb4a5}.lskin .item i{color:var(--copper);font-style:normal}
+#altarOpts .pick:hover{filter:none;outline:1px solid var(--bone)}
+/* cuenta */
+#login.lskin{background:var(--grain),rgba(14,16,21,.9);gap:14px}
+#login .lmark{font-size:clamp(14px,2vw,20px);letter-spacing:.28em;color:var(--dim)}
+#login .lmark b{color:var(--bone)}
+.lskin .lbox{background:var(--grain),rgba(21,24,32,.94);border:1px solid var(--edge);border-top:3px solid var(--copper);border-radius:0;box-shadow:6px 6px 0 rgba(0,0,0,.4)}
+.lskin .lbox h2{color:var(--dim);text-shadow:none;font-size:13px;letter-spacing:.24em;text-align:left;font-weight:600}
+.lskin .lbox input{background:var(--plate);border:1px solid var(--edge);border-radius:0;color:var(--bone);font-family:var(--cond);font-size:15px}
+.lskin .lbox input:focus{border-color:var(--copper);box-shadow:none}
+.lskin .lbox .row{flex-wrap:nowrap}
+.lskin .lbox .cta{font-size:16px;padding:10px 12px}
+.lskin #lErr{color:#e07a5f;font-size:13px;min-height:1em}
+.lskin #lGuest{color:var(--bone);font-size:13px}
+.lskin #altarNo{background:var(--plate);border:1px solid var(--edge);border-left:3px solid var(--copper);box-shadow:none;color:var(--bone)}
+.lskin .card b{margin-bottom:4px}

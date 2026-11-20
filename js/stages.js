@@ -94,7 +94,7 @@ function drawFog(cam,t){if(!QL.post)return;c.save();c.setTransform(K,0,0,K,0,0);
 const MENU={t:0,i:-1};
 function drawMenuBg(dt){MENU.t+=dt;const i=Math.floor(MENU.t/12)%STAGES.length,ph=MENU.t%12;
  if(i!==MENU.i){MENU.i=i;STAGE=STAGES[i];PLAT=STAGE.plats.map(q=>Object.assign({},q,{rx:q.x,ry:q.y,on:q.ph[0]===1}));genBg(STAGE,i*7919+13)}
- if(typeof drawLobby==='function'&&['menu','rank','opts','ctrls'].some(id=>$(id).style.display!=='none')){drawLobby(dt);return}  // lobby: el héroe en escena (lobby.js)
+ if(typeof drawLobby==='function'&&['menu','rank','opts','ctrls','login'].some(id=>$(id).style.display!=='none')){drawLobby(dt);return}  // lobby: el héroe en escena (lobby.js)
  updAmb(dt);screen();drawBg(MENU.t*45,0,MENU.t);
  c.save();c.translate(-((MENU.t*45)%(WORLD-W)),0);for(const q of PLAT)if(q.on){c.fillStyle=q.solid?STAGE.plat.floor:STAGE.plat.fill;c.globalAlpha=.6;c.fillRect(q.rx,q.ry,q.w,q.h)}c.restore();c.globalAlpha=1;
  drawFog(MENU.t*45,MENU.t);bloom();vignette(0);

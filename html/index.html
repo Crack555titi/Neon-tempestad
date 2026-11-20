@@ -10,14 +10,14 @@
 <div id="wrap">
   <canvas id="game" width="960" height="540"></canvas>
 
-  <div id="login" class="ov" style="display:none">
-    <h1>NEÓN <span>TEMPESTAD</span></h1>
+  <div id="login" class="ov lskin" style="display:none">
+    <div class="lmark">NEÓN <b>TEMPESTAD</b></div>
     <form id="lForm" class="lbox" autocomplete="on">
       <h2>CUENTA</h2>
       <input id="lUser" name="username" placeholder="Usuario" maxlength="16" autocomplete="username" required>
       <input id="lPass" name="password" type="password" placeholder="Contraseña (mín. 6)" autocomplete="current-password" required>
       <div id="lErr" role="alert"></div>
-      <div class="row"><button type="submit" id="lIn">ENTRAR</button><button type="button" class="sec" id="lReg">CREAR CUENTA</button></div>
+      <div class="row"><button type="submit" class="cta" id="lIn">ENTRAR</button><button type="button" class="sec" id="lReg">CREAR CUENTA</button></div>
       <a href="#" id="lGuest">Jugar como invitado (sin clasificación)</a>
       <small class="help">Tu cuenta sirve en cualquier dispositivo. Para entrar o crearla necesitas conexión.</small>
     </form>
@@ -122,11 +122,11 @@
     <small class="help" id="invHelp">Pasa el ratón o toca un objeto para ver qué hace · Tab / I / Esc para volver</small>
   </div>
 
-  <div id="altar" class="ov" style="display:none">
-    <h2 style="color:#5ab4ff;text-shadow:0 0 14px #5ab4ff">ALTAR FRAGMENTADO</h2>
+  <div id="altar" class="ov lskin" style="display:none">
+    <h2>ALTAR FRAGMENTADO</h2>
     <p class="help">Sacrifica un 30% de tu vida actual por un objeto fragmentado. Su coste es permanente.</p>
     <div class="row" id="altarOpts"></div>
-    <button id="altarNo">Rechazar</button>
+    <button class="lback" id="altarNo">Rechazar</button>
   </div>
 
   <div id="pause" class="ov lskin" style="display:none">
@@ -161,18 +161,18 @@
 
   <div id="rotate">↻ Gira el dispositivo para jugar en horizontal</div>
 
-  <div id="choice" class="ov" style="display:none">
+  <div id="choice" class="ov lskin" style="display:none">
     <h2 id="choiceT"></h2>
     <div class="row" id="choiceOpts"></div>
   </div>
 
-  <div id="storm" class="ov" style="display:none">
-    <h2 class="stormT">⚡ LA TEMPESTAD TE OFRECE UN TRATO</h2>
+  <div id="storm" class="ov lskin" style="display:none">
+    <h2 class="stormT">LA TEMPESTAD TE OFRECE UN TRATO</h2>
     <p class="help">La dimensión se resquebraja. Elige qué hacer con su energía.</p>
     <div class="row" id="stormOpts"></div>
   </div>
 
-  <div id="mastery" class="ov" style="display:none">
+  <div id="mastery" class="ov lskin" style="display:none">
     <h2>NODO DE MAESTRÍA <small id="mq"></small></h2>
     <div class="row" id="nodes"></div>
   </div>
