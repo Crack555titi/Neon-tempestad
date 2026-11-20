@@ -72,6 +72,16 @@ Elige uno de 20 personajes y cruza 5 escenarios. En cada uno buscas el teletrans
   - **Evolución de habilidades**: cada 4 niveles eliges una mejora real para una habilidad concreta (daño, enfriamiento, área, proyectiles, duración o velocidad).
   - **Mutaciones**: cada 7 niveles una mutación con ventaja y coste que dura toda la run (Piel de Vidrio, Sangre Volátil, Coraza Quitinosa…).
   - **Reliquias**: en la selección de personaje eliges una reliquia que cambia una regla de la partida. Se desbloquean **explorando**: salas secretas, terminales, rescates, mazmorras, el Cazador y el Heraldo.
+- **Preparación y modos.**
+  - **Maestría individual**: 3 ramas por héroe (su elemento, una técnica de su familia y resistencia), con puntos que se ganan jugando.
+  - **Armas modificables**: cargador ampliado, núcleo sobrecargado, cañón largo o mecanismo rápido para el ataque principal.
+  - **Compañero y sinergias**: otro héroe te acompaña, dispara y actúa con tu definitiva; 5 parejas de familias combinan sus poderes.
+  - **Reputación**: Guardianes del Equilibrio, Culto de la Tormenta y Gremio Mercante recuerdan tus decisiones.
+  - **Finales alternativos**: 6 finales según tus decisiones, secretos y jefes derrotados.
+  - **Campaña**: modo narrativo de 5 capítulos que lleva al origen de la Tempestad.
+  - **Inversión**: eres la Criatura y sobrevives a 10 oleadas de héroes.
+  - **Rutas**: al cruzar el teletransportador eliges ruta segura o peligrosa; tras descubrir un secreto aparece el bioma oculto Jardín del Vacío.
+  - **Transporte**: plataformas enlazadas en extremos opuestos del mapa.
 - **Mundo vivo.**
   - **Fracturas temporales**: la etapa salta 40 s a otra época (Ruinas Antiguas, Ciudad del Mañana, Dimensión Colapsada) con otros colores y reglas.
   - **Clima**: lluvia, nevada, viento o cenizas, que cambian el daño elemental, el movimiento, la curación o el oro.
@@ -260,6 +270,8 @@ Para borrar una puntuación (trampas, pruebas…) entra en la consola de Firebas
 | `js/bossplus.js` | Consecuencias de jefes, jefe secreto (Heraldo del Vacío) y jefes fusionados |
 | `js/explore.js` | Gravedad por zonas, salas secretas, terminales y Códice, mecanismos, rescates y mazmorras |
 | `js/progression.js` | Evolución de habilidades, mutaciones, reliquias y desbloqueos por descubrimiento |
+| `js/routes.js` | Rutas alternativas, bioma oculto y plataformas de transporte |
+| `js/loadout.js` | Maestría individual, armas, compañero y sinergias, reputación, finales, campaña e inversión |
 | `js/world.js` | Fracturas temporales, clima, mapa que aprende y objetos que se comunican |
 | `js/lore.js` | Ecos de partidas anteriores, recuerdos de jefes, eventos secretos y desafíos personales |
 | `js/tempest.js` | Personalidad de la Tempestad, deuda, corrupción, Sombra Corrupta y núcleos |

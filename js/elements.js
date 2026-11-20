@@ -15,7 +15,7 @@ const EL_RAYO={proc:1,el:'rayo'},EL_RAYO_RAW={proc:1,raw:1,el:'rayo'};  // opcio
 const ENEMY_EL={crawler:{weak:'fuego',res:'corrupcion'},wisp:{weak:'vacio',res:'fuego'},brute:{weak:'rayo',res:'fuego'},spitter:{weak:'fuego',res:'corrupcion'},
  sniper:{weak:'vacio',res:'rayo'},kamikaze:{weak:'corrupcion',res:'rayo'},bomber:{weak:'rayo',res:'vacio'},tank:{weak:'rayo',res:'fuego'},
  leaper:{weak:'corrupcion',res:'vacio'},swarm:{weak:'fuego',res:'rayo'},turret:{weak:'rayo',res:'fuego'},splitter:{weak:'fuego',res:'corrupcion'},
- splitlet:{weak:'fuego',res:'corrupcion'},shaman:{weak:'vacio',res:'corrupcion'},phantom:{weak:'fuego',res:'vacio'},golem:{weak:'corrupcion',res:'fuego'},hunter:{weak:'plasma',res:'vacio'},mimic:{weak:'corrupcion',res:'rayo'},crackwall:{weak:'rayo',res:'corrupcion'},shade:{weak:'fuego',res:'corrupcion'}};
+ splitlet:{weak:'fuego',res:'corrupcion'},shaman:{weak:'vacio',res:'corrupcion'},phantom:{weak:'fuego',res:'vacio'},golem:{weak:'corrupcion',res:'fuego'},hunter:{weak:'plasma',res:'vacio'},mimic:{weak:'corrupcion',res:'rayo'},crackwall:{weak:'rayo',res:'corrupcion'},shade:{weak:'fuego',res:'corrupcion'},h_blade:{weak:'hielo',res:'fuego'},h_gun:{weak:'rayo',res:'plasma'},h_mage:{weak:'vacio',res:'rayo'}};
 const BOSS_EL={prisma:{weak:'vacio',res:'rayo'},hydra:{weak:'corrupcion',res:'rayo'},queen:{weak:'fuego',res:'vacio'},leviathan:{weak:'rayo',res:'vacio'},archon:{weak:'vacio',res:'fuego'},herald:{weak:'fuego',res:'vacio'}};
 const elemOf=e=>e.boss?BOSS_EL[e.bid]:ENEMY_EL[e.type];
 

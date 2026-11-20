@@ -17,7 +17,7 @@ function loadStage(i){
  s.ints=[];const t=st.tp[Math.random()*st.tp.length|0];s.tp={x:t.x,y:t.y,state:'idle',charge:0};s.ints.push({k:'tp',x:t.x,y:t.y,open:0});
  for(let k=0;k<5+2*s.loop;k++)spawnChest();spawnAltar();s.chestT=40;s.altarT=150;s.spawn=3;
  p.x=t.x<WORLD/2?WORLD-250:250;p.y=60;p.vy=0;p.dash=null;p.hp=p.maxHp;  // empiezas lejos del teletransportador
- genBg(st,i*7919+13);s.fade=1;stormStage();hunterStage();npcStage();legacyStage();exploreStage();progStage();tempestStage();loreStage();worldStage();
+ genBg(st,i*7919+13);s.fade=1;stormStage();hunterStage();npcStage();legacyStage();exploreStage();progStage();tempestStage();loreStage();worldStage();routesStage();loadoutStage();
  say(`${s.loop?`Loop ${s.loop+1} · `:''}Etapa ${i+1}/${STAGES.length}: ${st.name} · encuentra el teletransportador`);
 }
 /* ===================== MODO INFINITO =====================

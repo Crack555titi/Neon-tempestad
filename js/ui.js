@@ -34,7 +34,7 @@ function hud(){
   gbar(x0+12,28,bw-24,12,b.hp/b.maxHp,'#ff3c6a',b.def.color,b.stun>0);gbar(x0+12,43,bw-24,5,b.stun>0?b.stun/3.2:b.stag/b.stagMax,'#ffd23c','#fff',b.stun>0)});ty=72}
  else{c.textAlign='center';c.font='bold 12px monospace';c.fillStyle=STAGE.plat.edge;c.fillText(`${s.loop?`LOOP ${s.loop+1} · `:''}ETAPA ${s.stage+1}/${STAGES.length} · ${STAGE.name.toUpperCase()}`,W/2,ty);ty=38}
  const T=s.tp;c.font='bold 12px monospace';
- const tl=T.state==='idle'?'Encuentra el teletransportador (E)':T.state==='ready'?'¡Teletransportador listo! (E)':`Teletransportador ${Math.floor(T.charge*100)}%${T.out?' · ¡vuelve a la zona!':''}${s.boss?' · derrota al jefe':''}`;
+ const tl=s.mode==='inv'?`Sobrevive a los héroes · oleada ${s.wave||0}/${INV_WAVES}`:T.state==='idle'?'Encuentra el teletransportador (E)':T.state==='ready'?'¡Teletransportador listo! (E)':`Teletransportador ${Math.floor(T.charge*100)}%${T.out?' · ¡vuelve a la zona!':''}${s.boss?' · derrota al jefe':''}`;
  c.fillStyle=T.state==='ready'?'#4cff7a':T.out?'#ff6a6a':'#ffd23c';c.fillText(tl,W/2,ty);
  if(T.state==='charging')gbar(W/2-120,ty+4,240,5,T.charge,'#ffb13c','#ffd23c');
  const tx=T.x-s.cam;if(tx<0||tx>W){const ex=tx<0?18:W-18,ey=clamp(T.y-40,90,H-110),d=tx<0?-1:1;glow('#3cf0ff',10);c.fillStyle=T.state==='ready'?'#4cff7a':'#3cf0ff';

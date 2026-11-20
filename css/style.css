@@ -227,3 +227,13 @@ h1.big span{animation:flick 6s steps(1) infinite}
 #choiceOpts .card{max-width:250px}
 
 #codexList .cxh{grid-column:1/-1;margin:14px 0 2px;color:#ffd23c;font-size:14px;letter-spacing:2px}
+
+/* preparación: árbol de maestría, arma y compañero */
+#loadout{display:flex;flex-direction:column;gap:6px;align-items:center;width:100%}
+#loadout .mt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center}
+#loadout .mtb{display:flex;flex-direction:column;align-items:center;padding:4px 10px;border:1px solid #3a2a6a;border-radius:8px;background:#120a26;min-width:140px}
+#loadout .mtb b{font-size:12px;color:#ffd23c}#loadout .mtb small{font-size:10px;color:#9a93c8}#loadout .mtb span{color:#3cf0ff;letter-spacing:2px}
+#loadout .mini{padding:2px 10px;font-size:12px;min-width:0}
+.card.story{width:min(560px,90vw);max-width:none;text-align:left}
+#loadout .mt .rl{width:100%;text-align:center;font-size:13px}.card.story small{font-size:14px;line-height:1.5;color:#e8e4ff;display:block;margin-bottom:10px}
+#endExtra{max-width:640px;text-align:center}

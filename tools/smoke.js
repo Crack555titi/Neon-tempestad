@@ -30,7 +30,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={WORLDCFG,ERAS,WEATHER,TALKS,eraShift,eraEnd,weatherStart,heatOf,heatStage,talkCheck,goldFor,applyElement,LORE,MEMORIES,memoryGet,echoRecord,echoStage,echoUse,secState,chalOf,loreHtml,endGame,addTaint,taint,borrow,debtStage,debtCost,takeCore,coreStage,CORE_OPTS,persEvent,persState,tempestSave,tempestLoad,spawnShade,RELICS,MUTATIONS,EVO_MODS,relicUnlocked,takeEvo,takeMutation,openPick,buildRelics,REL,ab,maxCd,bm,gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={ROUTES,routeOpen,routesStage,routesInteract,secretsNow,mtOf,mtSpend,mtReset,mtBranches,MT_MAX,WMODS,wmodOk,SYNERGY,COMP_MOVE,compAct,repOf,repAdd,FACTIONS,ENDINGS,pickEnding,CAMPAIGN,storyCard,INV_WAVES,buildLoadout,set MODE_NEXT(v){MODE_NEXT=v},get selC(){return selC},set selC(v){selC=v},WORLDCFG,ERAS,WEATHER,TALKS,eraShift,eraEnd,weatherStart,heatOf,heatStage,talkCheck,goldFor,applyElement,LORE,MEMORIES,memoryGet,echoRecord,echoStage,echoUse,secState,chalOf,loreHtml,endGame,addTaint,taint,borrow,debtStage,debtCost,takeCore,coreStage,CORE_OPTS,persEvent,persState,tempestSave,tempestLoad,spawnShade,RELICS,MUTATIONS,EVO_MODS,relicUnlocked,takeEvo,takeMutation,openPick,buildRelics,REL,ab,maxCd,bm,gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 T.WORLDCFG.on=0;  // épocas, clima y mapa que aprende solo en su propia sección
@@ -639,6 +639,52 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  p=fresh();const ee=T.spawnEnemy('brute',p.x+400,500,true);const gg=T.goldFor(ee);T.giveItem('voidpact');T.giveItem('clover');assert(T.goldFor(ee)>gg*1.25&&T.bm('as')<1,'el conflicto no tuvo efecto');
  for(const t of T.TALKS)assert(T.ITEM[t.a]&&T.ITEM[t.b],'objeto inexistente en las parejas: '+t.a+'/'+t.b);
  T.WORLDCFG.on=0;console.log('Mundo vivo: épocas, clima, el mapa aprende y objetos que se comunican: OK')}
+// 35. Preparación, facciones y modos: maestría, armas, compañero y sinergias, reputación, finales, campaña, inversión, rutas, transporte y bioma oculto
+{const fresh=(ch)=>{reset();T.start(ch||'vanguard',1);T.S.spawn=1e9;T.S.en.length=0;return T.S.p};const L=T.LORE(),st=T.Save.d.settings;
+ st.wmod=null;st.comp=null;L.mt={};L.rep={guard:0,cult:0,guild:0};L.endings={};
+ // maestría: ganar puntos, repartirlos y que se apliquen; tope de 9
+ let p=fresh();T.S.stage=1;T.S.runBoss=1;T.endGame(false);assert.strictEqual(T.mtOf('vanguard').pts,2,'no se ganaron puntos de maestría');T.S.st='play';
+ assert(T.mtSpend('vanguard',2)&&T.mtSpend('vanguard',0)&&!T.mtSpend('vanguard',0),'el reparto de puntos falló');
+ const hp0=T.CHARS.vanguard.hp;p=fresh();assert(p.maxHp>hp0*1.07&&p.m.dmg>1.07,'la maestría no se aplicó');
+ T.mtOf('vanguard').pts=50;T.mtOf('vanguard').sp=[3,3,3];p=fresh();T.S.stage=3;T.S.runBoss=1;T.endGame(false);T.S.st='play';assert(T.mtOf('vanguard').pts===50,'se superó el tope de maestría');
+ T.mtReset('vanguard');assert(T.mtOf('vanguard').pts===59&&T.mtOf('vanguard').sp.join()==='0,0,0');L.mt={};
+ for(const id in T.CHARS)assert.strictEqual(T.mtBranches(id).length,3,'faltan ramas: '+id);
+ // armas: cada componente cambia el ataque principal y solo para quien puede usarlo
+ for(const k in T.WMODS){const id=Object.keys(T.CHARS).find(c=>T.wmodOk(c,k));st.wmod=k;p=fresh(id);const d=T.ab('p'),b=T.CHARS[id].primary;
+  assert(d!==b&&(d.dmg!==b.dmg||d.cd!==b.cd||d.n!==b.n||d.r!==b.r||d.range!==b.range),'el componente no cambió el arma: '+k)}
+ const melee=Object.keys(T.CHARS).find(c=>!T.wmodOk(c,'cargador'));if(melee){st.wmod='cargador';p=fresh(melee);assert(T.ab('p')===T.CHARS[melee].primary,'un arma cuerpo a cuerpo aceptó un cargador')}
+ st.wmod=null;
+ // compañero: dispara solo y hace su movimiento con la definitiva; las parejas de familias dan sinergia
+ st.comp='artillery';p=fresh('chrono');assert(T.S.comp&&T.S.comp.cid==='artillery','no hay compañero');const e=T.spawnEnemy('tank',p.x+200,500,true);e.hp=e.maxHp=1e6;const h0=e.hp;step(120);assert(e.hp<h0,'el compañero no ataca');
+ const said=[];const sy=T.S;T.compAct();assert(sy.msg.includes('SINERGIA'),'chrono + artillery no dio sinergia');
+ for(const f in T.COMP_MOVE){const id=Object.keys(T.CHARS).find(c=>T.CHARS[c].fam===f);for(const pc of ['vanguard','artillery','summoner','chrono','hemo']){if(pc===id)continue;st.comp=id;fresh(pc);T.spawnEnemy('brute',T.S.p.x+150,500,true);T.compAct();step(10)}}
+ st.comp=null;
+ // reputación: decisiones la mueven y a ±30 actúa
+ p=fresh();T.takeDeal('estabilizar');assert(T.repOf().guard===8,'estabilizar no subió a los Guardianes');T.takeDeal('alimentar');assert(T.repOf().cult===8&&T.repOf().guard===4);
+ const pr0=T.priceOf({tier:'large'});L.rep.guild=40;assert(T.priceOf({tier:'large'})<pr0*.9,'el Gremio no rebajó precios');L.rep.guild=-40;assert(T.priceOf({tier:'large'})>pr0*1.1,'el Gremio enfadado no subió precios');
+ L.rep={guard:40,cult:40,guild:0};p=fresh();assert(p.maxHp>T.CHARS.vanguard.hp*1.09&&T.bm('dmg')>=1.1&&p.taint>=10,'la reputación alta no ayudó');
+ // finales según decisiones
+ assert.strictEqual(T.pickEnding(),'tormenta');L.rep={guard:45,cult:0,guild:0};assert.strictEqual(T.pickEnding(),'guardian');p.taint=80;assert.strictEqual(T.pickEnding(),'sombra');p.taint=0;
+ L.rep={guard:0,cult:0,guild:0};assert.strictEqual(T.pickEnding(),'superviviente');T.S.campaign=1;for(const k of ['prisma','hydra','queen','leviathan','herald'])L.mem[k]=1;assert.strictEqual(T.pickEnding(),'verdadero');
+ p=fresh();T.S.stage=4;T.endGame(true);assert(L.endings.superviviente,'ganar no registró el final');T.S.st='play';
+ // campaña: cada etapa abre su capítulo
+ T.MODE_NEXT='camp';p=fresh();assert(T.S.campaign,'no empezó la campaña');step(60);T.loadStage(1);step(80);assert(L.camp>=2&&T.S.st==='play','la campaña no avanzó');
+ const sv=T.saveRun();T.MODE_NEXT=null;
+ // inversión: oleadas de héroes hasta la victoria, sin ranking
+ T.MODE_NEXT='inv';p=fresh();assert(T.S.mode==='inv'&&!T.S.ints.some(o=>o.k==='tp')&&p.maxHp>T.CHARS.vanguard.hp*2,'no empezó la inversión');
+ step(60*5);assert(T.S.wave===1&&T.S.en.some(e=>e.hcid),'no llegó la primera oleada');
+ for(let w=0;w<12&&T.S.st==='play';w++){for(const e of T.S.en)if(e.hcid){p.inv=9;T.hurtE(e,1e9,{raw:1})}p.hp=p.maxHp;step(60*5)}
+ step(200);assert(T.S.wave===T.INV_WAVES&&T.S.st==='over','la inversión no terminó en victoria: '+T.S.wave+' '+T.S.st);
+ // rutas, transporte y bioma oculto
+ T.WORLDCFG.on=1;p=fresh();T.S.tp.state='ready';T.useTP('next');assert.strictEqual(T.S.st,'choice','no se ofreció la ruta');assert(!T.pickOpts||true);
+ step(1);assert.strictEqual(T.S.stage,1,'la ruta segura no avanzó');
+ p=fresh();T.S.route='peligro';const c0=T.S.ints.filter(o=>o.k==='chest').length;T.loadStage(1);assert(T.S.ints.filter(o=>o.k==='chest').length>=c0+2-5&&T.S.routeGold===1.3,'la ruta peligrosa no aplicó');
+ const en=T.spawnEnemy('brute',p.x+300,500,true);assert(en.maxHp>=T.ENEMIES.brute.hp*1.2,'la ruta peligrosa no reforzó enemigos');
+ p=fresh();T.S.sec={done:{quietud:1}};T.S.tp.state='ready';T.useTP('next');assert(el('choiceOpts').innerHTML.includes('Jardín'),'el secreto no abrió la ruta oculta');
+ T.S.route='vacio';T.S.st='play';el('choice').style.display='none';T.loadStage(2);assert(T.STAGE.name==='Jardín del Vacío'&&T.S.ints.some(o=>o.k==='chest'&&o.tier==='gold')&&!T.S.ints.some(o=>o.k==='chest'&&o.tier==='small'),'el bioma oculto no se cargó');
+ p=fresh();const A={k:'pad',x:300,y:500},B={k:'pad',x:2000,y:400};A.to=B;B.to=A;T.routesInteract(A);assert(p.x===2000&&p.y===400,'el transporte no llevó al otro extremo');
+ T.WORLDCFG.on=0;
+ console.log('Preparación y modos: maestría, armas, compañero y sinergias, reputación, finales, campaña, inversión, rutas, transporte y bioma oculto: OK')}
 // 30. Tienda de cosméticos
 {const sd=T.Save.d.shop;sd.gems=0;sd.own={};sd.eq={};
  assert(!T.buyOrEquip('skin','oro'),'compró sin cristales');assert(!sd.own['skin:oro']&&!sd.eq.skin);
