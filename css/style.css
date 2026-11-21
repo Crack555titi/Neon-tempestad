@@ -514,3 +514,48 @@ body.touchmode #menu .lside #who{display:none}
 #lForm.mail #lName,#lForm.pick #lName{display:block}
 #lForm.pick #lUser,#lForm.pick #lPass,#lForm.pick #lReg,#lForm.pick #lGuest{display:none}
 button#tutSkip{box-shadow:none;text-shadow:none;border-radius:0;transform:none;animation:none;position:fixed;top:54px;left:12px;z-index:58;display:none;background:#1d2028;color:#d9cfbd;border:1px solid #3a3f48;border-left:3px solid #9c6236;font:600 12px Bahnschrift,'Arial Narrow',sans-serif;letter-spacing:.1em;padding:6px 12px;min-width:0;height:auto}
+
+/* ===== Lobby más grande en pantallas de PC (arsenal, tienda/códice y ficha del héroe); el teléfono queda igual ===== */
+@media (min-width:900px) and (min-height:560px){
+ /* arsenal */
+ #menu #paneArsenal>*{width:min(900px,72%)}
+ #menu #paneArsenal{gap:10px}
+ #menu #paneArsenal .rl{font-size:17px}
+ #menu .diff,#menu #relics .diff{font-size:15px;padding:8px 14px;max-width:240px}
+ #menu .diff small{font-size:12px}
+ #menu #loadout .mtb{min-width:190px;padding:10px 16px;gap:3px}
+ #menu #loadout .mtb b{font-size:16px}#menu #loadout .mtb small{font-size:13px}#menu #loadout .mtb span{font-size:16px}
+ #menu #loadout .mt .rl{font-size:16px}
+ #menu #loadout .mini{font-size:15px;padding:4px 12px}
+ #menu #paneArsenal .help,#menu #unl{font-size:14px}
+ /* tienda y códice */
+ #menu .lsub h2{max-width:1240px;font-size:16px}
+ #menu .lsub h2 span{font-size:16px}
+ #menu #shopTabs .tab{font-size:15px;padding:9px 22px}
+ #menu .shopBody{max-width:1240px;gap:28px}
+ #menu #shopGrid{max-width:720px;grid-template-columns:repeat(3,minmax(190px,1fr));gap:10px}
+ #menu .sitem{padding:13px 16px;gap:5px}
+ #menu .sitem b{font-size:18px}
+ #menu .sitem span{font-size:14px}
+ #menu .shopSide{width:460px}
+ #menu #shopPrev{width:460px}
+ #menu #shopName{font-size:26px}
+ #menu #shopDesc{font-size:16px}
+ #menu #shopBuy{font-size:18px;padding:13px 34px}
+ #menu #codexStats{max-width:1240px;font-size:13px}
+ #menu .cx{padding:10px 14px}#menu .cx b{font-size:17px}#menu .cx small{font-size:14px}#menu .cx span{font-size:13px}
+ #menu #codexList .cxh{font-size:15px}
+ /* ficha del héroe */
+ #menu #info{width:min(540px,48%);padding:18px 22px}
+ #menu #info h2{font-size:clamp(30px,3.6vw,44px)}
+ #menu .lrole{font-size:16px;margin:5px 0 9px}
+ #menu .lel{font-size:14px;padding:3px 10px}
+ #menu .lstats{gap:6px;margin:12px 0}
+ #menu .lstat{grid-template-columns:110px 1fr;font-size:14px}
+ #menu .lstat b,#menu .lstat em{height:9px;max-width:44px}
+ #menu .labs{gap:9px}
+ #menu .abi{width:clamp(80px,8vw,104px);font-size:13px;padding:7px 3px;gap:4px}
+ #menu .abi canvas{width:clamp(36px,3.6vw,50px);height:clamp(36px,3.6vw,50px)}
+ #menu .ldesc{font-size:16px;line-height:1.4;margin-top:10px}
+ #menu .lhint{font-size:15px}
+}
