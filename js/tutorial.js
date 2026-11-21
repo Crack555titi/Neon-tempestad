@@ -34,7 +34,7 @@ function tutFoe(dummy){const p=S.p,e=spawnEnemy('crawler',clamp(p.x+(p.face||1)*
  if(dummy){e.dmg=0;e.hp=Math.min(e.hp,40);e.dummy=1}return e}
 
 function startTutorial(cid,did){const mode=MODE_NEXT;MODE_NEXT=null;start(cid,did);const s=S;
- s.tut={i:-1,cid,did,mode,cast:{},t:0};s.noRank=1;s.ints=s.ints.filter(o=>o.k==='tp');s.en.length=0;s.spawn=1e9;
+ s.tut={i:-1,cid,did,mode,cast:{},t:0};s.noRank=1;s.ints=s.ints.filter(o=>o.k==='tp'||o.k==='zip');s.en.length=0;s.spawn=1e9;
  tutNext();say('TUTORIAL · '+CHARS[cid].name+' — sin puntuación');tutSkipBtn()}
 function tutNext(){const T=S.tut;T.i++;T.t=0;T.cast={};S.p.hp=S.p.maxHp;const st=TUT_STEPS[T.i];if(st&&st.on)st.on(T);Snd.play('ui')}
 function tutEnd(skip){if(!S||!S.tut)return;const {cid,did,mode}=S.tut;(Save.d.tut||(Save.d.tut={}))[cid]=1;Save.write();

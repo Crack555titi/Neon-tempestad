@@ -249,6 +249,10 @@ El proyecto de Firebase es `neon-tempestad`. Usa **Authentication** (correo y co
 
 **Una entrada por jugador.** Cada jugador aparece una sola vez en el ranking de cada dificultad, con su mejor marca: la puntuación se guarda en `boards/{d}/scores/{uid}` y solo se reemplaza por una mayor. Las entradas antiguas repetidas se juntan al mostrar la tabla.
 
+**Mundo ampliado** (`js/expand.js`). Cada etapa mide 4000 px: el diseño original queda en el centro (a veces espejado) y a los lados hay tramos de plataformas que se generan distinto en cada partida, con una cuerda (mantén saltar para trepar) y una tirolesa (interactuar en el anclaje). Una trampilla lleva al **subsuelo**: dos oleadas y un guardián, y al vencerlo, dos objetos y oro; se vuelve por la escotilla. Cada 70–100 s puede aparecer un **evento**: una baliza que hay que defender 20 s o un cofre maldito con guardianes. Durante el jefe, el **escenario ataca** (lluvia de cristales, chorros de escoria, manos de la cripta, escombros o relámpagos, según la etapa).
+
+**Desafío diario.** En el lobby, el modo Diaria da a todos el mismo héroe, dificultad, regla del día (doble oro, cristal u horda dura) y mapas, con su propio ranking (`boards/dAAAAMMDD`, pestaña «Diaria (hoy)»).
+
 **Tutorial.** La primera vez que entras con cada personaje se juega una etapa guiada, sin puntuación ni ranking: moverse, saltar, sus cuatro habilidades, qué hace daño y qué no, oro y cofres, el teletransportador, el jefe y el portal. Se puede saltar, y al terminar empieza la partida de verdad (`js/tutorial.js`; lo ya visto queda en `Save.d.tut`).
 
 **Menú de pruebas.** Las cuentas listadas en `DEV_UIDS` (`js/dev.js`) ven un botón DEV en partida (o pulsan F2): hitboxes, invulnerable, sin enfriamientos, matar de un golpe, velocidad del juego, dar objetos, invocar enemigos y jefes, saltar etapa y cambiar de personaje. Una partida en la que se usó el menú no sube al ranking. El juego habla con la API REST directamente, sin librerías, y la `apiKey` va en `js/auth.js`: no es secreta, lo que protege los datos son las reglas.

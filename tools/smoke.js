@@ -28,14 +28,14 @@ global.fetch=async(url,opt={})=>{const res=(status,j)=>({ok:status<300,status,js
   if(!ok)return res(403,{error:{message:'Missing or insufficient permissions.'}});for(const w of ws){const [col,id]=w.path.split('/');FAKE[col][id]=w.d}return res(200,{})}
  const nm=url.match(/\/names\/([^/:]+)$/);if(nm)return FAKE.names[nm[1]]?res(200,{fields:{uid:{stringValue:FAKE.names[nm[1]].uid},user:{stringValue:FAKE.names[nm[1]].user}}}):res(404,{});
  // una puntuación por jugador: boards/{d}/scores/{uid}; solo se reemplaza por una mayor (como firestore.rules)
- const one=url.match(/boards\/(\d)\/scores\/([^/:]+)$/);
- if(one){const L=FAKE.docs[one[1]],i=L.findIndex(x=>x.uid===one[2]);
+ const one=url.match(/boards\/(\d|d\d{8})\/scores\/([^/:]+)$/);
+ if(one){const L=FAKE.docs[one[1]]||(FAKE.docs[one[1]]=[]),i=L.findIndex(x=>x.uid===one[2]);
   if(opt.method!=='PATCH')return i<0?res(404,{}):res(200,{fields:Object.fromEntries(Object.entries(L[i]).map(([k,v])=>[k,typeof v==='boolean'?{booleanValue:v}:typeof v==='number'?{integerValue:String(v)}:{stringValue:v}]))});
   const d=Object.fromEntries(Object.entries(b.fields).map(([k,v])=>[k,fsVal(v)])),u=byTok(String((opt.headers||{}).Authorization).slice(7));
   if(!u||one[2]!==u[1].uid||d.uid!==u[1].uid||(d.user.toLowerCase()+'@neontempestad.game'!==u[0]&&(FAKE.names[d.user.toLowerCase()]||{}).uid!==u[1].uid)||d.score>1e8||(i>=0&&d.score<=L[i].score))
    return res(403,{error:{message:'Missing or insufficient permissions.'}});
   if(i<0)L.push(d);else L[i]=d;return res(200,{name:'doc'})}
- const m=url.match(/boards\/(\d)(:runQuery|\/scores)$/);
+ const m=url.match(/boards\/(\d|d\d{8})(:runQuery|\/scores)$/);if(m&&!FAKE.docs[m[1]])FAKE.docs[m[1]]=[];
  if(m&&m[2]===':runQuery')return res(200,FAKE.docs[m[1]].slice().sort((x,y)=>y.score-x.score).slice(0,50).map(d=>({document:{fields:Object.fromEntries(Object.entries(d).map(([k,v])=>[k,typeof v==='boolean'?{booleanValue:v}:typeof v==='number'?{integerValue:String(v)}:{stringValue:v}]))}})));
  if(m){const d=Object.fromEntries(Object.entries(b.fields).map(([k,v])=>[k,fsVal(v)])),u=byTok(String((opt.headers||{}).Authorization).slice(7));
   if(!u||d.uid!==u[1].uid||(d.user.toLowerCase()+'@neontempestad.game'!==u[0]&&(FAKE.names[d.user.toLowerCase()]||{}).uid!==u[1].uid)||d.score>1e8)return res(403,{error:{message:'Missing or insufficient permissions.'}});
@@ -46,10 +46,10 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={startTutorial,tutEnd,tutDone,TUT_STEPS,DEV,isDev,DEV_UIDS,drawHitboxes,count,glyphOf,GLYPH,ALT_FAM,altOk,ROUTES,routeOpen,routesStage,routesInteract,secretsNow,mtOf,mtSpend,mtReset,mtBranches,MT_MAX,WMODS,wmodOk,SYNERGY,COMP_MOVE,compAct,repOf,repAdd,FACTIONS,ENDINGS,pickEnding,CAMPAIGN,storyCard,INV_WAVES,buildLoadout,set MODE_NEXT(v){MODE_NEXT=v},get selC(){return selC},set selC(v){selC=v},WORLDCFG,ERAS,WEATHER,TALKS,eraShift,eraEnd,weatherStart,heatOf,heatStage,talkCheck,goldFor,applyElement,LORE,MEMORIES,memoryGet,echoRecord,echoStage,echoUse,secState,chalOf,loreHtml,endGame,addTaint,taint,borrow,debtStage,debtCost,takeCore,coreStage,CORE_OPTS,persEvent,persState,tempestSave,tempestLoad,spawnShade,RELICS,MUTATIONS,EVO_MODS,relicUnlocked,takeEvo,takeMutation,openPick,buildRelics,REL,ab,maxCd,bm,gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={XCFG,expandStage,hatchUse,caveExit,zipUse,ropeAt,dailyInfo,dailyKey,HAZ,evStart,startTutorial,tutEnd,tutDone,TUT_STEPS,DEV,isDev,DEV_UIDS,drawHitboxes,count,glyphOf,GLYPH,ALT_FAM,altOk,ROUTES,routeOpen,routesStage,routesInteract,secretsNow,mtOf,mtSpend,mtReset,mtBranches,MT_MAX,WMODS,wmodOk,SYNERGY,COMP_MOVE,compAct,repOf,repAdd,FACTIONS,ENDINGS,pickEnding,CAMPAIGN,storyCard,INV_WAVES,buildLoadout,set MODE_NEXT(v){MODE_NEXT=v},get selC(){return selC},set selC(v){selC=v},WORLDCFG,ERAS,WEATHER,TALKS,eraShift,eraEnd,weatherStart,heatOf,heatStage,talkCheck,goldFor,applyElement,LORE,MEMORIES,memoryGet,echoRecord,echoStage,echoUse,secState,chalOf,loreHtml,endGame,addTaint,taint,borrow,debtStage,debtCost,takeCore,coreStage,CORE_OPTS,persEvent,persState,tempestSave,tempestLoad,spawnShade,RELICS,MUTATIONS,EVO_MODS,relicUnlocked,takeEvo,takeMutation,openPick,buildRelics,REL,ab,maxCd,bm,gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
-T.WORLDCFG.on=0;  // épocas, clima y mapa que aprende solo en su propia sección
+T.WORLDCFG.on=0;T.XCFG.events=0;  // épocas, clima y mapa que aprende solo en su propia sección
 const step=(n=1)=>{for(let i=0;i<n;i++){if(T.S.st==='mastery')els.nodes.onclick(pick0);if(T.S.st==='altar')els.altarOpts.onclick(pick0);if(T.S.st==='storm')el('stormOpts').onclick(pick0);if(T.S.st==='choice')el('choiceOpts').onclick(pick0);T.update(1/60);T.draw()}};
 const key=(code,repeat)=>L.keydown({code,repeat,preventDefault(){}});
 const reset=()=>{for(const k in T.keys)T.keys[k]=0;T.mouse.l=T.mouse.r=0};
@@ -337,8 +337,8 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  assert(foe.hp<foe.maxHp,'la trampa no dañó al enemigo');assert.strictEqual(items(),i0+1,'el compartimento no dio un objeto');
  // rescate: alejarse hace retroceder el progreso; quedarse 8 s cerca libera al explorador (dron aliado y objeto)
  p=fresh();const cage={k:'rescue',x:p.x,y:p.y,prog:0};T.S.ints.push(cage);T.exploreInteract(cage);step(60*3);const t3=T.S.rescue.t;p.x+=900;step(60);assert(T.S.rescue.t<t3,'alejarse no hizo retroceder el rescate');
- p.x=cage.x;const dr0=T.S.dr.length,i1=items();for(let f=0;f<60*12&&T.S.rescue;f++){p.x=cage.x;p.hp=p.maxHp;step()}
- assert(cage.open&&T.S.dr.length>dr0&&items()===i1+1,'el rescate no se completó con su recompensa');
+ p.x=cage.x;const dr0=T.S.dr.length,i1=items();for(let f=0;f<60*12&&T.S.rescue;f++){p.x=cage.x;p.y=cage.y;p.vy=0;p.hp=p.maxHp;step()}
+ assert(cage.open&&T.S.dr.length>dr0&&items()===i1+1,'el rescate no se completó con su recompensa '+[cage.open,T.S.dr.length,dr0,items(),i1,T.S.rescue&&T.S.rescue.t,T.S.st,T.S.stage,T.S.t,!!T.S.under,p===T.S.p]);
  // mazmorra: no se abre con un jefe activo; encierra, pasa 3 oleadas y da un legendario
  p=fresh();T.useTP();T.exploreInteract({k:'rift',x:p.x,y:p.y});assert(!T.S.dungeon,'la mazmorra se abrió con un jefe');
  p=fresh();const leg=()=>Object.keys(p.items).filter(k=>T.ITEM[k].r==='l').reduce((a,k)=>a+p.items[k],0),l0=leg();T.exploreInteract({k:'rift',x:p.x,y:p.y});
@@ -621,7 +621,7 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  // eventos secretos
  p=fresh();let n0=Object.values(p.items).reduce((a,b)=>a+b,0);T.secState().streak=15;step(2);assert(Object.values(p.items).reduce((a,b)=>a+b,0)===n0+1,'Intocable no premió');
  p=fresh();const c0=T.S.ints.filter(o=>o.k==='chest').length;for(let i=0;i<60*11;i++){p.vx=0;p.x=p.x;step()}assert(T.S.ints.filter(o=>o.k==='chest').length>c0||T.secState().done.quietud,'Quietud no ocurrió');
- p=fresh();const g2=p.gold;p.x=60;step(2);p.x=2340;step(2);assert(T.secState().done.cartografo&&p.gold>g2,'Cartógrafo no ocurrió');
+ p=fresh();const g2=p.gold;p.x=60;step(2);p.x=3940;step(2);assert(T.secState().done.cartografo&&p.gold>g2,'Cartógrafo no ocurrió');
  // desafíos personales: 150 bajas → capítulo 1, jefe → capítulo 2, última etapa → capítulo 3, cada uno con cristales
  p=fresh('artillery');const gm=T.Save.d.shop.gems;T.chalOf('artillery').kills=149;const e=T.spawnEnemy('brute',p.x+300,500,true);T.hurtE(e,1e9,{raw:1});step(3);
  assert(T.chalOf('artillery').step===1&&T.Save.d.shop.gems===gm+30,'el capítulo 1 no se completó');
@@ -646,7 +646,7 @@ console.log(fails?`${fails} combinaciones fallaron`:'Matriz personajes × dificu
  p=fresh();T.weatherStart('viento');p.ground=0;p.y=200;const x0=p.x;T.S.wind=90;for(let i=0;i<30;i++){T.S.p.ground=0;step()}assert(p.x!==x0,'el viento no empujó');
  p=fresh();T.weatherStart('nieve');step(60);
  // el mapa aprende: zona caliente vigilada y nido en la zona fría
- p=fresh();const h=T.heatOf(T.S.stage);h.fill(1);h[3]=200;T.S.ints=[];T.S.en.length=0;T.heatStage();assert(T.S.hot&&T.S.hot.x0<1000,'no detectó la zona más usada');
+ p=fresh();const h=T.heatOf(T.S.stage);h.fill(1);h[3]=200;T.S.ints=[];T.S.en.length=0;T.heatStage();assert(T.S.hot&&T.S.hot.x0<1200,'no detectó la zona más usada');
  assert(T.S.en.some(e=>e.nest)&&T.S.ints.some(o=>o.nest),'no apareció el nido en la zona ignorada');
  p.x=(T.S.hot.x0+T.S.hot.x1)/2;T.S.hot.t=.01;const n0=T.S.en.length;step(3);assert(T.S.en.length>n0,'la zona vigilada no envió patrulla');
  T.S.heatAcc=Array(12).fill(0);T.S.heatAcc[5]=50;const h5=h[5];T.loadStage(T.S.stage);assert(T.heatOf(0)[5]>h5,'no se guardó por dónde anduviste');
@@ -771,6 +771,44 @@ async function authTests(){const A=T.Auth;
  A.setSession(null);assert(/en uso/.test(await A.register('bobby','clave12')),'un usuario clásico tomó el nombre de una cuenta de correo');
  A.setSession(null);
  console.log('Cuentas online, ranking global, cola sin conexión, rechazo de suplantación y cuentas con correo: OK')}
+// 39. Mundo ampliado: tramos laterales, cuerdas, tirolesas, subsuelo, eventos, peligros del jefe y desafío diario
+function expandTests(){const A=T.Auth;A.setSession(null);
+ const fresh=(cid='vanguard')=>{T.start(cid,1);T.S.spawn=1e9;T.S.en.length=0;const p=T.S.p;p.inv=1e9;for(let i=0;i<120&&!p.ground;i++)step();return p};
+ const items=()=>Object.values(T.S.p.items).reduce((a,b)=>a+b,0);
+ for(let i=0;i<T.STAGES.length;i++){fresh();T.loadStage(i);const s=T.S,P=T.PLAT,W=4000;
+  assert(P.some(q=>q.gen&&q.x<800)&&P.some(q=>q.gen&&q.x>3200),i+': faltan tramos laterales');
+  assert(s.ropes.length===2&&s.zips.length===2&&s.ints.some(o=>o.k==='hatch'),i+': faltan cuerdas, tirolesas o la trampilla');
+  const tp=s.ints.find(o=>o.k==='tp');assert(tp.x===s.tp.x&&tp.y===s.tp.y,i+': el teletransportador dibujado y el real no coinciden');
+  for(const o of s.ints)if(o.k==='chest')assert(P.some(q=>q.ph[0]===1&&Math.abs(q.y-o.y)<1&&o.x>=q.x-1&&o.x<=q.x+q.w+1),i+': un cofre flota en el aire');
+  for(const ph of [2,3]){s.phase=ph;step(1);assert(T.PLAT.some(q=>q.on&&q.solid&&q.rx<=10)&&T.PLAT.some(q=>q.on&&q.solid&&q.rx+q.w>=W-10),i+': sin suelo en los extremos (fase '+ph+')')}}
+ // cuerda: mantener saltar te sube hasta la plataforma
+ let p=fresh();const r=T.S.ropes[0];p.x=r.x;p.y=r.bot;p.vy=0;T.keys.Space=1;for(let i=0;i<200&&p.y>r.top+1;i++)step();T.keys.Space=0;
+ assert(Math.abs(p.y-r.top)<2,'la cuerda no te subió');step(10);assert(Math.abs(p.y-r.top)<2,'no quedaste sobre la plataforma de la cuerda');
+ // tirolesa: te lleva al otro anclaje
+ p=fresh();const zi=T.S.ints.find(o=>o.k==='zip');p.x=zi.x;p.y=zi.y;T.zipUse(zi);for(let i=0;i<400&&T.S.zipR;i++)step();assert(!T.S.zipR&&Math.abs(p.x-zi.z.x2)<30,'la tirolesa no te llevó');
+ // subsuelo: dos oleadas y el guardián dan botín; al salir vuelve todo como estaba
+ p=fresh();const hz=T.S.ints.find(o=>o.k==='hatch'),P0=T.PLAT,ints0=T.S.ints,i0=items();T.hatchUse(hz);assert(T.S.under&&T.PLAT!==P0&&T.S.en.length,'la trampilla no llevó al subsuelo');
+ for(let k=0;k<12&&!T.S.under.done;k++){for(const e of T.S.en.slice())if(!e.dead)T.hurtE(e,1e9,{raw:1});step(5)}
+ assert(T.S.under.done&&items()>=i0+2,'el subsuelo no dio su botín '+[T.S.under.done,T.S.under.wave,items(),i0,T.S.st]);assert(T.S.under.foes.some(e=>e.guard),'no apareció el guardián');
+ T.caveExit();assert(!T.S.under&&T.PLAT===P0&&T.S.ints===ints0&&Math.abs(p.x-hz.x)<1,'salir del subsuelo no restauró la superficie');
+ p=fresh();T.spawnBoss();const hz2=T.S.ints.find(o=>o.k==='hatch');T.hatchUse(hz2);assert(!T.S.under,'se pudo bajar con el jefe despierto');
+ // eventos: baliza (defenderla 20 s) y cofre maldito (vencer a sus guardianes)
+ p=fresh();const rnd0=Math.random;Math.random=()=>.1;T.evStart();Math.random=rnd0;const bc=T.S.ints.find(o=>o.k==='beacon');assert(bc,'no apareció la baliza');
+ T.S.near=bc;T.interact();assert.strictEqual(bc.st,'on');const i1=items();for(let f=0;f<60*22&&!bc.open;f++){p.x=bc.x;p.y=bc.y;p.vy=0;p.hp=p.maxHp;step()}
+ assert(bc.open&&bc.st==='done'&&items()>=i1+1,'defender la baliza no dio premio');
+ p=fresh();Math.random=()=>.9;T.evStart();Math.random=rnd0;const cc=T.S.ints.find(o=>o.k==='cursed');T.S.near=cc;T.interact();assert(cc.open&&cc.foes.length,'el cofre maldito no despertó a sus guardianes');
+ const i2=items();for(const e of cc.foes)T.hurtE(e,1e9,{raw:1});step(2);assert(items()>=i2+2,'romper la maldición no dio dos objetos');
+ T.XCFG.events=1;p=fresh();T.S.evT=0;step(2);assert(T.S.ints.some(o=>o.k==='beacon'||o.k==='cursed'),'los eventos no aparecen solos');T.XCFG.events=0;
+ // peligros del escenario durante el jefe (en cada etapa)
+ for(let i=0;i<T.STAGES.length;i++){fresh();T.loadStage(i);T.S.en.length=0;T.spawnBoss();T.S.hzT=0;const z0=T.S.zn.length;step(40);assert(T.S.zn.some(z=>z.hostile),i+': el escenario no atacó durante el jefe')}
+ // desafío diario: mismo héroe, dificultad y mapas para todos; regla del día; ranking propio
+ const D=T.dailyInfo();assert.deepStrictEqual(T.dailyInfo(),D);assert(T.CHARS[D.cid]&&D.did>=1&&D.did<=2&&D.mod.n&&/^d\d{8}$/.test(D.key));
+ const lay=()=>{T.MODE_NEXT='daily';T.start('vanguard',0);return JSON.stringify([T.S.cid,T.S.df.name,T.S.tp.x,T.PLAT.filter(q=>q.gen).map(q=>[q.x|0,q.y|0])])};
+ const L1=lay(),L2=lay();assert.strictEqual(L1,L2,'el desafío diario no tiene el mismo mapa para todos');assert(T.S.daily&&T.S.cid===D.cid&&T.S.df===T.DIFFS[D.did]);
+ A.ses={user:'Piloto',uid:'u0',idToken:'t-u0',refresh:'r-u0',exp:Date.now()+1e6};A.user='Piloto';T.S.kills=40;
+ return A.submit(false).done.then(()=>{assert(FAKE.docs[D.key]&&FAKE.docs[D.key].length===1&&FAKE.docs[D.key][0].user==='Piloto','el diario no subió a su propio ranking');
+  return A.board(D.key)}).then(bd=>{assert(bd.rows.length===1&&!bd.rows.some(e=>e.seed),'el ranking diario tiene relleno ficticio');A.setSession(null);
+  console.log('Mundo ampliado: tramos laterales, cuerdas, tirolesas, subsuelo, eventos, peligros del jefe y desafío diario: OK')})}
 // 38. Tutorial: con cada personaje se completa entero (sin morir y sin ranking) y luego empieza la partida de verdad
 function tutorialTests(){const A=T.Auth;A.setSession(null);
  const near=o=>{T.S.p.x=o.x+(o.k==='tp'?40:0);T.S.p.y=o.y;T.S.p.vy=0;step(3)};
@@ -835,4 +873,4 @@ async function updateTests(){const U=T.Update;
  for(const bad of ['https://evil.com/NeonTempestad-Setup-1.3.0.exe','https://github.com/otro/Neon-tempestad/releases/download/v1.3.0/NeonTempestad-Setup-1.3.0.exe',base+'NeonTempestad-1.3.0.apk',base+'../x.exe'])
   assert(!ALLOWED.test(bad),'aceptó una URL no permitida: '+bad);
  console.log('Actualizaciones: versión sincronizada, aviso opcional, bloqueo obligatorio, modo sin red e instalación verificada: OK')}
-authTests().then(devTests).then(tutorialTests).then(updateTests).then(()=>process.exit(fails?1:0),e=>{console.error(e);process.exit(1)});
+authTests().then(devTests).then(tutorialTests).then(expandTests).then(updateTests).then(()=>process.exit(fails?1:0),e=>{console.error(e);process.exit(1)});

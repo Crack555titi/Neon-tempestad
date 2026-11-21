@@ -97,13 +97,13 @@ const Auth={
  // tabla a mostrar: reales + tus partidas aún sin subir + relleno ficticio mientras haya pocas reales
  async board(diff){const {list,online}=await this.fetchBoard(diff),pend=readJSON(AUTH_PENDING,[]).filter(p=>p.diff===diff).map(p=>Object.assign({pending:1},p.r));
   const best={};for(const e of list.concat(pend)){const k=e.uid||e.user;if(!best[k]||e.score>best[k].score)best[k]=e}
-  const real=Object.values(best).sort((a,b)=>b.score-a.score),fill=real.length<15?seedBoard(diff).slice(0,15-real.length):[];
+  const real=Object.values(best).sort((a,b)=>b.score-a.score),fill=typeof diff==='number'&&real.length<15?seedBoard(diff).slice(0,15-real.length):[];
   return {rows:real.concat(fill).sort((a,b)=>b.score-a.score),online}},
  // registra la partida que acaba de terminar: {score} al momento y {rank} cuando el servidor responde
- submit(win){if(!S)return null;const diff=DIFFS.indexOf(S.df);
+ submit(win){if(!S)return null;const di=DIFFS.indexOf(S.df),diff=S.daily?S.daily.key:di;
   const r={user:this.user||'',uid:this.ses?this.ses.uid:'',ch:S.ch.name.slice(0,24),lvl:clamp(S.p.lvl,1,999),loop:clamp((S.loop||0)+1,1,999),time:Math.round(S.t),
    kills:S.kills,stages:(S.loop||0)*STAGES.length+S.stage+(S.bossDone?1:0),win:!!win,date:Date.now()};
-  r.score=Math.min(1e8,scoreRun(Object.assign({diff},r)));if(!this.user)return {score:r.score};
+  r.score=Math.min(1e8,scoreRun(Object.assign({},r,{diff:di})));if(!this.user)return {score:r.score};
   const q=readJSON(AUTH_PENDING,[]);q.push({diff,r});writeJSON(AUTH_PENDING,q);
   return {score:r.score,done:this.flush().then(async()=>{const {rows,online}=await this.board(diff);
    const real=rows.filter(e=>!e.seed),i=real.findIndex(e=>e.uid===r.uid);/* el puesto solo cuenta jugadores reales; uno por jugador */
@@ -152,21 +152,22 @@ async function doAuth(reg){const u=$('lUser').value,p=$('lPass').value,n=$('lNam
  if(err&&Auth.pendingName){lMode('pick');$('lErr').textContent=err==='NEED_NAME'?'Elige tu nombre de usuario (es el que se verá en la clasificación).':err;setTimeout(()=>$('lName').focus&&$('lName').focus(),50);return}
  if(err){$('lErr').textContent=err;Snd.play('hurt');return}$('lErr').textContent='';lMode('');Snd.init();Snd.play('ui');enterMenu()}
 async function openRank(tab){if(tab!==undefined)rankTab=tab;$('menu').style.display=$('title').style.display='none';$('rank').style.display='flex';
- $('rTabs').innerHTML=DIFFS.map((d,i)=>`<button class="sec tab${i===rankTab?' on':''}" data-i="${i}">${esc(d.name)}</button>`).join('');
+ $('rTabs').innerHTML=DIFFS.map((d,i)=>`<button class="sec tab${i===rankTab?' on':''}" data-i="${i}">${esc(d.name)}</button>`).join('')+`<button class="sec tab${rankTab==='daily'?' on':''}" data-i="daily">Diaria (hoy)</button>`;
  $('rBody').innerHTML='<tr><td colspan="7" class="loading">Cargando clasificación…</td></tr>';$('rNote').textContent='';
- const req=++rankReq,{rows,online}=await Auth.board(rankTab);if(req!==rankReq)return;  // otra pestaña pedida mientras tanto
+ const daily=rankTab==='daily',req=++rankReq,{rows,online}=await Auth.board(daily?dailyKey():rankTab);if(req!==rankReq)return;  // otra pestaña pedida mientras tanto
  const mine=r=>Auth.ses&&r.uid===Auth.ses.uid;
+ if(!rows.length){$('rBody').innerHTML=`<tr><td colspan="7" class="loading">${daily?'Nadie jugó todavía el desafío de hoy: ¡sé el primero!':'Todavía no hay partidas.'}</td></tr>`}else
  $('rBody').innerHTML=rows.slice(0,15).map((r,i)=>`<tr class="${r.seed?'seed':mine(r)?'me':''}"><td>${i+1}</td><td>${esc(r.user)}${r.pending?' <small>⏳</small>':''}${r.seed?' <small>IA</small>':''}</td><td>${esc(r.ch)}</td><td>${r.lvl}</td><td>${r.loop}</td><td>${fmtTime(r.time)}</td><td>${r.score.toLocaleString('es')}</td></tr>`).join('');
  $('rNote').textContent=(online?'🌐 Clasificación global':'📴 Sin conexión: última clasificación descargada')+
-  (Auth.user?` · Tus partidas resaltadas${rows.some(r=>r.pending)?' (⏳ = pendiente de subir)':''}`:' · Entra con una cuenta para competir')+` · ×${DIFF_MULT[rankTab]} en ${DIFFS[rankTab].name}`}
-$('rTabs').onclick=e=>{const b=e.target.closest('.tab');if(b){openRank(+b.dataset.i);Snd.play('ui')}};
+  (Auth.user?` · Tus partidas resaltadas${rows.some(r=>r.pending)?' (⏳ = pendiente de subir)':''}`:' · Entra con una cuenta para competir')+(daily?(()=>{const D=dailyInfo();return ` · Desafío de hoy: ${CHARS[D.cid].name}, ${DIFFS[D.did].name}, ${D.mod.n}`})():` · ×${DIFF_MULT[rankTab]} en ${DIFFS[rankTab].name}`)}
+$('rTabs').onclick=e=>{const b=e.target.closest('.tab');if(b){openRank(b.dataset.i==='daily'?'daily':+b.dataset.i);Snd.play('ui')}};
 $('rBack').onclick=()=>{rankReq++;goHome()};
 $('mRank').onclick=()=>openRank(selD);
 $('lForm').onsubmit=e=>{e.preventDefault();doAuth(false)};
 $('lReg').onclick=()=>doAuth(true);
 $('lUser').oninput=lSync;
 $('lGuest').onclick=e=>{e.preventDefault();Auth.setSession(null);enterMenu()};
-$('endRank').onclick=()=>{$('end').style.display='none';openRank(S?DIFFS.indexOf(S.df):selD)};
+$('endRank').onclick=()=>{$('end').style.display='none';openRank(S?(S.daily?'daily':DIFFS.indexOf(S.df)):selD)};
 
 // arranque: con sesión guardada se entra directo (y se suben partidas pendientes); sin ella, la pantalla de cuenta
 (function(){const s=readJSON(AUTH_SESSION,null);

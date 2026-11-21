@@ -1,6 +1,6 @@
 'use strict';
 /* ===================== UTIL ===================== */
-const W=960,H=540,G=2100,WORLD=2400,FLOOR=500;
+const W=960,H=540,G=2100,WORLD=4000,FLOOR=500;
 const $=i=>document.getElementById(i),cv=$('game'),c=cv.getContext('2d');
 const R=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),sgn=v=>v<0?-1:1,hyp=Math.hypot;
 const Ev={h:{},on(n,f){(this.h[n]=this.h[n]||[]).push(f)},emit(n,...a){(this.h[n]||[]).forEach(f=>f(...a))}};

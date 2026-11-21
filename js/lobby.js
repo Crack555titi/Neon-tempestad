@@ -98,12 +98,14 @@ function lobbyRefresh(){if(!$('relicSlot'))return;const R=Save.d.settings.relic&
  document.querySelectorAll&&document.querySelectorAll('#modes [data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m===lobbyMode))}
 if($('ltabs')){
  $('ltabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(!b)return;lobbyTab(b.dataset.tab);Snd.play('ui')};
- $('modes').onclick=e=>{const b=e.target.closest('[data-m]');if(!b)return;lobbyMode=b.dataset.m;lobbyRefresh();Snd.play('ui')};
+ $('modes').onclick=e=>{const b=e.target.closest('[data-m]');if(!b)return;lobbyMode=b.dataset.m;
+  if(lobbyMode==='daily'&&typeof dailyInfo==='function'){const D=dailyInfo();selC=D.cid;buildMenu();const i=$('info');if(i&&i.querySelector){const h=i.querySelector('.lhint')||i.appendChild(document.createElement('div'));h.className='lhint';h.textContent=`Desafío de hoy · ${DIFFS[D.did].name} · ${D.mod.n}: ${D.mod.d}`}}
+  lobbyRefresh();Snd.play('ui')};
  $('diffBtn').onclick=e=>{e.stopPropagation();const p=$('diffPop');p.style.display=p.style.display==='none'?'block':'none';Snd.play('ui')};
  $('relicSlot').onclick=()=>{lobbyTab('arsenal');Snd.play('ui')};
  $('lRank').onclick=()=>openRank(selD);$('lOpts').onclick=()=>openOpts('menu');$('lCtrls').onclick=()=>openCtrls('menu');
  // ENTRAR: una carga corta y se juega (sin carga si se pidió reducir movimiento)
- $('go').onclick=()=>{const b=$('go');if(b.classList.contains('charging'))return;const go=()=>{b.classList.remove('charging');MODE_NEXT=lobbyMode==='normal'?null:lobbyMode;if(typeof startTutorial==='function'&&!tutDone(selC))startTutorial(selC,selD);else start(selC,selD)};  // primera vez con este personaje: tutorial
+ $('go').onclick=()=>{const b=$('go');if(b.classList.contains('charging'))return;const go=()=>{b.classList.remove('charging');MODE_NEXT=lobbyMode==='normal'?null:lobbyMode;if(lobbyMode!=='daily'&&typeof startTutorial==='function'&&!tutDone(selC))startTutorial(selC,selD);else start(selC,selD)};  // primera vez con este personaje: tutorial
   if(LOBBY.rm||typeof setTimeout!=='function')return go();b.classList.add('charging');Snd.play('tp');LOBBY.flash=1;setTimeout(go,300)};
  if(typeof addEventListener==='function')addEventListener('pointerdown',e=>{const p=$('diffPop');if(p&&p.style.display!=='none'&&!e.target.closest('.ddw'))p.style.display='none'});
  const who=$('who');if(who&&$('lside')&&$('lside').prepend)$('lside').prepend(who);
