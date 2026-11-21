@@ -32,7 +32,7 @@ const vj=path.join(root,'version.json'),v=JSON.parse(fs.readFileSync(vj,'utf8'))
 v.sha256=require('crypto').createHash('sha256').update(fs.readFileSync(path.join(root,files[0]))).digest('hex');fs.writeFileSync(vj,JSON.stringify(v,null,2)+'\n');
 
 // 3. commit, push y release
-run('git',['add','package.json','js/update.js','version.json']);run('git',['commit','-q','-m',`Versión ${ver}: ${notes}`]);
+run('git',['add','package.json','js/update.js','version.json']);run('git',['commit','-q','--author=Claude <noreply@anthropic.com>','-m',`Versión ${ver}: ${notes}`]);  // los commits de versión van a nombre de Claude; el resto, al del dueño
 run('git',['push','-q','origin','desarrollo']);
 run(GH,['release','create','v'+ver,...files,'--target',out('git',['rev-parse','HEAD']),'--title','v'+ver,'--notes',notes,'--latest']);
 
