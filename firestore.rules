@@ -27,23 +27,28 @@ service cloud.firestore {
         && getAfter(/databases/$(database)/documents/names/$(request.resource.data.name)).data.uid == uid;
       allow update, delete: if false;
     }
-    // Clasificación: una colección por dificultad (0 = Paseo … 4 = Pesadilla)
+    // Clasificación: una colección por dificultad (0 = Paseo … 4 = Pesadilla).
+    // Una sola entrada por jugador y dificultad: el documento se llama como su uid y solo se reemplaza por una marca mayor.
+    function okScore(d) {
+      return d.keys().hasOnly(['user','uid','ch','lvl','loop','time','kills','stages','win','score','date'])
+        && d.uid == request.auth.uid
+        // solo puedes publicar con tu propio nombre: el del usuario clásico o el reservado por tu cuenta de correo
+        && (request.auth.token.email == d.user.lower() + '@neontempestad.game'
+            || get(/databases/$(database)/documents/names/$(d.user.lower())).data.uid == request.auth.uid)
+        && d.score is int && d.score >= 0 && d.score <= 100000000
+        && d.lvl is int && d.lvl >= 1 && d.lvl <= 999
+        && d.loop is int && d.loop >= 1 && d.loop <= 999
+        && d.time is int && d.time >= 0
+        && d.ch is string && d.ch.size() <= 24;
+    }
     match /boards/{diff}/scores/{id} {
       allow read: if diff in ['0','1','2','3','4'];
-      allow create: if request.auth != null
-        && diff in ['0','1','2','3','4']
-        && request.resource.data.keys().hasOnly(['user','uid','ch','lvl','loop','time','kills','stages','win','score','date'])
-        && request.resource.data.uid == request.auth.uid
-        // solo puedes publicar con tu propio nombre: el del usuario clásico o el reservado por tu cuenta de correo
-        && (request.auth.token.email == request.resource.data.user.lower() + '@neontempestad.game'
-            || get(/databases/$(database)/documents/names/$(request.resource.data.user.lower())).data.uid == request.auth.uid)
-        && request.resource.data.score is int && request.resource.data.score >= 0 && request.resource.data.score <= 100000000
-        && request.resource.data.lvl is int && request.resource.data.lvl >= 1 && request.resource.data.lvl <= 999
-        && request.resource.data.loop is int && request.resource.data.loop >= 1 && request.resource.data.loop <= 999
-        && request.resource.data.time is int && request.resource.data.time >= 0
-        && request.resource.data.ch is string && request.resource.data.ch.size() <= 24;
-      // nadie puede editar ni borrar puntuaciones, ni siquiera las propias
-      allow update, delete: if false;
+      allow create: if request.auth != null && diff in ['0','1','2','3','4'] && id == request.auth.uid
+        && okScore(request.resource.data);
+      allow update: if request.auth != null && diff in ['0','1','2','3','4'] && id == request.auth.uid
+        && okScore(request.resource.data) && request.resource.data.score > resource.data.score;
+      // nadie puede borrar puntuaciones, ni siquiera las propias
+      allow delete: if false;
     }
   }
 }

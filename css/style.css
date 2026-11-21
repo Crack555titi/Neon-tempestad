@@ -513,3 +513,4 @@ body.touchmode #menu .lside #who{display:none}
 #lForm #lName{display:none}
 #lForm.mail #lName,#lForm.pick #lName{display:block}
 #lForm.pick #lUser,#lForm.pick #lPass,#lForm.pick #lReg,#lForm.pick #lGuest{display:none}
+button#tutSkip{box-shadow:none;text-shadow:none;border-radius:0;transform:none;animation:none;position:fixed;top:54px;left:12px;z-index:58;display:none;background:#1d2028;color:#d9cfbd;border:1px solid #3a3f48;border-left:3px solid #9c6236;font:600 12px Bahnschrift,'Arial Narrow',sans-serif;letter-spacing:.1em;padding:6px 12px;min-width:0;height:auto}

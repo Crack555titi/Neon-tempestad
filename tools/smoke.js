@@ -27,6 +27,14 @@ global.fetch=async(url,opt={})=>{const res=(status,j)=>({ok:status<300,status,js
    return col==='owners'&&id===uid&&ws.some(o=>o.path==='names/'+w.d.name&&o.d.uid===uid)});
   if(!ok)return res(403,{error:{message:'Missing or insufficient permissions.'}});for(const w of ws){const [col,id]=w.path.split('/');FAKE[col][id]=w.d}return res(200,{})}
  const nm=url.match(/\/names\/([^/:]+)$/);if(nm)return FAKE.names[nm[1]]?res(200,{fields:{uid:{stringValue:FAKE.names[nm[1]].uid},user:{stringValue:FAKE.names[nm[1]].user}}}):res(404,{});
+ // una puntuación por jugador: boards/{d}/scores/{uid}; solo se reemplaza por una mayor (como firestore.rules)
+ const one=url.match(/boards\/(\d)\/scores\/([^/:]+)$/);
+ if(one){const L=FAKE.docs[one[1]],i=L.findIndex(x=>x.uid===one[2]);
+  if(opt.method!=='PATCH')return i<0?res(404,{}):res(200,{fields:Object.fromEntries(Object.entries(L[i]).map(([k,v])=>[k,typeof v==='boolean'?{booleanValue:v}:typeof v==='number'?{integerValue:String(v)}:{stringValue:v}]))});
+  const d=Object.fromEntries(Object.entries(b.fields).map(([k,v])=>[k,fsVal(v)])),u=byTok(String((opt.headers||{}).Authorization).slice(7));
+  if(!u||one[2]!==u[1].uid||d.uid!==u[1].uid||(d.user.toLowerCase()+'@neontempestad.game'!==u[0]&&(FAKE.names[d.user.toLowerCase()]||{}).uid!==u[1].uid)||d.score>1e8||(i>=0&&d.score<=L[i].score))
+   return res(403,{error:{message:'Missing or insufficient permissions.'}});
+  if(i<0)L.push(d);else L[i]=d;return res(200,{name:'doc'})}
  const m=url.match(/boards\/(\d)(:runQuery|\/scores)$/);
  if(m&&m[2]===':runQuery')return res(200,FAKE.docs[m[1]].slice().sort((x,y)=>y.score-x.score).slice(0,50).map(d=>({document:{fields:Object.fromEntries(Object.entries(d).map(([k,v])=>[k,typeof v==='boolean'?{booleanValue:v}:typeof v==='number'?{integerValue:String(v)}:{stringValue:v}]))}})));
  if(m){const d=Object.fromEntries(Object.entries(b.fields).map(([k,v])=>[k,fsVal(v)])),u=byTok(String((opt.headers||{}).Authorization).slice(7));
@@ -38,7 +46,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={DEV,isDev,DEV_UIDS,drawHitboxes,count,glyphOf,GLYPH,ALT_FAM,altOk,ROUTES,routeOpen,routesStage,routesInteract,secretsNow,mtOf,mtSpend,mtReset,mtBranches,MT_MAX,WMODS,wmodOk,SYNERGY,COMP_MOVE,compAct,repOf,repAdd,FACTIONS,ENDINGS,pickEnding,CAMPAIGN,storyCard,INV_WAVES,buildLoadout,set MODE_NEXT(v){MODE_NEXT=v},get selC(){return selC},set selC(v){selC=v},WORLDCFG,ERAS,WEATHER,TALKS,eraShift,eraEnd,weatherStart,heatOf,heatStage,talkCheck,goldFor,applyElement,LORE,MEMORIES,memoryGet,echoRecord,echoStage,echoUse,secState,chalOf,loreHtml,endGame,addTaint,taint,borrow,debtStage,debtCost,takeCore,coreStage,CORE_OPTS,persEvent,persState,tempestSave,tempestLoad,spawnShade,RELICS,MUTATIONS,EVO_MODS,relicUnlocked,takeEvo,takeMutation,openPick,buildRelics,REL,ab,maxCd,bm,gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={startTutorial,tutEnd,tutDone,TUT_STEPS,DEV,isDev,DEV_UIDS,drawHitboxes,count,glyphOf,GLYPH,ALT_FAM,altOk,ROUTES,routeOpen,routesStage,routesInteract,secretsNow,mtOf,mtSpend,mtReset,mtBranches,MT_MAX,WMODS,wmodOk,SYNERGY,COMP_MOVE,compAct,repOf,repAdd,FACTIONS,ENDINGS,pickEnding,CAMPAIGN,storyCard,INV_WAVES,buildLoadout,set MODE_NEXT(v){MODE_NEXT=v},get selC(){return selC},set selC(v){selC=v},WORLDCFG,ERAS,WEATHER,TALKS,eraShift,eraEnd,weatherStart,heatOf,heatStage,talkCheck,goldFor,applyElement,LORE,MEMORIES,memoryGet,echoRecord,echoStage,echoUse,secState,chalOf,loreHtml,endGame,addTaint,taint,borrow,debtStage,debtCost,takeCore,coreStage,CORE_OPTS,persEvent,persState,tempestSave,tempestLoad,spawnShade,RELICS,MUTATIONS,EVO_MODS,relicUnlocked,takeEvo,takeMutation,openPick,buildRelics,REL,ab,maxCd,bm,gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 T.WORLDCFG.on=0;  // épocas, clima y mapa que aprende solo en su propia sección
@@ -732,14 +740,20 @@ async function authTests(){const A=T.Auth;
  let bd=await A.board(2);assert(bd.online&&bd.rows.every((e,i)=>!i||bd.rows[i-1].score>=e.score)&&bd.rows.some(e=>e.seed)&&!bd.rows[0].seed);
  // sin conexión: la partida queda en cola, el ranking usa la copia guardada y se sube al volver la red
  FAKE.offline=true;T.start('vanguard',2);T.S.kills=10;res=A.submit(false);const r2=await res.done;assert(r2.queued,'sin red no quedó en cola');
- bd=await A.board(2);assert(!bd.online&&bd.rows.some(e=>e.pending)&&bd.rows.some(e=>e.user==='Piloto'&&!e.pending),'sin red no usó la copia guardada');
- FAKE.offline=false;await A.flush();assert.strictEqual(FAKE.docs[2].length,2,'la partida en cola no se subió al volver la red');
+ bd=await A.board(2);assert(!bd.online&&bd.rows.filter(e=>e.user==='Piloto').length===1&&bd.rows.some(e=>e.user==='Piloto'&&!e.pending),'sin red no usó la copia guardada (una fila por jugador, la mejor)');
+ FAKE.offline=false;await A.flush();assert.strictEqual(FAKE.docs[2].length,1,'una partida peor creó una segunda entrada del mismo jugador');
+ assert.strictEqual(FAKE.docs[2][0].kills,5000,'la marca peor reemplazó a la mejor');assert(!JSON.parse(T.STORE.getItem('neonTempestad.pending')||'[]').length,'la partida peor quedó en cola');
+ // una marca mejor reemplaza la anterior: sigue habiendo una sola fila por jugador
+ const old=FAKE.docs[2][0].score;T.start('vanguard',2);T.S.kills=9000;T.S.stage=4;T.S.bossDone=1;const r3=await A.submit(true).done;
+ assert.strictEqual(FAKE.docs[2].length,1);assert(FAKE.docs[2][0].score>old,'la marca mejor no reemplazó a la anterior');assert(r3.rank===1&&r3.best);
+ T.start('vanguard',2);T.S.kills=1;const r4=await A.submit(false).done;assert(r4.rank===1&&!r4.best,'una partida peor no mostró el puesto de tu mejor marca');
+ FAKE.docs[2].push({...FAKE.docs[2][0],score:5,date:1});bd=await A.board(2);assert.strictEqual(bd.rows.filter(e=>e.user==='Piloto').length,1,'la tabla repite al jugador');FAKE.docs[2].pop();
  // una puntuación manipulada (otro nombre) la rechaza el servidor y se descarta de la cola
  T.start('vanguard',2);A.user='OtroJugador';A.submit(false).done.catch(()=>{});await A.flush();A.user='Piloto';
- assert.strictEqual(FAKE.docs[2].length,2,'aceptó una puntuación con otro nombre');
+ assert.strictEqual(FAKE.docs[2].length,1,'aceptó una puntuación con otro nombre');
  // token caducado: se renueva solo; invitado: no sube nada
  A.ses.exp=0;assert.strictEqual(await A.token(),'t-'+A.ses.uid);assert(A.ses.exp>Date.now());
- A.setSession(null);T.start('vanguard',2);assert(!A.submit(false).done);assert.strictEqual(FAKE.docs[2].length,2,'el invitado subió una puntuación');
+ A.setSession(null);T.start('vanguard',2);assert(!A.submit(false).done);assert.strictEqual(FAKE.docs[2].length,1,'el invitado subió una puntuación');
  // cuentas con correo: el nombre se elige aparte, es único (también frente a los clásicos) y sirve para el ranking
  await new Promise(r=>setImmediate(r));assert(FAKE.names.piloto&&FAKE.names.piloto.uid===FAKE.users['piloto@neontempestad.game'].uid,'el usuario clásico no reservó su nombre');
  assert(A.isMail('ana@correo.com')&&!A.isMail('Piloto')&&!A.isMail('x@neontempestad.game'));
@@ -757,6 +771,26 @@ async function authTests(){const A=T.Auth;
  A.setSession(null);assert(/en uso/.test(await A.register('bobby','clave12')),'un usuario clásico tomó el nombre de una cuenta de correo');
  A.setSession(null);
  console.log('Cuentas online, ranking global, cola sin conexión, rechazo de suplantación y cuentas con correo: OK')}
+// 38. Tutorial: con cada personaje se completa entero (sin morir y sin ranking) y luego empieza la partida de verdad
+function tutorialTests(){const A=T.Auth;A.setSession(null);
+ const near=o=>{T.S.p.x=o.x+(o.k==='tp'?40:0);T.S.p.y=o.y;T.S.p.vy=0;step(3)};
+ for(const cid in T.CHARS){T.Save.d.tut={};T.startTutorial(cid,1);const S0=T.S;assert(S0.tut&&S0.noRank,'no empezó el tutorial');
+  for(let guard=0;T.S===S0&&guard<200;guard++){const Tt=S0.tut,i=Tt.i,st=T.TUT_STEPS[i],p=S0.p;
+   if(i===0){const k=S0.p.x<1500?'KeyD':'KeyA';T.keys[k]=1;step(70);T.keys[k]=0}
+   else if(i===1){p.ground=1;p.vy=0;key('Space');step(2)}
+   else if(i===2||i===6){for(const e of S0.en)if(!e.dead)T.hurtE(e,1e9,{raw:1});step(2)}
+   else if(i>=3&&i<=5){p.cd[['s','m','u'][i-3]]=0;T.cast(['s','m','u'][i-3]);step(2)}
+   else if(i===7){near(Tt.chest);T.interact();step(2)}
+   else if(i===8){near(S0.ints.find(o=>o.k==='tp'));T.interact();step(2)}
+   else if(i===9){near(S0.ints.find(o=>o.k==='tp'));for(const e of S0.en)if(e.boss&&!e.dead)T.hurtE(e,1e9,{raw:1});step(60)}
+   else if(i===10){const o=S0.ints.find(o=>o.k==='tp');near(o);T.S.p.x=o.x+40;step(1);T.interact()}
+   assert(S0.st!=='over'&&S0.p.hp>0,cid+': se murió en el tutorial (paso '+(i+1)+')');
+   if(T.S===S0)step(40)}
+  assert(T.S!==S0&&!T.S.tut&&!T.S.noRank,cid+': el tutorial no terminó en una partida de verdad (quedó en el paso '+(S0.tut.i+1)+', st='+S0.st+', tp='+S0.tp.state+')');assert(T.tutDone(cid),cid+': no quedó marcado como hecho')}
+ // se puede saltar; un personaje ya visto no lo repite; el tutorial no sube al ranking
+ T.Save.d.tut={};T.startTutorial('necro',1);T.tutEnd(true);assert(T.tutDone('necro')&&!T.S.tut);
+ A.ses={user:'Piloto',uid:'u0',idToken:'t-u0',refresh:'r-u0',exp:Date.now()+1e6};A.user='Piloto';T.startTutorial('vanguard',1);assert.strictEqual(A.submit(false).score,0,'el tutorial subió al ranking');A.setSession(null);
+ console.log('Tutorial: todos los personajes lo completan sin morir, se puede saltar, no puntúa y termina en la partida de verdad: OK')}
 // 37. Menú de pruebas (cuenta de desarrollador) y torre de la Mecánica
 function devTests(){const A=T.Auth,D=T.DEV;
  A.setSession(null);assert(!T.isDev(),'un invitado tiene el menú de pruebas');
@@ -801,4 +835,4 @@ async function updateTests(){const U=T.Update;
  for(const bad of ['https://evil.com/NeonTempestad-Setup-1.3.0.exe','https://github.com/otro/Neon-tempestad/releases/download/v1.3.0/NeonTempestad-Setup-1.3.0.exe',base+'NeonTempestad-1.3.0.apk',base+'../x.exe'])
   assert(!ALLOWED.test(bad),'aceptó una URL no permitida: '+bad);
  console.log('Actualizaciones: versión sincronizada, aviso opcional, bloqueo obligatorio, modo sin red e instalación verificada: OK')}
-authTests().then(devTests).then(updateTests).then(()=>process.exit(fails?1:0),e=>{console.error(e);process.exit(1)});
+authTests().then(devTests).then(tutorialTests).then(updateTests).then(()=>process.exit(fails?1:0),e=>{console.error(e);process.exit(1)});

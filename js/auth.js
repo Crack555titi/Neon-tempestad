@@ -21,8 +21,8 @@ function scoreRun(r){
 
 /* ---------- REST ---------- */
 class NetError extends Error{}  // sin conexión o servidor caído: se reintenta más tarde
-async function api(url,body,token){let r;
- try{r=await fetch(url,{method:'POST',headers:Object.assign({'Content-Type':'application/json'},token?{Authorization:'Bearer '+token}:{}),body:JSON.stringify(body)})}
+async function api(url,body,token,method){let r;
+ try{r=await fetch(url,{method:method||'POST',headers:Object.assign({'Content-Type':'application/json'},token?{Authorization:'Bearer '+token}:{}),body:JSON.stringify(body)})}
  catch(e){throw new NetError('sin conexión')}
  const j=await r.json().catch(()=>({}));if(r.status>=500)throw new NetError('servidor');
  if(!r.ok){const e=new Error((j.error&&j.error.message)||('HTTP '+r.status));e.status=r.status;throw e}return j}
@@ -96,7 +96,8 @@ const Auth={
   catch(e){if(!(e instanceof NetError))console.warn('ranking:',e.message);return {list:readJSON(AUTH_CACHE,{})[diff]||[],online:false}}},
  // tabla a mostrar: reales + tus partidas aún sin subir + relleno ficticio mientras haya pocas reales
  async board(diff){const {list,online}=await this.fetchBoard(diff),pend=readJSON(AUTH_PENDING,[]).filter(p=>p.diff===diff).map(p=>Object.assign({pending:1},p.r));
-  const real=list.concat(pend).sort((a,b)=>b.score-a.score),fill=real.length<15?seedBoard(diff).slice(0,15-real.length):[];
+  const best={};for(const e of list.concat(pend)){const k=e.uid||e.user;if(!best[k]||e.score>best[k].score)best[k]=e}
+  const real=Object.values(best).sort((a,b)=>b.score-a.score),fill=real.length<15?seedBoard(diff).slice(0,15-real.length):[];
   return {rows:real.concat(fill).sort((a,b)=>b.score-a.score),online}},
  // registra la partida que acaba de terminar: {score} al momento y {rank} cuando el servidor responde
  submit(win){if(!S)return null;const diff=DIFFS.indexOf(S.df);
@@ -105,11 +106,15 @@ const Auth={
   r.score=Math.min(1e8,scoreRun(Object.assign({diff},r)));if(!this.user)return {score:r.score};
   const q=readJSON(AUTH_PENDING,[]);q.push({diff,r});writeJSON(AUTH_PENDING,q);
   return {score:r.score,done:this.flush().then(async()=>{const {rows,online}=await this.board(diff);
-   const i=rows.filter(e=>!e.seed).findIndex(e=>e.date===r.date&&e.uid===r.uid);/* el puesto solo cuenta jugadores reales */return {rank:i+1||null,online,queued:readJSON(AUTH_PENDING,[]).some(p=>p.r.date===r.date)}})}},
+   const real=rows.filter(e=>!e.seed),i=real.findIndex(e=>e.uid===r.uid);/* el puesto solo cuenta jugadores reales; uno por jugador */
+   return {rank:i+1||null,best:i<0||(real[i].date===r.date&&real[i].score===r.score),online,queued:readJSON(AUTH_PENDING,[]).some(p=>p.r.date===r.date)}})}},
  // sube las partidas en cola; los errores de red las dejan para más tarde, los rechazos del servidor las descartan
  async flush(){if(this.flushing)return this.flushing;this.flushing=(async()=>{
   for(const p of readJSON(AUTH_PENDING,[])){if(!this.ses||p.r.uid!==this.ses.uid)continue;
-   try{const t=await this.token();await api(`${FS_URL}/boards/${p.diff}/scores`,toFS(p.r),t)}catch(e){if(e instanceof NetError)break;console.warn('puntuación descartada:',e.message)}
+   try{const t=await this.token(),url=`${FS_URL}/boards/${p.diff}/scores/${p.r.uid}`;let cur=null;
+    try{const g=await fetch(url);if(g.status>=500)throw new NetError('servidor');if(g.ok)cur=fromFS(await g.json())}catch(e){throw e instanceof NetError?e:new NetError('sin conexión')}
+    if(!cur||p.r.score>cur.score)await api(url,toFS(p.r),t,'PATCH')}  // una sola entrada por jugador en cada dificultad: la mejor
+   catch(e){if(e instanceof NetError)break;console.warn('puntuación descartada:',e.message)}
    writeJSON(AUTH_PENDING,readJSON(AUTH_PENDING,[]).filter(x=>x.r.date!==p.r.date||x.r.uid!==p.r.uid))}})().finally(()=>{this.flushing=null});return this.flushing}
 };
 

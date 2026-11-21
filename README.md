@@ -247,6 +247,10 @@ El icono del `.exe` (`build/icon.png`), los iconos de Android y su pantalla de c
 
 El proyecto de Firebase es `neon-tempestad`. Usa **Authentication** (correo y contraseña; el juego convierte el usuario en `usuario@neontempestad.game`) y **Firestore**, con la clasificación en `boards/{0-4}/scores`. Se puede entrar con usuario (el juego lo convierte en `usuario@neontempestad.game`) o con un correo real; las cuentas con correo eligen un nombre de usuario, que se reserva en `names/{nombre}` y `owners/{uid}` (uno por cuenta, sin chocar con los usuarios clásicos). Las reglas de seguridad están en [`firestore.rules`](firestore.rules): se pegan en la consola de Firebase › Firestore › Reglas › Publicar.
 
+**Una entrada por jugador.** Cada jugador aparece una sola vez en el ranking de cada dificultad, con su mejor marca: la puntuación se guarda en `boards/{d}/scores/{uid}` y solo se reemplaza por una mayor. Las entradas antiguas repetidas se juntan al mostrar la tabla.
+
+**Tutorial.** La primera vez que entras con cada personaje se juega una etapa guiada, sin puntuación ni ranking: moverse, saltar, sus cuatro habilidades, qué hace daño y qué no, oro y cofres, el teletransportador, el jefe y el portal. Se puede saltar, y al terminar empieza la partida de verdad (`js/tutorial.js`; lo ya visto queda en `Save.d.tut`).
+
 **Menú de pruebas.** Las cuentas listadas en `DEV_UIDS` (`js/dev.js`) ven un botón DEV en partida (o pulsan F2): hitboxes, invulnerable, sin enfriamientos, matar de un golpe, velocidad del juego, dar objetos, invocar enemigos y jefes, saltar etapa y cambiar de personaje. Una partida en la que se usó el menú no sube al ranking. El juego habla con la API REST directamente, sin librerías, y la `apiKey` va en `js/auth.js`: no es secreta, lo que protege los datos son las reglas.
 
 Para borrar una puntuación (trampas, pruebas…) entra en la consola de Firebase › Firestore › `boards` › dificultad › `scores` y elimina el documento.
