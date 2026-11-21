@@ -1,9 +1,9 @@
 {
-  "latest": "1.4.2",
-  "min": "1.4.2",
-  "notes": "Nuevo lobby antes de la partida (escena del taller bajo la tormenta, pestañas y un solo botón ENTRAR). Tienda, Códice, Ranking, Opciones, Controles, Pausa, Fin de partida, Cuenta y las elecciones en partida con el mismo estilo. Inventario con iconos y ficha al pasar el ratón o tocar, y botón para volver al juego en el teléfono. Cada objeto tiene su propio icono y al abrir un cofre se ve el objeto que sale con un haz de su rareza y su nombre.",
+  "latest": "1.4.3",
+  "min": "1.4.3",
+  "notes": "Tutorial la primera vez con cada personaje (sin puntuación; se puede saltar). Una sola entrada por jugador en cada ranking, con su mejor marca. Entrar con correo eligiendo nombre de usuario. Arreglo de la Mecánica: la Torre de Asedio ya no se acumula ni se relanza sin enfriamiento.",
   "url": "https://github.com/Crack555titi/Neon-tempestad/releases/latest",
-  "exe": "NeonTempestad-Setup-1.4.2.exe",
-  "apk": "NeonTempestad-1.4.2.apk",
-  "sha256": "fdd4bdc72b311cd1532065bbd4687c3fea38cabd52cf3b7a6ff03bb085ed43bc"
+  "exe": "NeonTempestad-Setup-1.4.3.exe",
+  "apk": "NeonTempestad-1.4.3.apk",
+  "sha256": "99133f353a1088dcbd7d54e63817b2b11b14ad9bf5a69a3dc2661a534d924d10"
 }

@@ -1,7 +1,7 @@
 {
   "name": "neon-tempestad",
   "productName": "Neón Tempestad",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Roguelike de acción 2D en HTML5 Canvas y JavaScript puro",
   "main": "js/main.js",
   "author": "thaigo naboni",
