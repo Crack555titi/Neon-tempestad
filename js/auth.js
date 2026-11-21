@@ -33,6 +33,7 @@ const fromFS=d=>Object.fromEntries(Object.entries(d.fields||{}).map(([k,v])=>[k,
 const AUTH_ERR={EMAIL_EXISTS:'Ese nombre ya está en uso. Elige otro.',INVALID_LOGIN_CREDENTIALS:'Usuario o contraseña incorrectos.',EMAIL_NOT_FOUND:'Usuario o contraseña incorrectos.',
  INVALID_PASSWORD:'Usuario o contraseña incorrectos.',USER_DISABLED:'Esta cuenta está desactivada.',TOO_MANY_ATTEMPTS_TRY_LATER:'Demasiados intentos. Espera unos minutos.',
  OPERATION_NOT_ALLOWED:'Las cuentas no están activadas en el servidor (Authentication › Correo/contraseña).',WEAK_PASSWORD:'La contraseña debe tener al menos 6 caracteres.'};
+AUTH_ERR.INVALID_EMAIL='Ese correo no es válido.';AUTH_ERR.NAME_TAKEN='Ese nombre ya está en uso. Elige otro.';
 const authMsg=e=>e instanceof NetError?'Sin conexión: necesitas internet para entrar o crear la cuenta.':AUTH_ERR[String(e.message).split(' ')[0].replace(/:$/,'')]||'No se pudo completar: '+e.message;
 
 const Auth={
@@ -41,15 +42,40 @@ const Auth={
  valid(name,pass){
   if(!/^[A-Za-z0-9_-]{3,16}$/.test(name))return 'El nombre debe tener de 3 a 16 letras (sin tildes), números, guion o guion bajo.';
   if(pass.length<6)return 'La contraseña debe tener al menos 6 caracteres.';return ''},
- email:name=>name.toLowerCase()+'@'+FB.domain,
- async register(name,pass){name=name.trim();const err=this.valid(name,pass);if(err)return err;
-  try{const r=await api(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FB.apiKey}`,{email:this.email(name),password:pass,returnSecureToken:true});
+ email:id=>id.includes('@')?id.trim().toLowerCase():id.toLowerCase()+'@'+FB.domain,
+ isMail:id=>/@/.test(id)&&!/@neontempestad[.]game$/i.test(id.trim()),
+ /* Nombres: el usuario clásico es dueño de su nombre por el correo interno; las cuentas con correo real
+    lo reservan en names/{nombre} (+ owners/{uid}: uno por cuenta). Las reglas del servidor comprueban ambas cosas. */
+ async nameFree(name){let r;try{r=await fetch(`${FS_URL}/names/${name.toLowerCase()}`)}catch(e){throw new NetError('sin conexión')}
+  if(r.status===404)return true;if(r.status>=500)throw new NetError('servidor');const j=await r.json().catch(()=>({}));
+  return !(j.fields&&j.fields.uid&&j.fields.uid.stringValue!==(this.pendingName?this.pendingName.r.localId:this.ses&&this.ses.uid))},
+ reserve(name,tok,uid,owner){const D=`projects/${FB.project}/databases/(default)/documents`,
+   w=[{update:Object.assign({name:`${D}/names/${name.toLowerCase()}`},toFS({uid,user:name})),currentDocument:{exists:false}}];
+  if(owner)w.push({update:Object.assign({name:`${D}/owners/${uid}`},toFS({name:name.toLowerCase()})),currentDocument:{exists:false}});
+  return api(`${FS_URL}:commit`,{writes:w},tok)},
+ open(r,name){this.pendingName=null;this.setSession({user:name,uid:r.localId,idToken:r.idToken,refresh:r.refreshToken,exp:Date.now()+r.expiresIn*1000});this.flush()},
+ // registro: usuario clásico, o correo real + nombre de usuario elegido
+ async register(id,pass,name){id=id.trim();const mail=this.isMail(id);name=(mail?name||'':id).trim();
+  const err=this.valid(name,pass);if(err)return err;if(mail&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(id))return AUTH_ERR.INVALID_EMAIL;
+  try{if(!await this.nameFree(name))return AUTH_ERR.NAME_TAKEN;
+   const r=await api(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FB.apiKey}`,{email:this.email(id),password:pass,returnSecureToken:true});
+   if(mail){this.pendingName={r};return this.pickName(name)}
    await api(`https://identitytoolkit.googleapis.com/v1/accounts:update?key=${FB.apiKey}`,{idToken:r.idToken,displayName:name,returnSecureToken:false}).catch(()=>{});
-   this.setSession({user:name,uid:r.localId,idToken:r.idToken,refresh:r.refreshToken,exp:Date.now()+r.expiresIn*1000});this.flush();return ''}
+   this.reserve(name,r.idToken,r.localId,false).catch(()=>{});this.open(r,name);return ''}
   catch(e){return authMsg(e)}},
- async login(name,pass){name=name.trim();if(!name||!pass)return 'Escribe tu usuario y contraseña.';
-  try{const r=await api(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FB.apiKey}`,{email:this.email(name),password:pass,returnSecureToken:true});
-   this.setSession({user:r.displayName||name,uid:r.localId,idToken:r.idToken,refresh:r.refreshToken,exp:Date.now()+r.expiresIn*1000});this.flush();return ''}
+ // entrar con usuario o correo; una cuenta de correo que aún no tiene nombre devuelve 'NEED_NAME'
+ async login(id,pass){id=id.trim();if(!id||!pass)return 'Escribe tu usuario (o correo) y contraseña.';
+  try{const r=await api(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FB.apiKey}`,{email:this.email(id),password:pass,returnSecureToken:true});
+   if(this.isMail(id)&&!r.displayName){this.pendingName={r};return 'NEED_NAME'}
+   const name=r.displayName||id;if(!this.isMail(id))this.reserve(name,r.idToken,r.localId,false).catch(()=>{});  // reserva el nombre de las cuentas antiguas
+   this.open(r,name);return ''}
+  catch(e){return authMsg(e)}},
+ // elige el nombre de la cuenta de correo pendiente; si está ocupado, la cuenta sigue pendiente para probar otro
+ async pickName(name){const P=this.pendingName;if(!P)return 'Vuelve a entrar.';name=name.trim();const err=this.valid(name,'xxxxxx');if(err)return err;
+  try{if(!await this.nameFree(name))return AUTH_ERR.NAME_TAKEN;
+   try{await this.reserve(name,P.r.idToken,P.r.localId,true)}catch(e){if(e instanceof NetError)throw e;return await this.nameFree(name)?'El servidor no aceptó el nombre ('+e.message+').':AUTH_ERR.NAME_TAKEN}
+   await api(`https://identitytoolkit.googleapis.com/v1/accounts:update?key=${FB.apiKey}`,{idToken:P.r.idToken,displayName:name,returnSecureToken:false}).catch(()=>{});
+   this.open(P.r,name);return ''}
   catch(e){return authMsg(e)}},
  setSession(s){this.ses=s;this.user=s?s.user:null;try{s?STORE.setItem(AUTH_SESSION,JSON.stringify(s)):STORE.removeItem(AUTH_SESSION)}catch(e){}},
  setUser(name){if(!name)this.setSession(null)},  // solo para pasar a invitado
@@ -105,13 +131,21 @@ function seedBoard(diff){if(seedCache[diff])return seedCache[diff];
 /* ===================== PANTALLAS ===================== */
 const fmtTime=t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`;
 let rankTab=1,rankReq=0;
-function showLogin(){$('menu').style.display=$('title').style.display='none';$('login').style.display='flex';$('lErr').textContent='';$('lPass').value='';setTimeout(()=>$('lUser').focus(),50)}
+function showLogin(){Auth.pendingName=null;lMode('');$('menu').style.display=$('title').style.display='none';$('login').style.display='flex';$('lErr').textContent='';$('lPass').value='';setTimeout(()=>$('lUser').focus(),50)}
 function enterMenu(){$('login').style.display='none';updateWho();goHome()}
 function updateWho(){$('who').innerHTML=Auth.user?`👤 <b>${esc(Auth.user)}</b> · <a href="#" id="logout">salir</a>`:'👤 Invitado · <a href="#" id="logout">entrar</a>';
  $('logout').onclick=e=>{e.preventDefault();Auth.logout()}}
-async function doAuth(reg){const u=$('lUser').value,p=$('lPass').value;$('lErr').textContent='Conectando…';$('lIn').disabled=$('lReg').disabled=true;
- const err=await (reg?Auth.register(u,p):Auth.login(u,p));$('lIn').disabled=$('lReg').disabled=false;
- if(err){$('lErr').textContent=err;Snd.play('hurt');return}$('lErr').textContent='';Snd.init();Snd.play('ui');enterMenu()}
+// con un correo aparece el campo «nombre de usuario»; al elegir nombre solo queda ese campo
+let lPick=false;
+function lMode(m){lPick=m==='pick';const f=$('lForm');if(f.classList){f.classList.toggle('mail',m==='mail');f.classList.toggle('pick',lPick)}
+ $('lIn').textContent=lPick?'ELEGIR NOMBRE':'ENTRAR'}
+function lSync(){if(!lPick)lMode(Auth.isMail($('lUser').value)?'mail':'')}
+async function doAuth(reg){const u=$('lUser').value,p=$('lPass').value,n=$('lName').value;
+ if(reg&&!lPick&&Auth.isMail(u)&&!n.trim()){$('lErr').textContent='Elige tu nombre de usuario para la clasificación.';$('lName').focus&&$('lName').focus();return}
+ $('lErr').textContent='Conectando…';$('lIn').disabled=$('lReg').disabled=true;
+ const err=await (lPick?Auth.pickName(n):reg?Auth.register(u,p,n):Auth.login(u,p));$('lIn').disabled=$('lReg').disabled=false;
+ if(err&&Auth.pendingName){lMode('pick');$('lErr').textContent=err==='NEED_NAME'?'Elige tu nombre de usuario (es el que se verá en la clasificación).':err;setTimeout(()=>$('lName').focus&&$('lName').focus(),50);return}
+ if(err){$('lErr').textContent=err;Snd.play('hurt');return}$('lErr').textContent='';lMode('');Snd.init();Snd.play('ui');enterMenu()}
 async function openRank(tab){if(tab!==undefined)rankTab=tab;$('menu').style.display=$('title').style.display='none';$('rank').style.display='flex';
  $('rTabs').innerHTML=DIFFS.map((d,i)=>`<button class="sec tab${i===rankTab?' on':''}" data-i="${i}">${esc(d.name)}</button>`).join('');
  $('rBody').innerHTML='<tr><td colspan="7" class="loading">Cargando clasificación…</td></tr>';$('rNote').textContent='';
@@ -125,6 +159,7 @@ $('rBack').onclick=()=>{rankReq++;goHome()};
 $('mRank').onclick=()=>openRank(selD);
 $('lForm').onsubmit=e=>{e.preventDefault();doAuth(false)};
 $('lReg').onclick=()=>doAuth(true);
+$('lUser').oninput=lSync;
 $('lGuest').onclick=e=>{e.preventDefault();Auth.setSession(null);enterMenu()};
 $('endRank').onclick=()=>{$('end').style.display='none';openRank(S?DIFFS.indexOf(S.df):selD)};
 

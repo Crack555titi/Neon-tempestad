@@ -15,7 +15,7 @@ const RARITY={
  l:{n:'Legendario',col:'#ffd23c'},m:{n:'Mítico',col:'#ff3cf2'},f:{n:'Fragmentado',col:'#5ab4ff'}
 };
 // definitivas que Memoria Artificial puede repetir con el daño reducido (el resto se sustituye por una explosión)
-const MEM_OK=new Set(['nova','zone','well','blackhole','static','quake','rift','barrage','napalm','storm','orbital','beam','rocket','proj','ringshot','chain','siege','slam','hemorrhage']);
+const MEM_OK=new Set(['nova','zone','well','blackhole','static','quake','rift','barrage','napalm','storm','orbital','beam','rocket','proj','ringshot','chain','slam','hemorrhage']);
 const tick=(id,every,n,dt)=>{const s=S.p.ist;s[id]=(s[id]||0)+dt;if(s[id]<every)return false;s[id]=0;return true};
 
 const ITEMS=[

@@ -1,0 +1,49 @@
+rules_version = '2';
+// Reglas de Firestore de Neón Tempestad. Se pegan en la consola de Firebase › Firestore › Reglas › Publicar.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Nombres de usuario de las cuentas con correo real (y los clásicos, que se reservan al entrar)
+    match /names/{n} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && n.matches('^[a-z0-9_-]{3,16}$')
+        && request.resource.data.keys().hasOnly(['uid','user'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.user is string && request.resource.data.user.lower() == n
+        && (
+          // cuenta clásica: solo su propio nombre
+          request.auth.token.email == n + '@neontempestad.game'
+          // cuenta con correo: un único nombre, creado junto con owners/{uid}
+          || (!request.auth.token.email.matches('.*@neontempestad[.]game$')
+              && !exists(/databases/$(database)/documents/owners/$(request.auth.uid))
+              && getAfter(/databases/$(database)/documents/owners/$(request.auth.uid)).data.name == n)
+        );
+      allow update, delete: if false;
+    }
+    match /owners/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['name'])
+        && getAfter(/databases/$(database)/documents/names/$(request.resource.data.name)).data.uid == uid;
+      allow update, delete: if false;
+    }
+    // Clasificación: una colección por dificultad (0 = Paseo … 4 = Pesadilla)
+    match /boards/{diff}/scores/{id} {
+      allow read: if diff in ['0','1','2','3','4'];
+      allow create: if request.auth != null
+        && diff in ['0','1','2','3','4']
+        && request.resource.data.keys().hasOnly(['user','uid','ch','lvl','loop','time','kills','stages','win','score','date'])
+        && request.resource.data.uid == request.auth.uid
+        // solo puedes publicar con tu propio nombre: el del usuario clásico o el reservado por tu cuenta de correo
+        && (request.auth.token.email == request.resource.data.user.lower() + '@neontempestad.game'
+            || get(/databases/$(database)/documents/names/$(request.resource.data.user.lower())).data.uid == request.auth.uid)
+        && request.resource.data.score is int && request.resource.data.score >= 0 && request.resource.data.score <= 100000000
+        && request.resource.data.lvl is int && request.resource.data.lvl >= 1 && request.resource.data.lvl <= 999
+        && request.resource.data.loop is int && request.resource.data.loop >= 1 && request.resource.data.loop <= 999
+        && request.resource.data.time is int && request.resource.data.time >= 0
+        && request.resource.data.ch is string && request.resource.data.ch.size() <= 24;
+      // nadie puede editar ni borrar puntuaciones, ni siquiera las propias
+      allow update, delete: if false;
+    }
+  }
+}

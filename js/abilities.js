@@ -116,7 +116,7 @@ const AB={
  sacrifice(p,d){for(const m of count('walker')){aoe(m.x,m.y-10,d.r,d.dmg);ring(m.x,m.y-10,d.r,S.ch.color,.3);burst(m.x,m.y-10,14,S.ch.color,300,4);m.life=0}
   S.shake=Math.max(S.shake,10);AB.raise(p,Object.assign({},S.ch.secondary,{n:3}))},
  turret(p,d){const o=count('turret').filter(m=>!m.big);if(o.length>=d.max)o[0].life=0;S.dr.push({k:'turret',x:p.x,y:p.ground?p.y:FLOOR,life:d.life,dmg:d.dmg,rate:d.rate,cd:0})},
- siege(p,d){S.dr.push({k:'turret',big:1,x:p.x,y:p.ground?p.y:FLOOR,life:d.life,dmg:d.dmg,rate:d.rate,cd:0});say('Torre de Asedio desplegada')},
+ siege(p,d){for(const m of count('turret'))if(m.big)m.life=0;S.dr.push({k:'turret',big:1,x:p.x,y:p.ground?p.y:FLOOR,life:d.life,dmg:d.dmg,rate:d.rate,cd:0});say('Torre de Asedio desplegada')},
  mine(p,d){const o=count('mine');if(o.length>=d.max)o[0].life=0;S.dr.push({k:'mine',x:p.x,y:p.ground?p.y:FLOOR,life:60,dmg:d.dmg,r:d.r,arm:.5})},
  bees(p,d){for(let i=0;i<d.n;i++)S.dr.push({k:'bee',x:p.x,y:p.y-30,vx:R(-250,250),vy:-250,life:6,dmg:d.dmg,r:d.r,dps:d.dps})},
  queen(p,d){for(const m of count('queen'))m.life=0;S.dr.push({k:'queen',a:0,x:p.x,y:p.y-80,life:d.life,dmg:d.dmg,cd:0});say('¡La Reina Colmena despierta!')}
@@ -132,6 +132,7 @@ function cast(slot,f){
  Ev.emit('onCast',slot);if(slot==='m')Ev.emit('onDash');
  p.cd[slot]=maxCd(slot,d);
  if(slot!=='p'&&bany('nocd'))p.cd[slot]=Math.min(p.cd[slot],.15);  // Mente Febril
+ if(slot==='u')p.uLock=S.t+maxCd('u',d)*.4;  // ningún reinicio de enfriamiento permite relanzar la definitiva antes del 40%: evita bucles de bajas → recarga
 }
 // primario: velocidad de ataque; resto: reducción general + la propia de la ranura (definitiva/movimiento) × buffs (cdm)
 function maxCd(slot,d){const m=S.p.m;if(slot==='p')return d.cd/(m.as*bm('as'));

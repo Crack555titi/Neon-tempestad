@@ -277,8 +277,9 @@ function update(dt){
  const noatk=bany('noatk'),nomove=bany('nomove');
  for(const k of SLOTS){const d=ab(k),down=BTN[k]()||(k==='u'&&p.items.gesture);  // Gesto del Abismo: definitiva automática
   if(root||(noatk&&k!=='m')||(nomove&&k==='m')){p.chg[k]=0;continue}
-  if(d.hold){if(down&&p.cd[k]<=0)p.chg[k]=Math.min(d.max,p.chg[k]+dt);else if(p.chg[k]>0){cast(k,p.chg[k]/d.max);p.chg[k]=0}}
-  else if(down&&p.cd[k]<=0)cast(k)}
+  const rdy=p.cd[k]<=0&&(k!=='u'||!(s.t<p.uLock));
+  if(d.hold){if(down&&rdy)p.chg[k]=Math.min(d.max,p.chg[k]+dt);else if(p.chg[k]>0){cast(k,p.chg[k]/d.max);p.chg[k]=0}}
+  else if(down&&rdy)cast(k)}
  if(!p.items.bloodoath&&!bany('noregen'))heal(p.maxHp*(.008+p.m.regen)*dt);  // noregen: herida de infección
  // escudo: se recarga tras 4 s sin recibir daño
  p.shT-=dt;const shMax=p.maxHp*p.m.shield;if(p.shT<=0&&p.sh<shMax)p.sh=Math.min(shMax,p.sh+shMax*.5*dt);

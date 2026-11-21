@@ -7,7 +7,7 @@ const files=[...fs.readFileSync(path.join(root,'html','index.html'),'utf8').matc
 
 global.Path2D=function(){};let fakeVersion=null;
 // Firebase simulado en memoria: cuentas (Identity Toolkit), renovación de token y Firestore con las mismas reglas que el servidor real
-const FAKE={users:{},docs:{0:[],1:[],2:[],3:[],4:[]},offline:false};
+const FAKE={users:{},docs:{0:[],1:[],2:[],3:[],4:[]},names:{},owners:{},offline:false};
 const fsVal=v=>'integerValue' in v?+v.integerValue:'booleanValue' in v?v.booleanValue:v.stringValue;
 global.fetch=async(url,opt={})=>{const res=(status,j)=>({ok:status<300,status,json:async()=>j});
  if(url.includes('version.json'))return fakeVersion?res(200,fakeVersion):res(404,{});
@@ -19,10 +19,18 @@ global.fetch=async(url,opt={})=>{const res=(status,j)=>({ok:status<300,status,js
  if(url.includes('signInWithPassword')){const u=FAKE.users[b.email];if(!u||u.pass!==b.password)return res(400,{error:{message:'INVALID_LOGIN_CREDENTIALS'}});
   return res(200,{idToken:'t-'+u.uid,refreshToken:'r-'+u.uid,localId:u.uid,expiresIn:'3600',displayName:u.name})}
  if(url.includes('securetoken')){const uid=decodeURIComponent(String(b).split('refresh_token=')[1]).slice(2);return res(200,{id_token:'t-'+uid,refresh_token:'r-'+uid,expires_in:'3600'})}
+ // nombres de las cuentas con correo: mismas reglas que firestore.rules (un nombre por cuenta, el clásico solo el suyo)
+ if(url.endsWith(':commit')){const u=byTok(String((opt.headers||{}).Authorization).slice(7));if(!u)return res(403,{error:{message:'Missing or insufficient permissions.'}});
+  const ws=b.writes.map(w=>({path:w.update.name.split('/documents/')[1],d:Object.fromEntries(Object.entries(w.update.fields).map(([k,v])=>[k,fsVal(v)]))})),uid=u[1].uid,classic=/@neontempestad\.game$/.test(u[0]);
+  const ok=ws.every(w=>{const [col,id]=w.path.split('/');if(FAKE[col][id])return false;
+   if(col==='names')return /^[a-z0-9_-]{3,16}$/.test(id)&&w.d.uid===uid&&w.d.user.toLowerCase()===id&&(u[0]===id+'@neontempestad.game'||(!classic&&!FAKE.owners[uid]&&ws.some(o=>o.path==='owners/'+uid&&o.d.name===id)));
+   return col==='owners'&&id===uid&&ws.some(o=>o.path==='names/'+w.d.name&&o.d.uid===uid)});
+  if(!ok)return res(403,{error:{message:'Missing or insufficient permissions.'}});for(const w of ws){const [col,id]=w.path.split('/');FAKE[col][id]=w.d}return res(200,{})}
+ const nm=url.match(/\/names\/([^/:]+)$/);if(nm)return FAKE.names[nm[1]]?res(200,{fields:{uid:{stringValue:FAKE.names[nm[1]].uid},user:{stringValue:FAKE.names[nm[1]].user}}}):res(404,{});
  const m=url.match(/boards\/(\d)(:runQuery|\/scores)$/);
  if(m&&m[2]===':runQuery')return res(200,FAKE.docs[m[1]].slice().sort((x,y)=>y.score-x.score).slice(0,50).map(d=>({document:{fields:Object.fromEntries(Object.entries(d).map(([k,v])=>[k,typeof v==='boolean'?{booleanValue:v}:typeof v==='number'?{integerValue:String(v)}:{stringValue:v}]))}})));
  if(m){const d=Object.fromEntries(Object.entries(b.fields).map(([k,v])=>[k,fsVal(v)])),u=byTok(String((opt.headers||{}).Authorization).slice(7));
-  if(!u||d.uid!==u[1].uid||d.user.toLowerCase()+'@neontempestad.game'!==u[0]||d.score>1e8)return res(403,{error:{message:'Missing or insufficient permissions.'}});
+  if(!u||d.uid!==u[1].uid||(d.user.toLowerCase()+'@neontempestad.game'!==u[0]&&(FAKE.names[d.user.toLowerCase()]||{}).uid!==u[1].uid)||d.score>1e8)return res(403,{error:{message:'Missing or insufficient permissions.'}});
   FAKE.docs[m[1]].push(d);return res(200,{name:'doc'})}
  return res(404,{})};
 const ctx=new Proxy({},{get:(t,k)=>k in t?t[k]:(k==='createLinearGradient'||k==='createRadialGradient'?()=>({addColorStop(){}}):k==='measureText'?s=>({width:String(s).length*7}):()=>{}),set:(t,k,v)=>(t[k]=v,true)});
@@ -30,7 +38,7 @@ const els={},L={};
 const el=id=>els[id]||(els[id]={id,style:{setProperty(){}},innerHTML:'',textContent:'',width:960,height:540,getContext:()=>ctx,addEventListener(){},getBoundingClientRect:()=>({left:0,top:0,width:960,height:540})});
 Object.assign(global,{document:{getElementById:el,createElement:()=>({width:0,height:0,getContext:()=>ctx})},addEventListener:(n,f)=>{L[n]=f},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(){}});
 eval(files.map(f=>fs.readFileSync(path.join(root,'html',f),'utf8')).join('\n;\n')+
- '\n;global.T={glyphOf,GLYPH,ALT_FAM,altOk,ROUTES,routeOpen,routesStage,routesInteract,secretsNow,mtOf,mtSpend,mtReset,mtBranches,MT_MAX,WMODS,wmodOk,SYNERGY,COMP_MOVE,compAct,repOf,repAdd,FACTIONS,ENDINGS,pickEnding,CAMPAIGN,storyCard,INV_WAVES,buildLoadout,set MODE_NEXT(v){MODE_NEXT=v},get selC(){return selC},set selC(v){selC=v},WORLDCFG,ERAS,WEATHER,TALKS,eraShift,eraEnd,weatherStart,heatOf,heatStage,talkCheck,goldFor,applyElement,LORE,MEMORIES,memoryGet,echoRecord,echoStage,echoUse,secState,chalOf,loreHtml,endGame,addTaint,taint,borrow,debtStage,debtCost,takeCore,coreStage,CORE_OPTS,persEvent,persState,tempestSave,tempestLoad,spawnShade,RELICS,MUTATIONS,EVO_MODS,relicUnlocked,takeEvo,takeMutation,openPick,buildRelics,REL,ab,maxCd,bm,gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
+ '\n;global.T={DEV,isDev,DEV_UIDS,drawHitboxes,count,glyphOf,GLYPH,ALT_FAM,altOk,ROUTES,routeOpen,routesStage,routesInteract,secretsNow,mtOf,mtSpend,mtReset,mtBranches,MT_MAX,WMODS,wmodOk,SYNERGY,COMP_MOVE,compAct,repOf,repAdd,FACTIONS,ENDINGS,pickEnding,CAMPAIGN,storyCard,INV_WAVES,buildLoadout,set MODE_NEXT(v){MODE_NEXT=v},get selC(){return selC},set selC(v){selC=v},WORLDCFG,ERAS,WEATHER,TALKS,eraShift,eraEnd,weatherStart,heatOf,heatStage,talkCheck,goldFor,applyElement,LORE,MEMORIES,memoryGet,echoRecord,echoStage,echoUse,secState,chalOf,loreHtml,endGame,addTaint,taint,borrow,debtStage,debtCost,takeCore,coreStage,CORE_OPTS,persEvent,persState,tempestSave,tempestLoad,spawnShade,RELICS,MUTATIONS,EVO_MODS,relicUnlocked,takeEvo,takeMutation,openPick,buildRelics,REL,ab,maxCd,bm,gravAt,exploreInteract,researchTarget,openCodex,LEGACY,legacyStage,legacyWt,legacyPrice,legacyGold,sealReady,openSeal,spawnFusion,fusedDef,spawnBossAt,priceOf,npcStage,interact,merchantPrice,QUESTS,ADAPT,adaptBoss,bossPool,mimicAct,MIMIC_KIND,spawnBoss,spawnHunter,hunterState,hunterStage,evolve,ecoReward,armorAbsorb,buff,hurtP,pollInput,cmb,execTarget,addEnergy,combatMul,WOUNDS,PARRY_FAM,autoQuality,AUTOQ,fitCanvas,cv,get QL(){return QL},QUALITY,STORE,SAVE_KEY,ELEMENTS,CHAR_EL,ENEMY_EL,BOSS_EL,applyDot,giveItem,ITEM,get PR(){return PR},ANOMALIES,STORM_COMBOS,STORM_DEALS,stormUnleash,stormErode,stormStage,takeDeal,spawnEnemy,buyOrEquip,COSMETICS,drawShopPreview,drawParade,goHome,get Save(){return Save},loop,get MENU(){return MENU},Update,cmpVer,APP_VERSION,get STAGE(){return STAGE},loadStage,coef,capL,Auth,scoreRun,seedBoard,start,get S(){return S},get PLAT(){return PLAT},update,draw,keys,mouse,CHARS,DIFFS,STAGES,BOSSES,ENEMIES,AFX,useTP,saveRun,loadRun,clearRun,Z,heal,cast,fxProj,drawMenuBg,setQuality,get BIND(){return BIND},set BIND(v){BIND=v},BIND_DEF,saveBinds,loadBinds,rebindStart:(a,i)=>{rebind={a,i}},pollInput,AIM,TOUCHV,act,Snd,SFX,get QL(){return QL},get chroma(){return chroma},get hitstop(){return hitstop},hurtE,hurtP,TX,Save,isUnlocked,ACHIEVEMENTS,AB,spawnEnemy,ab,Ev,ITEMS,FRAGMENTS,ITEM,giveItem,priceOf,interact,applyDot,kill,BL,PR,PT};');
 
 const pick0={target:{closest:()=>({dataset:{i:0}})}};
 T.WORLDCFG.on=0;  // épocas, clima y mapa que aprende solo en su propia sección
@@ -59,7 +67,7 @@ T.start('vanguard',1);T.S.phase=3;step(1);const pl=T.PLAT.find(q=>q.ax);
 T.S.p.x=pl.rx+65;T.S.p.y=pl.ry;T.S.p.vy=0;T.S.en.length=0;step(1);step(40);
 assert(T.S.p.plat===pl,'el jugador no está sobre la plataforma');assert(Math.abs(T.S.p.x-(pl.rx+65))<8,'la plataforma no arrastró al jugador');
 // 7. Logros: el salto 500 desbloquea a Colmena; todo personaje bloqueado tiene un logro válido
-assert(!T.isUnlocked('hive'));T.Save.d.stats.jumps=499;T.start('vanguard',1);step(5);key('Space',false);
+assert(!T.isUnlocked('hive'));T.Save.d.stats.jumps=499;T.start('vanguard',1);T.S.en.length=0;T.S.spawn=1e9;for(let i=0;i<120&&!(T.S.p.ground&&i>4);i++)step(1);key('Space',false);  // saltar solo con los pies en el suelo (antes fallaba al azar)
 assert(T.isUnlocked('hive'),'el logro de saltos no desbloqueó a Colmena');
 for(const [k,v] of Object.entries(T.CHARS)){if(v.unlock)assert(T.ACHIEVEMENTS[v.unlock],k+' tiene un logro inexistente');
  for(const s of ['primary','secondary','move','ult'])for(const a of v[s].forms?Object.values(v[s].forms):[v[s]])assert(T.AB[a.t],`${k}.${s}: tipo «${a.t}» no existe`)}
@@ -732,7 +740,41 @@ async function authTests(){const A=T.Auth;
  // token caducado: se renueva solo; invitado: no sube nada
  A.ses.exp=0;assert.strictEqual(await A.token(),'t-'+A.ses.uid);assert(A.ses.exp>Date.now());
  A.setSession(null);T.start('vanguard',2);assert(!A.submit(false).done);assert.strictEqual(FAKE.docs[2].length,2,'el invitado subió una puntuación');
- console.log('Cuentas online, ranking global, cola sin conexión y rechazo de suplantación: OK')}
+ // cuentas con correo: el nombre se elige aparte, es único (también frente a los clásicos) y sirve para el ranking
+ await new Promise(r=>setImmediate(r));assert(FAKE.names.piloto&&FAKE.names.piloto.uid===FAKE.users['piloto@neontempestad.game'].uid,'el usuario clásico no reservó su nombre');
+ assert(A.isMail('ana@correo.com')&&!A.isMail('Piloto')&&!A.isMail('x@neontempestad.game'));
+ assert(/en uso/.test(await A.register('ana@correo.com','clave12','piloto')),'una cuenta de correo tomó el nombre de un usuario clásico');
+ assert(/nombre/.test(await A.register('ana@correo.com','clave12','')),'creó una cuenta de correo sin nombre');
+ assert(/correo/.test(await A.register('ana@correo','clave12','Ana_X')),'aceptó un correo inválido');
+ assert.strictEqual(await A.register('Ana@Correo.com','clave12','Ana_X'),'');assert.strictEqual(A.user,'Ana_X');const anaUid=A.ses.uid;
+ assert(FAKE.users['ana@correo.com']&&FAKE.names.ana_x.uid===anaUid&&FAKE.owners[anaUid].name==='ana_x','no se reservó el nombre de la cuenta de correo');
+ T.start('vanguard',3);T.S.kills=50;await A.submit(false).done;assert(FAKE.docs[3].some(d=>d.user==='Ana_X'),'la cuenta de correo no pudo subir su puntuación');
+ A.pendingName={r:{idToken:'t-'+anaUid,localId:anaUid,refreshToken:'r-'+anaUid,expiresIn:'3600'}};assert(await A.pickName('Ana_Dos'),'una cuenta de correo reservó un segundo nombre');A.pendingName=null;
+ A.setSession(null);assert.strictEqual(await A.login('ANA@correo.com','clave12'),'');assert.strictEqual(A.user,'Ana_X','entrar por correo no recuperó el nombre');
+ A.setSession(null);FAKE.users['bob@correo.com']={pass:'clave12',uid:'ubob',name:''};assert.strictEqual(await A.login('bob@correo.com','clave12'),'NEED_NAME','no pidió elegir nombre');
+ assert.strictEqual(A.user,null);assert(/en uso/.test(await A.pickName('ana_x')));assert.strictEqual(await A.pickName('Bobby'),'');assert.strictEqual(A.user,'Bobby');
+ assert.strictEqual(FAKE.users['bob@correo.com'].name,'Bobby','el nombre elegido no quedó en la cuenta');
+ A.setSession(null);assert(/en uso/.test(await A.register('bobby','clave12')),'un usuario clásico tomó el nombre de una cuenta de correo');
+ A.setSession(null);
+ console.log('Cuentas online, ranking global, cola sin conexión, rechazo de suplantación y cuentas con correo: OK')}
+// 37. Menú de pruebas (cuenta de desarrollador) y torre de la Mecánica
+function devTests(){const A=T.Auth,D=T.DEV;
+ A.setSession(null);assert(!T.isDev(),'un invitado tiene el menú de pruebas');
+ A.ses={user:'ntdev',uid:T.DEV_UIDS[0],idToken:'x',refresh:'r',exp:Date.now()+1e6};A.user='ntdev';assert(T.isDev());
+ T.start('engineer',1);T.S.spawn=1e9;T.S.en.length=0;
+ D.god=1;const hp=T.S.p.hp;T.S.p.inv=0;T.hurtP(500);assert.strictEqual(T.S.p.hp,hp,'invulnerable no funcionó');D.god=0;
+ D.nocd=1;T.cast('s');step(1);assert(T.S.p.cd.s<=0,'sin enfriamientos no funcionó');D.nocd=0;
+ D.oneshot=1;T.spawnEnemy('brute',T.S.p.x+100);const e=T.S.en[T.S.en.length-1];T.hurtE(e,1);assert(e.dead||e.hp<=0,'matar de un golpe no funcionó');D.oneshot=0;
+ D.hit=1;T.draw();D.hit=0;D.slow=.25;const t0=T.S.t;T.update(1);assert(Math.abs(T.S.t-t0-.25)<1e-9,'la velocidad del juego no se aplicó');D.slow=1;
+ T.S.devUsed=1;const n0=Object.values(FAKE.docs).flat().length;assert.strictEqual(A.submit(false).score,0);assert.strictEqual(Object.values(FAKE.docs).flat().length,n0,'una partida de pruebas subió al ranking');
+ A.setSession(null);
+ // Mecánica: la Torre de Asedio es una sola y la Q no se relanza aunque algo le reinicie el enfriamiento (Reloj Roto, Mente Febril…)
+ T.start('engineer',1);T.S.spawn=1e9;T.S.en.length=0;const p=T.S.p;p.cd.u=0;T.keys.KeyQ=1;step(1);T.keys.KeyQ=0;
+ const big=()=>T.count('turret').filter(m=>m.big).length;assert.strictEqual(big(),1);
+ for(let i=0;i<120;i++){p.cd.u=0;T.keys.KeyQ=1;step(1)}T.keys.KeyQ=0;assert.strictEqual(big(),1,'se apilaron torres de asedio');
+ let n=0;const _s=T.AB.siege;T.AB.siege=function(){n++;return _s.apply(this,arguments)};
+ for(let i=0;i<60*3;i++){p.cd.u=0;T.keys.KeyQ=1;step(1)}T.keys.KeyQ=0;T.AB.siege=_s;assert(n<=1,'la Q de la Mecánica se relanzó '+n+' veces en 3 s con el enfriamiento reiniciado');
+ console.log('Menú de pruebas (hitboxes, invulnerable, sin enfriamientos, un golpe, velocidad, fuera del ranking) y Torre de Asedio sin bucle: OK')}
 // 29. Actualizaciones obligatorias
 async function updateTests(){const U=T.Update;
  assert.strictEqual(T.APP_VERSION,require('../package.json').version,'js/update.js y package.json tienen versiones distintas');
@@ -759,4 +801,4 @@ async function updateTests(){const U=T.Update;
  for(const bad of ['https://evil.com/NeonTempestad-Setup-1.3.0.exe','https://github.com/otro/Neon-tempestad/releases/download/v1.3.0/NeonTempestad-Setup-1.3.0.exe',base+'NeonTempestad-1.3.0.apk',base+'../x.exe'])
   assert(!ALLOWED.test(bad),'aceptó una URL no permitida: '+bad);
  console.log('Actualizaciones: versión sincronizada, aviso opcional, bloqueo obligatorio, modo sin red e instalación verificada: OK')}
-authTests().then(updateTests).then(()=>process.exit(fails?1:0),e=>{console.error(e);process.exit(1)});
+authTests().then(devTests).then(updateTests).then(()=>process.exit(fails?1:0),e=>{console.error(e);process.exit(1)});

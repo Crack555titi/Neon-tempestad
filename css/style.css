@@ -498,3 +498,18 @@ body.touchmode #menu .lside #who{display:none}
 .lskin #lGuest{color:var(--bone);font-size:13px}
 .lskin #altarNo{background:var(--plate);border:1px solid var(--edge);border-left:3px solid var(--copper);box-shadow:none;color:var(--bone)}
 .lskin .card b{margin-bottom:4px}
+
+/* ===== Menú de pruebas (cuenta de desarrollador) ===== */
+#devp{position:fixed;inset:auto 8px 8px auto;max-width:min(720px,calc(100vw - 16px));max-height:calc(100vh - 16px);z-index:60;flex-direction:column;gap:6px;padding:10px 12px;border:1px solid var(--edge);overflow:auto}
+#devp h2{font-size:13px}#devp h2 small{color:var(--amber);letter-spacing:0;margin-left:8px}
+#devp .drow{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:12px;color:var(--dim)}
+#devp button.sec{padding:5px 10px;font-size:12px}
+#devp button.sec.on{background:var(--plate2);border-left-color:var(--amber);color:var(--amber)}
+#devp select,#devp input{background:var(--plate);color:var(--bone);border:1px solid var(--edge);font-family:var(--cond);font-size:12px;padding:4px;max-width:180px}
+#devp input{width:48px}
+#devp .cta{background:var(--amber);color:#1a1206;border:0;font-weight:800;padding:5px 14px;margin-left:auto}
+#devBtn{position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:59;display:none;background:#1d2028;color:#ffb733;border:1px solid #3a3f48;font:700 11px Consolas,monospace;padding:3px 10px;letter-spacing:.1em;opacity:.8}
+/* cuenta con correo: campo de nombre de usuario; al elegirlo solo queda ese campo */
+#lForm #lName{display:none}
+#lForm.mail #lName,#lForm.pick #lName{display:block}
+#lForm.pick #lUser,#lForm.pick #lPass,#lForm.pick #lReg,#lForm.pick #lGuest{display:none}
