@@ -152,15 +152,17 @@ function abHtml(lbl,a){
 }
 // Lobby: el héroe en escena (lobby.js lo dibuja en el canvas), una ficha corta, la tira de retratos y ENTRAR.
 // Los números exactos y las descripciones solo aparecen al tocar una habilidad (sin muros de texto).
-const famCol=f=>({'Vanguardia':'#c8613f','Artillería':'#c99a3a','Invocadores':'#5fae7c','Tiempo/Espacio':'#5f9fb4','Malditos/Híbridos':'#a8546a'}[f]||'#888');
+const famCol=f=>({'Vanguardia':'#c8613f','Artillería':'#c99a3a','Invocadores':'#5fae7c','Tiempo/Espacio':'#5f9fb4','Malditos/Híbridos':'#a8546a','Joke':'#d8b23c'}[f]||'#888');
 const lbar=(n,v,mx)=>{const k=Math.max(1,Math.min(5,Math.round(v/mx*5)));return `<div class="lstat"><span>${n}</span><i>${'<b></b>'.repeat(k)}${'<em></em>'.repeat(5-k)}</i></div>`};
 let abSel=-1;
 function abList(v){const out=[];for(const [sl,a] of [['p',v.primary],['s',v.secondary],['m',v.move],['u',v.ult]]){if(a.forms)for(const f of Object.values(a.forms))out.push([sl,f]);else out.push([sl,a])}return out}
 function buildMenu(){
  if(!isUnlocked(selC)&&!(typeof lobbyMode!=='undefined'&&lobbyMode==='daily'))selC='vanguard';  // el desafío diario deja jugar al héroe del día aunque esté bloqueado
- const order=FAMILIES.flatMap(f=>Object.keys(CHARS).filter(k=>CHARS[k].fam===f));
- $('fams').innerHTML=order.map(k=>{const v=CHARS[k],lk=!isUnlocked(k);
-  return `<button class="pt ${k===selC?'sel':''} ${lk?'lock':''}" data-k="${k}" style="--f:${famCol(v.fam)}" title="${esc(v.name)} · ${esc(v.fam)}" aria-label="${esc(v.name)}"><canvas width="96" height="96"></canvas></button>`}).join('');
+ // retratos agrupados por familia: una etiqueta con la familia va del primer al último héroe de cada grupo
+ const pt=k=>{const v=CHARS[k],lk=!isUnlocked(k);
+  return `<button class="pt ${k===selC?'sel':''} ${lk?'lock':''}" data-k="${k}" style="--f:${famCol(v.fam)}" title="${esc(v.name)} · ${esc(v.fam)}" aria-label="${esc(v.name)}"><canvas width="96" height="96"></canvas></button>`};
+ $('fams').innerHTML=FAMILIES.map(f=>{const ks=Object.keys(CHARS).filter(k=>CHARS[k].fam===f);if(!ks.length)return '';
+  return `<div class="fgrp" style="--f:${famCol(f)}"><span class="fgl">${esc(f)}</span><div class="fgrow">${ks.map(pt).join('')}</div></div>`}).join('');
  if(typeof drawPortraits==='function')drawPortraits();
  const v=CHARS[selC];previewC=selC;showInfo(v,false);
  $('diffs').innerHTML=DIFFS.map((d,i)=>`<button class="dopt ${i===selD?'sel':''}" data-i="${i}">${i+1}. ${esc(d.name)}</button>`).join('');

@@ -559,3 +559,8 @@ button#tutSkip{box-shadow:none;text-shadow:none;border-radius:0;transform:none;a
  #menu .ldesc{font-size:16px;line-height:1.4;margin-top:10px}
  #menu .lhint{font-size:15px}
 }
+/* tira de retratos agrupada por familia: la etiqueta abarca del primer al último héroe del grupo */
+#menu .fgrp{display:flex;flex-direction:column;gap:2px;flex:none}
+#menu .fgl{font-size:10px;line-height:1.2;letter-spacing:.14em;text-transform:uppercase;color:var(--f);border-bottom:2px solid var(--f);padding:0 2px 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#menu .fgrow{display:flex;gap:5px}
+#menu #fams{gap:12px;align-items:flex-end}

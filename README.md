@@ -249,6 +249,10 @@ El proyecto de Firebase es `neon-tempestad`. Usa **Authentication** (correo y co
 
 **Una entrada por jugador.** Cada jugador aparece una sola vez en el ranking de cada dificultad, con su mejor marca: la puntuación se guarda en `boards/{d}/scores/{uid}` y solo se reemplaza por una mayor. Las entradas antiguas repetidas se juntan al mostrar la tabla.
 
+**Familia Joke** (`js/joke.js`). Seis héroes de broma con arte propio: Gerpillo (cepillo de dientes), Morchopsito (dinosaurio con ovni de sombrero), Juanchito (vóley: saque, salto y remate que elimina de un golpe), Bachata Man (bailarín helado), Frutillini (frutilla con palo de hockey; remata sus bochas con parry, crítico asegurado) y Cafesito (café alienígena). En el lobby, una etiqueta con la familia abarca del primer al último retrato de cada grupo.
+
+**Derechos de autor.** © 2026 thaigo naboni, todos los derechos reservados (ver `LICENSE`).
+
 **Mundo ampliado** (`js/expand.js`). Cada etapa mide 4000 px: el diseño original queda en el centro (a veces espejado) y a los lados hay tramos de plataformas que se generan distinto en cada partida, con una cuerda (mantén saltar para trepar) y una tirolesa (interactuar en el anclaje). Una trampilla lleva al **subsuelo**: dos oleadas y un guardián, y al vencerlo, dos objetos y oro; se vuelve por la escotilla. Cada 70–100 s puede aparecer un **evento**: una baliza que hay que defender 20 s o un cofre maldito con guardianes. Durante el jefe, el **escenario ataca** (lluvia de cristales, chorros de escoria, manos de la cripta, escombros o relámpagos, según la etapa).
 
 **Desafío diario.** En el lobby, el modo Diaria da a todos el mismo héroe, dificultad, regla del día (doble oro, cristal u horda dura) y mapas, con su propio ranking (`boards/dAAAAMMDD`, pestaña «Diaria (hoy)»).
